@@ -1,0 +1,56 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "UpdateCodeToServer",
+				"type": "shell",
+				"command": "rsync -avz -e 'ssh -i /c/Users/Gwencutilia/.ssh/Gwencutilia_PemKey.pem' ./ Gwencutilia@4.154.208.172:/opt/1panel/apps/openresty/OpenResty/www/sites/drive.alittlesnowflake.uk/index/Storage/Tagsy/",
+				"options": {
+					"shell": {
+						"executable": "bash.exe",
+						"args": ["-c"]
+					}
+				},
+				"presentation": {
+					"reveal": "silent",
+					"echo": false,
+					"focus": false
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "UpdateCode",
+				"type": "node",                      // 保持类型为 Node, 但覆盖执行命令
+				"request": "launch",
+				"preLaunchTask": "UpdateCodeToServer",   // 核心: 关联任务
+				"runtimeExecutable": "cmd.exe",        // Windows 下使用 cmd.exe
+				"args": ["/C", "echo Completed."],     // 无害命令
+				"console": "internalConsole"          // 静默输出
+			}
+		]
+	},
+	"settings": {
+		"[javascript]": {
+			"editor.insertSpaces": false,
+			"editor.detectIndentation": false,
+			"editor.tabSize": 4
+		},
+		"[json]": {
+			"editor.insertSpaces": false,
+			"editor.detectIndentation": false,
+			"editor.tabSize": 4
+		},
+		"commentTranslate.targetLanguage": "zh-CN",
+		"commentTranslate.source": "Bing",
+	}
+}

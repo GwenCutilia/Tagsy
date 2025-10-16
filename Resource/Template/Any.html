@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tagsy 仪表盘</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+<div id="app" class="flex min-h-screen">
+	<!-- 侧边栏 -->
+	<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
+		<div id="sidebar-header" class="text-center text-xl font-bold text-gray-800 py-5 border-b">Tagsy_V2.0.0</div>
+		<ul id="sidebar-menu" class="flex flex-col mt-4 space-y-1 px-2">
+			<li>
+				<a href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+					<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
+				</a>
+			</li>
+			<li>
+				<a href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
+				</a>
+			</li>
+			<li>
+				<a href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-cog mr-3 w-5 text-center"></i>QLabel标注
+				</a>
+			</li>
+			<li>
+				<a href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-cog mr-3 w-5 text-center"></i>凌波微步日报
+				</a>
+			</li>
+			<li>
+				<a href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-cog mr-3 w-5 text-center"></i>企业微信日报
+				</a>
+			</li>
+			<li>
+				<a href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
+				</a>
+			</li>
+		</ul>
+		<div id="sidebar-footer" class="mt-auto px-4 py-4 border-t">
+			<a href="#" class="flex items-center px-4 py-2 text-sm rounded-md text-red-600 hover:bg-red-50">
+				<i class="fas fa-sign-out-alt mr-2 w-5 text-center"></i>退出登录
+			</a>
+		</div>
+	</aside>
+
+	<!-- 主内容区域 -->
+	<main id="main-content" class="flex-1 ml-64 p-6 space-y-6">
+		<!-- 公告栏 -->
+		<div id="announcement" class="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-lg relative shadow mb-6">
+			<div class="flex items-center">
+				<span>📢 系统将在今晚 23:00 进行维护, 请提前保存好数据。</span>
+			</div>
+			<button id="close-announcement" class="absolute top-2 right-3 text-yellow-600 hover:text-yellow-800">
+				<i class="fas fa-times"></i>
+			</button>
+		</div>
+
+		<!-- 网格布局 -->
+		<div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
+			<!-- 第一行: 卡片 -->
+			<div id="loading-status" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+				<div class="text-gray-500 text-sm mb-1">加载状态</div>
+				<div class="text-2xl font-bold text-blue-600">--</div>
+			</div>
+
+			<div id="operating-status" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+				<div class="text-gray-500 text-sm mb-1">运行状态</div>
+				<div class="text-2xl font-bold text-green-600">--</div>
+			</div>
+
+			<div id="running-time" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+				<div class="text-gray-500 text-sm mb-1">运行时间</div>
+				<div class="text-2xl font-bold text-green-600">--</div>
+			</div>
+
+			<!-- 第二行: 作业量统计, 占两列 -->
+			<!-- <div id="job-stats" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center col-span-2">
+				<div class="text-gray-500 text-sm mb-2">作业量统计</div>
+				<div class="w-full bg-gray-200 rounded-full h-4">
+					<div class="bg-purple-600 h-4 rounded-full" style="width: 65%;"></div>
+				</div>
+			</div> -->
+            <!-- 申请抽调卡片 -->
+<div id="apply-transfer" class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4">
+	<!-- 标题 + 提交按钮同一行 -->
+	<div class="flex items-center justify-between">
+		<div class="text-gray-500 text-sm">申请抽调</div>
+		<button id="submit-transfer" class="ml-auto bg-blue-600 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-700 transition">
+			提交申请
+		</button>
+	</div>
+
+	<!-- 表单: 两列网格布局 -->
+	<div class="grid grid-cols-2 gap-4">
+		<!-- 时间制度（保持左对齐） -->
+		<div class="flex items-center space-x-2">
+			<label for="time-system" class="w-20 text-sm text-gray-600">时间制度</label>
+			<select id="time-system" class="w-32 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+				<option value="12">12小时制</option>
+				<option value="24">24小时制</option>
+			</select>
+		</div>
+
+		<!-- 抽调类型（右对齐） -->
+		<div class="flex items-center space-x-2 justify-end">
+			<label for="transfer-type" class="w-20 text-sm text-gray-600">抽调类型</label>
+			<select id="transfer-type" class="w-32 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+				<option value="qc">抽调质检</option>
+				<option value="training">线下培训</option>
+			</select>
+		</div>
+
+		<!-- 时间（保持左对齐） -->
+		<div class="flex items-center space-x-2">
+			<label for="time-input" class="w-20 text-sm text-gray-600">时间</label>
+			<input type="text" id="time-input" placeholder="请输入时间" class="w-32 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+		</div>
+
+		<!-- 抽调内容（右对齐） -->
+		<div class="flex items-center space-x-2 justify-end">
+			<label for="transfer-content" class="w-20 text-sm text-gray-600">抽调内容</label>
+			<input type="text" id="transfer-content" placeholder="请输入内容" class="w-32 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+		</div>
+	</div>
+</div>
+
+
+
+			<!-- 第二行: 运行日志（运行时间下方） -->
+			<!-- <div id="running-log" class="bg-white shadow rounded-xl p-5 h-96 flex flex-col justify-start">
+				<div class="text-gray-500 text-sm mb-2">运行日志</div>
+				<div class="flex-1 overflow-y-auto">静态日志内容示例...</div>
+			</div> -->
+		</div>
+	</main>
+</div>
+
+</body>
+</html>

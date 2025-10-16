@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tagsy 仪表盘</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+<div id="app" class="flex min-h-screen">
+	<!-- 侧边栏 -->
+	<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
+		<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 py-5 border-b">Tagsy_V2.0.0</div>
+		<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
+			<li id="menu_overview">
+				<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+					<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
+				</a>
+			</li>
+			<li id="menu_w2">
+				<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
+				</a>
+			</li>
+			<li id="menu_qlabel">
+				<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
+				</a>
+			</li>
+			<li id="menu_ls">
+				<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
+				</a>
+			</li>
+			<li id="menu_wecom">
+				<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
+				</a>
+			</li>
+			<li id="menu_setting">
+				<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
+				</a>
+			</li>
+		</ul>
+		<div id="sidebar_footer" class="mt-auto px-4 py-4 border-t">
+			<a id="link_logout" href="#" class="flex items-center px-4 py-2 text-sm rounded-md text-red-600 hover:bg-red-50">
+				<i class="fas fa-sign-out-alt mr-2 w-5 text-center"></i>退出登录
+			</a>
+		</div>
+	</aside>
+
+	<!-- 主内容区域 -->
+	<main id="main_content" class="flex-1 ml-64 p-6 space-y-6">
+		<!-- 公告栏 -->
+		<div id="announcement" class="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-lg relative shadow mb-6">
+			<div id="announcement_text" class="flex items-center">
+				<span id="announcement_span">📢 系统将在今晚 23:00 进行维护, 请提前保存好数据。</span>
+			</div>
+			<button id="close_announcement_btn" class="absolute top-2 right-3 text-yellow-600 hover:text-yellow-800">
+				<i class="fas fa-times" id="close_announcement_icon"></i>
+			</button>
+		</div>
+
+		<!-- 网格布局 -->
+		<div id="dashboard_grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
+			<!-- 第一行: 卡片 -->
+			<div id="loading_status" class="bg-white shadow rounded-xl p-5 h-24 flex justify-between">
+				<!-- 左边: 状态 -->
+				<div class="flex flex-col justify-center">
+					<div id="loading_status_label" class="text-gray-500 text-sm mb-1">加载状态</div>
+					<div id="loading_status_value" class="text-2xl font-bold text-blue-600">--</div>
+				</div>
+
+				<!-- 右边: 按钮 -->
+				<div class="flex items-center space-x-2">
+					<button id="btn_load" class="px-3 py-1 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800 transition">
+						<i class="fas fa-play mr-1"></i>加载
+					</button>
+					<button id="btn_unload" class="px-3 py-1 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-800 transition">
+						<i class="fas fa-stop mr-1"></i>卸载
+					</button>
+				</div>
+			</div>
+			<div id="operating_status" class="bg-white shadow rounded-xl p-5 h-24 flex justify-between justify-center">
+				<div class="flex flex-col justify-center">
+					<div id="operating_status_label" class="text-gray-500 text-sm mb-1">运行状态</div>
+					<div id="operating_status_value" class="text-2xl font-bold text-green-600">--</div>
+				</div>
+				<div class="flex items-center space-x-2">
+					<button id="running_start" class="px-3 py-1 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800 transition">
+						<i class="fas fa-play mr-1"></i>运行
+					</button>
+					<button id="running_stop" class="px-3 py-1 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-800 transition">
+						<i class="fas fa-stop mr-1"></i>停止
+					</button>
+				</div>
+			</div>
+
+			<div id="running_time" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+				<div id="running_time_label" class="text-gray-500 text-sm mb-1">运行时间</div>
+				<div id="running_time_value" class="text-2xl font-bold text-green-600">--</div>
+			</div>
+
+			<!-- 第二行: 作业量统计, 占两列 -->
+			<div id="job_stats" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center col-span-2">
+				<div id="job_stats_label" class="text-gray-500 text-sm mb-2">作业量统计</div>
+				<div id="job_stats_bar_bg" class="w-full bg-gray-200 rounded-full h-4">
+					<div id="job_stats_bar" class="bg-purple-600 h-4 rounded-full" style="width: 65%;"></div>
+				</div>
+			</div>
+
+			<!-- 第二行: 运行日志（运行时间下方） -->
+			<div id="running_log" class="bg-white shadow rounded-xl p-5 h-96 flex flex-col justify-start">
+				<div id="running_log_header" class="flex items-center justify-between mb-2">
+					<!-- 左边: 标题 -->
+					<div id="running_log_title" class="text-gray-500 text-sm">运行日志</div>
+					<!-- 右边: 清空按钮 -->
+					<button id="clear_log_btn" class="px-2 py-1 text-xs font-medium rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-800 transition">
+						<i id="clear_log_icon" class="fas fa-trash-alt mr-1"></i>清空
+					</button>
+				</div>
+				<div id="running_log_content" class="flex-1 overflow-y-auto">静态日志内容示例...</div>
+			</div>
+		</div>
+	</main>
+</div>
+
+</body>
+</html>

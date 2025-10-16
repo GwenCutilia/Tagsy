@@ -1,0 +1,10 @@
+// Tagsy_Core.js
+async function Core() {
+	// 初始化设置
+	Global.init();
+	log = new Logger("Core");
+
+	// 绑定按钮事件
+	// 页面加载时实例化
+	Page.init();
+}

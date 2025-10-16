@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tagsy 设置</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+	<style>
+		/* 自定义样式 */
+		.toggle-checkbox:checked {
+			right: 0;
+			border-color: #3b82f6;
+		}
+		.toggle-checkbox:checked + .toggle-label {
+			background-color: #3b82f6;
+		}
+		.toggle-checkbox {
+			transition: all 0.3s;
+		}
+		.progress-bar {
+			transition: width 0.5s ease-in-out;
+		}
+	</style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+	<div id="app" class="flex min-h-screen">
+		<!-- 侧边栏 -->
+		<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
+			<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 py-5 border-b">Tagsy_V2.0.0</div>
+			<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
+				<li id="menu_overview">
+					<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
+					</a>
+				</li>
+				<li id="menu_w2">
+					<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
+					</a>
+				</li>
+				<li id="menu_qlabel">
+					<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
+					</a>
+				</li>
+				<li id="menu_ls">
+					<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
+					</a>
+				</li>
+				<li id="menu_wecom">
+					<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
+					</a>
+				</li>
+				<li id="menu_setting">
+					<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+						<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
+					</a>
+				</li>
+			</ul>
+			<div id="sidebar_footer" class="mt-auto px-4 py-4 border-t">
+				<a id="link_logout" href="#" class="flex items-center px-4 py-2 text-sm rounded-md text-red-600 hover:bg-red-50">
+					<i class="fas fa-sign-out-alt mr-2 w-5 text-center"></i>退出登录
+				</a>
+			</div>
+		</aside>
+
+		<!-- 主内容区域 -->
+		<main id="main_content" class="flex-1 ml-64 p-6 space-y-6">
+			<!-- 页面标题和操作按钮 -->
+			<div id="page_header" class="flex items-center justify-between">
+				<h1 id="page_title" class="text-2xl font-bold text-gray-800">系统设置</h1>
+				<div id="header_actions" class="flex space-x-2">
+					<button id="btn_save_settings" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+						<i class="fas fa-save mr-2"></i>保存设置
+					</button>
+					<button id="btn_reset_settings" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center">
+						<i class="fas fa-undo mr-2"></i>恢复默认
+					</button>
+				</div>
+			</div>
+
+			<!-- 设置内容区域 -->
+			<div id="settings_content" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<!-- 左侧: 系统设置 -->
+				<div id="left_settings_column" class="space-y-6">
+					<!-- 基本设置 -->
+					<div id="basic_settings_card" class="bg-white shadow rounded-xl p-5">
+						<h2 id="basic_settings_title" class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+							<i class="fas fa-sliders-h mr-2 text-blue-500"></i>基本设置
+						</h2>
+						<div id="basic_settings_content" class="space-y-4">
+							<div id="auto_start_setting" class="flex items-center justify-between">
+								<label for="auto_start" class="text-sm text-gray-600">开机自启动</label>
+								<label class="relative inline-flex items-center cursor-pointer">
+									<input type="checkbox" id="auto_start" class="sr-only peer" checked>
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								</label>
+							</div>
+							
+							<div id="auto_update_setting" class="flex items-center justify-between">
+								<label for="auto_update" class="text-sm text-gray-600">自动更新</label>
+								<label class="relative inline-flex items-center cursor-pointer">
+									<input type="checkbox" id="auto_update" class="sr-only peer" checked>
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								</label>
+							</div>
+							
+							<div id="notifications_setting" class="flex items-center justify-between">
+								<label for="notifications" class="text-sm text-gray-600">通知提醒</label>
+								<label class="relative inline-flex items-center cursor-pointer">
+									<input type="checkbox" id="notifications" class="sr-only peer" checked>
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+								</label>
+							</div>
+							
+							<div id="language_setting" class="flex items-center justify-between">
+								<label for="language" class="text-sm text-gray-600">界面语言</label>
+								<select id="language" class="w-32 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+									<option value="zh-CN">简体中文</option>
+									<option value="en-US">English</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div id="account_settings_card" class="bg-white shadow rounded-xl p-5">
+						<h2 id="account_settings_title" class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+							<i class="fas fa-user mr-2 text-blue-500"></i>账号设置
+						</h2>
+						<div id="account_settings_content" class="space-y-4">
+							<!-- W2设置分组 -->
+							<div id="w2_settings_group" class="p-5">
+							<!-- 第一个板块: 万维平台(W2)账号设置 -->
+								<div id="w2_account_settings_block" class="mb-6">
+									<div class="flex items-center justify-between mb-3">
+										<div class="flex items-center">
+											<i class="fas fa-server text-blue-500 mr-2"></i>
+											<h3 class="font-medium text-gray-700">万维平台(W2)账号设置</h3>
+										</div>
+										<div class="flex space-x-2">
+											<button id="w2_account_test_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
+												<i class="fas fa-play mr-1.5 text-xs"></i>测试W2连通性
+											</button>
+										</div>
+									</div>
+									<div class="space-y-4">
+										<div id="w2_userid_setting">
+											<label for="w2_userid" class="block text-sm text-gray-600 mb-1">用户名</label>
+											<input type="text" id="w2_userid" placeholder="lingboweibu(beijing)kejiyouxiangongsi_" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+										<div id="w2_password_setting">
+											<label for="w2_password" class="block text-sm text-gray-600 mb-1">密码</label>
+											<input type="password" id="w2_password" placeholder="输入W2密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+									</div>
+								</div>
+
+								<!-- 第二个板块: 万维平台(W2)邮箱验证码设置 -->
+								<div id="w2_email_verify_settings_block">
+									<div class="flex items-center justify-between mb-3">
+										<div class="flex items-center">
+											<i class="fas fa-server text-blue-500 mr-2"></i>
+											<h3 class="font-medium text-gray-700">万维平台(W2)邮箱验证码设置</h3>
+										</div>
+										<div class="flex space-x-2">
+											<button id="w2_api_test_button" class="px-3.5 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center text-sm">
+												<i class="fas fa-play mr-1.5 text-xs"></i>测试API连通性
+											</button>
+										</div>
+									</div>
+									<div class="space-y-4">
+										<div id="w2_email_api_id_setting">
+											<label for="w2_email_api_id" class="block text-sm text-gray-600 mb-1">通讯ID</label>
+											<input type="text" id="w2_email_api_id" placeholder="输入邮箱API的通讯ID" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+										
+										<div id="w2_email_api_secret_setting">
+											<label for="w2_email_api_secret" class="block text-sm text-gray-600 mb-1">通讯密钥</label>
+											<input type="text" id="w2_email_api_secret" placeholder="输入邮箱API的通讯密钥" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+										
+										<div id="w2_email_address_setting">
+											<label for="w2_email_address" class="block text-sm text-gray-600 mb-1">邮箱地址</label>
+											<input type="text" id="w2_email_address" placeholder="输入万维邮箱地址" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+										
+										<div id="w2_pop3_auth_code_setting">
+											<label for="w2_pop3_auth_code" class="block text-sm text-gray-600 mb-1">POP3授权码</label>
+											<input type="text" id="w2_email_pop3_auth_code" placeholder="输入邮箱的POP3授权码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+										<!-- 错误提示 -->
+										<div id="w2_error_message" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+											<div class="flex items-center">
+												<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+												<span class="text-red-700 text-sm">--</span>
+											</div>
+										</div>
+										<div id="w2_info_message" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+											<div class="flex items-center">
+												<i class="fas fa-info-circle text-blue-500 mr-2"></i>
+												<span class="text-blue-700 text-sm">--</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- W2设置分组结束 -->
+							<!-- LS设置分组 -->
+							<div id="ls_settings_group" class="p-5">
+							<!-- 第一个板块: 凌波微步(LS)账号设置 -->
+								<div id="ls_account_settings_block" class="mb-6">
+									<div class="flex items-center justify-between mb-3">
+										<div class="flex items-center">
+											<i class="fas fa-file-alt text-blue-500 mr-2"></i>
+											<h3 class="font-medium text-gray-700">凌波微步(LS)账号设置</h3>
+										</div>
+										<div class="flex space-x-2">
+											<button id="ls_account_test_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
+												<i class="fas fa-play mr-1.5 text-xs"></i>测试LS连通性
+											</button>
+										</div>
+									</div>
+									<div class="space-y-4">
+										<div id="ls_userid_setting">
+											<label for="ls_userid" class="block text-sm text-gray-600 mb-1">用户名</label>
+											<input type="text" id="ls_userid" placeholder="dt" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+										<div id="ls_password_setting">
+											<label for="ls_password" class="block text-sm text-gray-600 mb-1">密码</label>
+											<input type="password" id="ls_password" placeholder="输入LS密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 右侧: 高级设置 -->
+				<div id="right_settings_column" class="space-y-6">
+					<!-- 系统集成 -->
+					<div id="integration_settings_card" class="bg-white shadow rounded-xl p-5">
+						<h2 id="integration_settings_title" class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+							<i class="fas fa-plug mr-2 text-blue-500"></i>系统集成
+						</h2>
+						<div id="integration_settings_content" class="space-y-4">
+							<div id="api_endpoint_setting">
+								<label for="api_endpoint" class="block text-sm text-gray-600 mb-1">API 端点</label>
+								<input type="text" id="api_endpoint" value="https://api.tagsy.com/v2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+							</div>
+							
+							<div id="api_key_setting">
+								<label for="api_key" class="block text-sm text-gray-600 mb-1">API 密钥</label>
+								<div class="flex">
+									<input type="password" id="api_key" value="****************" class="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+									<button id="toggle_api_key" class="bg-gray-200 border border-l-0 border-gray-300 rounded-r-lg px-3 text-gray-600 hover:bg-gray-300">
+										<i id="toggle_api_key_icon" class="fas fa-eye"></i>
+									</button>
+								</div>
+							</div>
+							
+							<div id="sync_interval_setting">
+								<label for="sync_interval" class="block text-sm text-gray-600 mb-1">同步间隔</label>
+								<select id="sync_interval" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+									<option value="5">5分钟</option>
+									<option value="15" selected>15分钟</option>
+									<option value="30">30分钟</option>
+									<option value="60">1小时</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<!-- 数据管理 -->
+					<div id="data_management_card" class="bg-white shadow rounded-xl p-5">
+						<h2 id="data_management_title" class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+							<i class="fas fa-database mr-2 text-blue-500"></i>数据管理
+						</h2>
+						<div id="data_management_content" class="space-y-4">
+							<div id="storage_path_setting" class="flex items-center justify-between">
+								<div>
+									<div id="storage_path_label" class="text-sm text-gray-600">数据存储路径</div>
+									<div id="storage_path_value" class="text-sm text-gray-800">C:\ProgramData\Tagsy\data</div>
+								</div>
+								<button id="btn_change_path" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
+									更改路径
+								</button>
+							</div>
+							
+							<div id="database_size_setting" class="flex items-center justify-between">
+								<div>
+									<div id="database_size_label" class="text-sm text-gray-600">数据库大小</div>
+									<div id="database_size_value" class="text-sm text-gray-800">245 MB / 1 GB</div>
+								</div>
+								<button id="btn_cleanup" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm">
+									清理数据
+								</button>
+							</div>
+							
+							<div id="export_data_setting" class="pt-2">
+								<button id="btn_export_data" class="w-full py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition flex items-center justify-center">
+									<i class="fas fa-download mr-2"></i>导出数据
+								</button>
+							</div>
+							
+							<div id="import_data_setting">
+								<button id="btn_import_data" class="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center">
+									<i class="fas fa-upload mr-2"></i>导入数据
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- 关于系统 -->
+					<div id="about_system_card" class="bg-white shadow rounded-xl p-5">
+						<h2 id="about_system_title" class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+							<i class="fas fa-info-circle mr-2 text-blue-500"></i>关于系统
+						</h2>
+						<div id="about_system_content" class="space-y-3">
+							<div id="version_info" class="flex justify-between">
+								<span id="version_label" class="text-sm text-gray-600">版本</span>
+								<span id="version_value" class="text-sm text-gray-800">Tagsy V2.0.0</span>
+							</div>
+							
+							<div id="build_date_info" class="flex justify-between">
+								<span id="build_date_label" class="text-sm text-gray-600">构建日期</span>
+								<span id="build_date_value" class="text-sm text-gray-800">2025-09-18</span>
+							</div>
+							
+							<div id="license_info" class="flex justify-between">
+								<span id="license_label" class="text-sm text-gray-600">许可证</span>
+								<span id="license_value" class="text-sm text-gray-800">--</span>
+							</div>
+							
+							<div id="support_info" class="flex justify-between">
+								<span id="support_label" class="text-sm text-gray-600">技术支持</span>
+								<span id="support_value" class="text-sm text-gray-800">Gwencutilia@outlook.com</span>
+							</div>
+							
+							<div id="update_check_setting" class="pt-2">
+								<button id="btn_check_update" class="w-full py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition flex items-center justify-center">
+									<i class="fas fa-sync-alt mr-2"></i>检查更新
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 底部状态栏 -->
+			<div id="status_bar" class="bg-white shadow rounded-xl p-4 mt-6 flex items-center justify-between">
+				<div id="status_info" class="flex items-center space-x-4">
+					<div id="last_save_status" class="flex items-center">
+						<i class="fas fa-check-circle text-green-500 mr-2"></i>
+						<span id="last_save_text" class="text-sm text-gray-600">上次保存: 2025-09-18 14:30</span>
+					</div>
+					<div id="system_status" class="flex items-center">
+						<div id="status_indicator" class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+						<span id="status_text" class="text-sm text-gray-600">系统运行正常</span>
+					</div>
+				</div>
+				<div id="status_actions">
+					<button id="btn_refresh_status" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm flex items-center">
+						<i class="fas fa-redo-alt mr-1"></i>刷新状态
+					</button>
+				</div>
+			</div>
+		</main>
+	</div>
+</body>
+</html>

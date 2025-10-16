@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>登录页面</title>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	}
+
+	body {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 100vh;
+		background-color: #d8e9e7;
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* 新增: 背景动画canvas, 层级最低, 铺满 */
+	#bg-canvas {
+		position: fixed;
+		top: 0; left: 0; right: 0; bottom: 0;
+		width: 100vw;
+		height: 100vh;
+		z-index: 0;
+		pointer-events: none; /* 不阻挡鼠标事件 */
+	}
+
+	.login-container {
+		position: relative;
+		z-index: 2;
+		background-color: #fff;
+		padding: 40px;
+		border-radius: 20px;
+		box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+		width: 100%;
+		max-width: 380px;
+		text-align: center;
+	}
+
+	.title {
+		font-size: 2em;
+		color: #333;
+		margin-bottom: 30px;
+		font-weight: 600;
+	}
+
+	.input-group {
+		position: relative;
+		margin-bottom: 20px;
+	}
+
+	.input-field {
+		width: 100%;
+		padding: 15px 15px 15px 50px;
+		border: 1px solid #e0e0e0;
+		background-color: #f7f9fc;
+		border-radius: 12px;
+		font-size: 1em;
+		color: #555;
+		outline: none;
+		transition: border-color 0.3s, box-shadow 0.3s;
+	}
+
+	.input-field::placeholder {
+		color: #aaa;
+	}
+
+	.input-field:focus {
+		border-color: #008c75;
+		box-shadow: 0 0 0 3px rgba(0, 140, 117, 0.1);
+	}
+
+	.input-group .icon {
+		position: absolute;
+		left: 18px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #888;
+	}
+
+	.input-group .toggle-password {
+		position: absolute;
+		right: 18px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #888;
+		cursor: pointer;
+	}
+
+	.login-button {
+		width: 100%;
+		padding: 15px;
+		border: none;
+		background-color: #008c75;
+		color: #fff;
+		border-radius: 12px;
+		font-size: 1.1em;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background-color 0.3s, transform 0.1s;
+	}
+
+	.login-button:hover {
+		background-color: #007360;
+	}
+
+	.login-button:active {
+		transform: scale(0.98);
+	}
+</style>
+</head>
+<body>
+
+	<!-- 背景动画canvas -->
+	<canvas id="bg-canvas"></canvas>
+
+	<!-- 登录框 -->
+	<div class="login-container">
+    <h1 class="title" id="greeting">欢迎</h1>
+
+    <style>
+        /* 渐隐渐现动画关键帧 */
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .fade-in {
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+    </style>
+
+    <script>
+        const greetings = ['欢迎', '你好'];
+        let index = 0;
+        const greetingEl = document.getElementById('greeting');
+
+        function switchGreeting() {
+            // 先渐隐
+            greetingEl.classList.remove('fade-in');
+            greetingEl.classList.add('fade-out');
+
+            // 0.8秒后文字切换并渐显
+            setTimeout(() => {
+                index = (index + 1) % greetings.length;
+                greetingEl.textContent = greetings[index];
+                greetingEl.classList.remove('fade-out');
+                greetingEl.classList.add('fade-in');
+            }, 800);
+        }
+
+        // 初始设为渐显
+        greetingEl.classList.add('fade-in');
+
+        // 每2秒切换一次
+        setInterval(switchGreeting, 4000);
+    </script>
+		<form onsubmit="event.preventDefault();">
+			<div class="input-group">
+				<span class="icon">👤</span>
+				<input type="text" class="input-field" placeholder="用户名" />
+			</div>
+			<div class="input-group">
+				<span class="icon">🔒</span>
+				<input type="password" id="password" class="input-field" placeholder="密码" />
+				<span class="toggle-password" id="toggle-password">👁️</span>
+			</div>
+			<button type="submit" class="login-button">登录</button>
+		</form>
+	</div>
+
+	<script>
+		// 密码显示切换逻辑, 保持不变
+		const togglePassword = document.getElementById("toggle-password");
+		const passwordInput = document.getElementById("password");
+
+		togglePassword.addEventListener("click", () => {
+			const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+			passwordInput.setAttribute("type", type);
+			togglePassword.textContent = type === "password" ? "👁️" : "🙈";
+		});
+
+		// 背景粒子动画
+		const canvas = document.getElementById('bg-canvas');
+		const ctx = canvas.getContext('2d');
+		let width, height;
+
+		function resize() {
+			width = window.innerWidth;
+			height = window.innerHeight;
+			canvas.width = width;
+			canvas.height = height;
+		}
+		window.addEventListener('resize', resize);
+		resize();
+
+		// 粒子类
+		class Particle {
+			constructor() {
+				this.reset();
+			}
+			reset() {
+				this.x = Math.random() * width;
+				this.y = Math.random() * height;
+				this.size = 1 + Math.random() * 5;
+				this.speedX = (Math.random() - 0.5) * 0.5;
+				this.speedY = (Math.random() - 0.5) * 0.5;
+				this.opacity = 0.1 + Math.random() * 0.4;
+			}
+			update() {
+				this.x += this.speedX;
+				this.y += this.speedY;
+
+				if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+					this.reset();
+				}
+			}
+			draw(ctx) {
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+				ctx.fillStyle = `rgba(0, 140, 117, ${this.opacity})`;
+				ctx.fill();
+			}
+		}
+
+		// 初始化粒子
+		const particles = [];
+		const PARTICLE_COUNT = 80;
+		for (let i = 0; i < PARTICLE_COUNT; i++) {
+			particles.push(new Particle());
+		}
+
+		// 动画循环
+		function animate() {
+			ctx.clearRect(0, 0, width, height);
+
+			// 绘制所有粒子
+			for (const p of particles) {
+				p.update();
+				p.draw(ctx);
+			}
+
+			requestAnimationFrame(animate);
+		}
+		animate();
+	</script>
+
+</body>
+</html>
