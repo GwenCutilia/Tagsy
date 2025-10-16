@@ -157,11 +157,10 @@ class W2 extends Page {
 	task_label_1 = DomHelper.bySelector("#task_label_1"); // 任务2标签
 	task_label_2 = DomHelper.bySelector("#task_label_2"); // 任务3标签
 	task_label_3 = DomHelper.bySelector("#task_label_3"); // 任务4标签
-
-	calendar_month_title = DomHelper.bySelector("#calendar_month_title");
-	calendar_month_dates = DomHelper.bySelector("#calendar_month_dates");
-	prev_month_btn = DomHelper.bySelector("#prev_month_btn");
-	next_month_btn = DomHelper.bySelector("#next_month_btn");
+	calendar_month_title = DomHelper.bySelector("#calendar_month_title"); // 日历月份
+	calendar_month_dates = DomHelper.bySelector("#calendar_month_dates"); // 日历主体
+	prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
+	next_month_btn = DomHelper.bySelector("#next_month_btn"); // 查看下个月排班按钮
 
 	static status = {
 		not_login: "未登录",
@@ -201,8 +200,15 @@ class W2 extends Page {
 		});
 		card_login_out_btn.addEventListener("click", async () => {
 			await W2Request.logout();
+			// 将UI置为默认状态
+			this.card_work_status_value.innerText = W2.status.unknown;
+			this.card_work_status_value.innerText = W2.status.unknown;
+			calendar_month_title.innerText = W2.status.unknown;
+			calendar_month_dates.innerHTML = "";
+
 			Global.config.w2.w2_login_status = W2.status.not_login;
 			Global.config.w2.w2_token_check_task = false;
+
 		});
 		card_switch_status_btn.addEventListener("click", async () => {
 			if (card_work_status_value.innerText === "正在标注") {
@@ -376,13 +382,13 @@ class W2 extends Page {
 						dateDiv.classList.add('bg-gray-50', 'hover:bg-blue-100');
 					}
 					this.calendar_month_dates.appendChild(dateDiv);
-					// 运行完毕后自动关闭日历任务
 				}
-				Global.config.w2.w2_calendar_container_task = false;
+				await System.sleepSeconds(60 * 60 * 8);
 			} else {
-				calendar_month_title.innerText = "--";
+				calendar_month_title.innerText = W2.status.unknown;
+				calendar_month_dates.innerHTML = "";
+				await System.sleepSeconds(3);
 			}
-			await System.sleepSeconds(3);
 		}
 	}
 
@@ -397,24 +403,25 @@ class W2 extends Page {
 	}
 	// 定时任务
 	static async currentTask() {
-		TimerScheduler.setDailyTask(8, 50, async () => { await W2.login() }, "W2_LOGIN_TASK");
-		TimerScheduler.setDailyTask(8, 55, async () => { 
+		
+		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_login_range_start, Global.config.w2.w2_login_range_end), async () => { await W2.login() }, "W2_LOGIN_TASK");
+		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_work_in_range_start, Global.config.w2.w2_work_in_range_end), async () => { 
 			await W2Request.workIn();
 			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workIn;
 		}, "W2_WORK_IN_TASK");
-		TimerScheduler.setDailyTask(12, 0, async () => { 
+		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_go_meal_range_start, Global.config.w2.w2_go_meal_range_end), async () => { 
 			await W2Request.goMeal();
 			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.meal;
 		}, "W2_GO_MEAL_TASK");
-		TimerScheduler.setDailyTask(13, 30, async () => { 
+		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_go_work_range_start, Global.config.w2.w2_go_work_range_end), async () => { 
 			await W2Request.goWork()
 			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.working;
 		}, "W2_GO_WORK_TASK");
-		TimerScheduler.setDailyTask(18, 30, async () => { 
+		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_work_out_range_start, Global.config.w2.w2_work_out_range_end), async () => { 
 			await W2Request.workOut();
 			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workOut;
 		}, "W2_WORK_OUT_TASK");
-		TimerScheduler.setDailyTask(18, 35, async () => { await W2Request.logout();}, "W2_LOG_OUT_TASK");
+		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_log_out_range_start, Global.config.w2.w2_log_out_range_end), async () => { await W2Request.logout();}, "W2_LOG_OUT_TASK");
 	}
 	static async isLogin() {
 		let result = await W2Request.getTokenCheck();

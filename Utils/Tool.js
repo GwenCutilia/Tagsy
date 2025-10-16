@@ -750,10 +750,94 @@ class Time {
 				throw new Error(`Time.formatDate: 不支持的格式 "${format}", 可选格式: default/cn/short`);
 		}
 	}
+	/**
+	 * 在指定时间区间内随机生成一个时间字符串
+	 * @param {string} startTimeStr - 开始时间字符串 (格式: HH:MM:SS 或 HH:MM)
+	 * @param {string} endTimeStr - 结束时间字符串 (格式: HH:MM:SS 或 HH:MM)
+	 * @param {string} [format='HH:MM:SS'] - 返回时间格式
+	 * - 'HH:MM:SS': 完整格式 (如 "08:50:00")
+	 * - 'HH:MM': 简洁格式 (如 "08:50")
+	 * @returns {string} 在区间内随机生成的时间字符串
+	 * @throws {Error} 时间格式无效或开始时间晚于结束时间时抛出错误
+	 * @example
+	 * // 在 08:50:00 到 18:35:00 之间随机生成时间
+	 * const randomTime1 = Time.getRandomTimeInRange('08:50:00', '18:35:00');
+	 * // 可能返回: "14:23:45"
+	 * 
+	 * // 使用简洁格式返回
+	 * const randomTime2 = Time.getRandomTimeInRange('08:50', '18:35', 'HH:MM');
+	 * // 可能返回: "14:23"
+	 * 
+	 * // 使用您配置中的变量
+	 * const loginTime = Time.getRandomTimeInRange(
+	 *   Global.config.w2.w2_login_range_start, 
+	 *   Global.config.w2.w2_login_range_end
+	 * );
+	 */
+	static getRandomTimeInRange(startTimeStr, endTimeStr, format = 'HH:MM:SS') {
+		// 时间解析正则表达式 (支持 HH:MM:SS 和 HH:MM 格式)
+		const timeRegex = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/;
+		
+		// 将时间字符串转换为秒数的逻辑
+		const parseTimeToSeconds = (timeStr) => {
+			const match = timeStr.match(timeRegex);
+			if (!match) {
+				throw new Error(`Time.getRandomTimeInRange: 无效的时间格式 "${timeStr}", 支持格式: HH:MM:SS 或 HH:MM`);
+			}
+			
+			const hours = parseInt(match[1]);
+			const minutes = parseInt(match[2]);
+			const seconds = match[3] ? parseInt(match[3]) : 0;
+			
+			// 参数验证
+			if (hours < 0 || hours > 23) {
+				throw new Error(`Time.getRandomTimeInRange: 小时必须在 0-23 之间, 当前为 ${hours}`);
+			}
+			if (minutes < 0 || minutes > 59) {
+				throw new Error(`Time.getRandomTimeInRange: 分钟必须在 0-59 之间, 当前为 ${minutes}`);
+			}
+			if (seconds < 0 || seconds > 59) {
+				throw new Error(`Time.getRandomTimeInRange: 秒必须在 0-59 之间, 当前为 ${seconds}`);
+			}
+			
+			return hours * 3600 + minutes * 60 + seconds;
+		};
+		
+		// 将开始时间和结束时间转换为秒数
+		const startSeconds = parseTimeToSeconds(startTimeStr);
+		const endSeconds = parseTimeToSeconds(endTimeStr);
+		
+		// 验证时间区间有效性
+		if (startSeconds >= endSeconds) {
+			throw new Error(`Time.getRandomTimeInRange: 开始时间 "${startTimeStr}" 不能晚于或等于结束时间 "${endTimeStr}"`);
+		}
+		
+		// 在区间内随机生成秒数 (包含边界)
+		const randomSeconds = Math.floor(Math.random() * (endSeconds - startSeconds + 1)) + startSeconds;
+		
+		// 将秒数转换为时间字符串
+		const hours = Math.floor(randomSeconds / 3600);
+		const minutes = Math.floor((randomSeconds % 3600) / 60);
+		const seconds = randomSeconds % 60;
+		
+		const hourStr = this._padZero(hours);
+		const minuteStr = this._padZero(minutes);
+		const secondStr = this._padZero(seconds);
+		
+		// 根据格式返回结果
+		switch (format.toUpperCase()) {
+			case 'HH:MM:SS':
+				return `${hourStr}:${minuteStr}:${secondStr}`;
+			case 'HH:MM':
+				return `${hourStr}:${minuteStr}`;
+			default:
+				throw new Error(`Time.getRandomTimeInRange: 不支持的输出格式 "${format}", 可选格式: HH:MM:SS/HH:MM`);
+		}
+	}
 }
 
 class TimerScheduler {
-	// 存储所有定时器信息，现在按任务名称存储
+	// 存储所有定时器信息，按任务名称存储
 	static timers = new Map();
 	// 生成唯一内部ID的计数器（仅用于内部管理）
 	static timerIdCounter = 0;
@@ -765,16 +849,25 @@ class TimerScheduler {
 	}
 
 	/**
-	 * 每天指定时间点执行任务
-	 * @param {number} hour - 24小时制的小时数 (0-23)
-	 * @param {number} minute - 分钟数 (0-59)
+	 * 每天指定时间点执行任务（支持秒级精度）
+	 * @param {string} timeString - 时间字符串，格式为"HH:MM:SS"或"H:M:S"（如"08:00:00"或"8:5:30"）
 	 * @param {() => void} callback - 到达指定时间时执行的回调函数
 	 * @param {string} taskName - 任务名称, 用于标识和停止任务
 	 * @returns {boolean} 任务是否成功设置
 	 */
-	static setDailyTask(hour, minute, callback, taskName) {
-		if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-			throw new Error('无效的时间参数, 小时应在0-23之间, 分钟应在0-59之间');
+	static setDailyTask(timeString, callback, taskName) {
+		// 验证时间字符串格式
+		const timeParts = timeString.split(':').map(part => parseInt(part, 10));
+		
+		if (timeParts.length !== 3 || timeParts.some(isNaN)) {
+			throw new Error('无效的时间格式, 请使用"HH:MM:SS"格式');
+		}
+		
+		const [hour, minute, second] = timeParts;
+		
+		// 验证时间范围
+		if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
+			throw new Error('无效的时间参数, 小时应在0-23之间, 分钟和秒应在0-59之间');
 		}
 		
 		if (!taskName || typeof taskName !== 'string') {
@@ -787,33 +880,37 @@ class TimerScheduler {
 		}
 		
 		let hasRun = false;
+		// 每秒钟检查一次时间
 		const timerId = setInterval(() => {
-		const now = new Date();
-		if (now.getHours() === hour && now.getMinutes() === minute) {
-			if (!hasRun) {
-			try {
-				callback();
-			} catch (err) {
-				this.log.error('每日任务执行错误:', err);
+			const now = new Date();
+			// 检查当前时间是否与目标时间匹配
+			if (now.getHours() === hour && now.getMinutes() === minute && now.getSeconds() === second) {
+				if (!hasRun) {
+					try {
+						callback();
+					} catch (err) {
+						this.log.error('每日任务执行错误:', err);
+					}
+					hasRun = true;
+				}
+			} else {
+				hasRun = false;
 			}
-			hasRun = true;
-			}
-		} else {
-			hasRun = false;
-		}
 		}, 1000);
 		
 		const internalId = `daily_${TimerScheduler.timerIdCounter++}`;
 		this.timers.set(taskName, {
-		id: timerId,
-		internalId: internalId,
-		type: 'daily',
-		hour,
-		minute,
-		name: taskName
+			id: timerId,
+			internalId: internalId,
+			type: 'daily',
+			hour,
+			minute,
+			second,  // 新增秒信息
+			timeString,  // 保存原始时间字符串
+			name: taskName
 		});
 		
-		this.log.log(`每日任务已设置: ${taskName} (${hour}:${minute})`);
+		this.log.log(`每日任务已设置: ${taskName} (${timeString})`);
 		return true;
 	}
 
@@ -946,6 +1043,10 @@ class TimerScheduler {
 		type: info.type,
 		intervalMs: info.intervalMs,
 		maxCount: info.maxCount,
+		hour: info.hour,
+		minute: info.minute,
+		second: info.second,
+		timeString: info.timeString,
 		internalId: info.internalId
 		}));
 	}
@@ -963,7 +1064,7 @@ class TimerScheduler {
 		}
 		
 		// 保存任务配置
-		const { type, intervalMs, maxCount, hour, minute, name } = timerInfo;
+		const { type, intervalMs, maxCount, timeString, name } = timerInfo;
 		
 		// 停止当前任务
 		this.stopTask(taskName);

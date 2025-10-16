@@ -38,6 +38,15 @@ class Global {
 			w2_work_hour_status_task: false, // 工作时长任务
 			w2_current_task_status_task: false, // 当前任务任务
 			w2_calendar_container_task: false, // 日历任务
+			// 模块设置
+			w2_login_range_start: "08:50:00",
+			w2_login_range_end: "08:55:00",
+			w2_workin_range_start: "08:50:00",
+			w2_workin_range_end: "12:00:00",
+			w2_workout_range_start: "12:00:00",
+			w2_workout_range_end: "18:35:00",
+			w2_meal_range_start: "08:50:00",
+			w2_meal_range_end: "12:00:00",
 		},
 		ui: {},
 	};
