@@ -50,7 +50,7 @@ class Template {
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
 		// 添加一个重新登录的按钮监听事件
 		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
-		W2.currentTask();
+		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
     static isTemplatePage() {
         return location.pathname.includes('/Template/');
@@ -127,6 +127,7 @@ class Index extends Template {
 			this.runtimeLog.add("W2账号未填写, 请于设置填写账号信息");
 			this.runtimeLog.add("W2模块已停止运行");
 			// 停止W2模块
+			TimerScheduler.stopAllTasks();
 		}
 	}
 	async loggerShow() {
@@ -393,35 +394,83 @@ class W2 extends Page {
 	}
 
 	async init() {
-		await W2Request.getLoginPage();
 		// await W2.login();
 		// 为每日任务写单独的函数出来
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
 		// 添加一个重新登录的按钮监听事件
 		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
 		// this.currentTask();
+		// 将所有W2相关的变量的登录变为signin, signout, meal, work, workin, workout
+		// 其他的html变量统一
 	}
 	// 定时任务
 	static async currentTask() {
-		
-		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_login_range_start, Global.config.w2.w2_login_range_end), async () => { await W2.login() }, "W2_LOGIN_TASK");
-		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_work_in_range_start, Global.config.w2.w2_work_in_range_end), async () => { 
-			await W2Request.workIn();
-			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workIn;
-		}, "W2_WORK_IN_TASK");
-		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_go_meal_range_start, Global.config.w2.w2_go_meal_range_end), async () => { 
-			await W2Request.goMeal();
-			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.meal;
-		}, "W2_GO_MEAL_TASK");
-		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_go_work_range_start, Global.config.w2.w2_go_work_range_end), async () => { 
-			await W2Request.goWork()
-			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.working;
-		}, "W2_GO_WORK_TASK");
-		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_work_out_range_start, Global.config.w2.w2_work_out_range_end), async () => { 
-			await W2Request.workOut();
-			Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workOut;
-		}, "W2_WORK_OUT_TASK");
-		TimerScheduler.setDailyTask(Time.getRandomTimeInRange(Global.config.w2.w2_log_out_range_start, Global.config.w2.w2_log_out_range_end), async () => { await W2Request.logout();}, "W2_LOG_OUT_TASK");
+		const taskConfigs = [
+			{
+				start: Global.config.w2.w2_login_range_start,
+				end: Global.config.w2.w2_login_range_end,
+				action: async () => { await W2.login() },
+				name: "W2_LOGIN_TASK"
+			},
+			{
+				start: Global.config.w2.w2_workin_range_start,
+				end: Global.config.w2.w2_workin_range_end,
+				action: async () => { 
+					await W2Request.workIn();
+					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workIn;
+				},
+				name: "W2_WORK_IN_TASK"
+			},
+			{
+				start: Global.config.w2.w2_meal_range_start,
+				end: Global.config.w2.w2_meal_range_end,
+				action: async () => { 
+					await W2Request.goMeal();
+					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.meal;
+				},
+				name: "W2_GO_MEAL_TASK"
+			},
+			{
+				start: Global.config.w2.w2_working_range_start,
+				end: Global.config.w2.w2_working_range_end,
+				action: async () => { 
+					await W2Request.goWork();
+					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.working;
+				},
+				name: "W2_GO_WORK_TASK"
+			},
+			{
+				start: Global.config.w2.w2_workout_range_start,
+				end: Global.config.w2.w2_workout_range_end,
+				action: async () => { 
+					await W2Request.workOut();
+					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workOut;
+				},
+				name: "W2_WORK_OUT_TASK"
+			},
+			{
+				start: Global.config.w2.w2_logout_range_start,
+				end: Global.config.w2.w2_logout_range_end,
+				action: async () => { await W2Request.logout(); },
+				name: "W2_LOG_OUT_TASK"
+			}
+		];
+		if (Global.config.w2.w2_login_status === W2.status.login_success && !await W2.isTodayOff()) {
+			if (Global.value.w2_current_task_flag === true) {
+				for (const config of taskConfigs) {
+					TimerScheduler.setDailyTask(
+						Time.getRandomTimeInRange(config.start, config.end),
+						config.action,
+						config.name
+					);
+				}
+				Global.value.w2_current_task_flag = false;
+			}
+			this.log.log("今天是工作日, 定时任务已启动");
+		} else {
+			TimerScheduler.stopAllTasks();
+			this.log.log("未登录或今天是休息日, 定时任务已停止");
+		}
 	}
 	static async isLogin() {
 		let result = await W2Request.getTokenCheck();
@@ -431,6 +480,42 @@ class W2 extends Page {
 		} else {
 			return false;
 		}
+	}
+	// 判断今天是否是休息日
+	static async isTodayOff() {
+		// 记录之前通过其他函数更改的月份
+		let saveMonth = Global.value.month;
+		Global.value.month = Time.getCurrentMonth();
+		// 获取当前月份的排班数据
+		const scheduleResult = await W2Request.queryCurrentMonthSchedule();
+		// 恢复之前记录的月份
+		Global.value.month = saveMonth;
+		// 检查返回数据是否有效
+		if (!scheduleResult || !scheduleResult.data || 
+			!scheduleResult.data.detail_data_list || 
+			scheduleResult.data.detail_data_list.length === 0) {
+			this.log.warn("无法获取排班数据");
+			return false;
+		}
+
+		const detailData = scheduleResult.data.detail_data_list[0];
+		const scheduleInfos = detailData.schedule_infos;
+		
+		// 获取今天的日期字符串（格式：YYYY-MM-DD）
+		const today = Time.getCurrentDate('default');
+		
+		// 检查今天是否有排班信息
+		if (!scheduleInfos[today]) {
+			this.log.warn(`今天 ${today} 没有排班信息`);
+			return false;
+		}
+
+		const todaySchedule = scheduleInfos[today];
+		
+		// 判断是否是休息日（根据你的数据结构，休息日的 schedule_conf_name 为 "休息"）
+		const isOff = todaySchedule.schedule_conf_name === "休息";
+		
+		return isOff;
 	}
 	static async getLoginInformat() {
 		let loginInformat = {
@@ -519,6 +604,7 @@ class LS extends Page {
 }
 class Setting extends Page {
 	btn_save_settings = DomHelper.bySelector("#btn_save_settings"); // 保存设置按钮
+	// W2账号账号设置
 	w2_account_test_button = DomHelper.bySelector("#w2_account_test_button"); // W2账号测试按钮
 	w2_userid = DomHelper.bySelector("#w2_userid"); // W2账号输入框 账号
 	w2_password = DomHelper.bySelector("#w2_password"); // W2密码输入框
@@ -529,6 +615,23 @@ class Setting extends Page {
 	w2_email_pop3_auth_code = DomHelper.bySelector("#w2_email_pop3_auth_code"); // W2POP3授权码输入框
 	w2_error_message = DomHelper.bySelector("#w2_error_message") // W2错误提示
 	w2_info_message = DomHelper.bySelector("#w2_info_message"); // W2提示信息
+	// W2模块设置
+	w2_validate_format_button = DomHelper.bySelector("#w2_validate_format_button"); // W2验证格式按钮
+	w2_login_range_start_input = DomHelper.bySelector("#w2_login_range_start_input"); // W2登录时间段开始输入框
+	w2_login_range_end_input = DomHelper.bySelector("#w2_login_range_end_input"); // W2登录时间段结束输入框
+	w2_logout_range_start_input = DomHelper.bySelector("#w2_logout_range_start_input"); // W2登出时间段开始输入框
+	w2_logout_range_end_input = DomHelper.bySelector("#w2_logout_range_end_input"); // W2登出时间段结束输入框
+	w2_workin_range_start_input = DomHelper.bySelector("#w2_workin_range_start_input"); // W2上班时间段开始输入框
+	w2_workin_range_end_input = DomHelper.bySelector("#w2_workin_range_end_input"); // W2上班时间段结束输入框
+	w2_workout_range_start_input = DomHelper.bySelector("#w2_workout_range_start_input"); // W2下班时间段开始输入框
+	w2_workout_range_end_input = DomHelper.bySelector("#w2_workout_range_end_input"); // W2下班时间段结束输入框
+	w2_meal_range_start_input = DomHelper.bySelector("#w2_meal_range_start_input"); // W2吃饭时间段开始输入框
+	w2_meal_range_end_input = DomHelper.bySelector("#w2_meal_range_end_input"); // W2吃饭时间段结束输入框
+	w2_working_range_start_input = DomHelper.bySelector("#w2_working_range_start_input"); // W2工作时间段开始输入框
+	w2_working_range_end_input = DomHelper.bySelector("#w2_working_range_end_input"); // W2工作时间段结束输入框
+	w2_advanced_error_message = DomHelper.bySelector("#w2_advanced_error_message"); // W2高级设置错误提示
+	w2_advanced_info_message = DomHelper.bySelector("#w2_advanced_info_message"); // W2高级设置提示信息
+	
 	constructor() {
 		super();
 		this.bindEvents();
@@ -648,6 +751,101 @@ class Setting extends Page {
 				}
 			});
 		}
+		this.w2_validate_format_button.addEventListener("click", async () => {
+			// 做一个校验, 格式是否正确
+			// 获取所有时间值
+			const timeFields = [
+				{
+					start: this.w2_login_range_start_input.value,
+					end: this.w2_login_range_end_input.value,
+					configStart: 'w2_login_range_start',
+					configEnd: 'w2_login_range_end',
+					fieldName: '登录',
+					startInput: this.w2_login_range_start_input,
+					endInput: this.w2_login_range_end_input
+				},
+				{
+					start: this.w2_logout_range_start_input.value,
+					end: this.w2_logout_range_end_input.value,
+					configStart: 'w2_logout_range_start',
+					configEnd: 'w2_logout_range_end',
+					fieldName: '退出登录',
+					startInput: this.w2_logout_range_start_input,
+					endInput: this.w2_logout_range_end_input
+				},
+				{
+					start: this.w2_workin_range_start_input.value,
+					end: this.w2_workin_range_end_input.value,
+					configStart: 'w2_workin_range_start',
+					configEnd: 'w2_workin_range_end',
+					fieldName: '上班打卡',
+					startInput: this.w2_workin_range_start_input,
+					endInput: this.w2_workin_range_end_input
+				},
+				{
+					start: this.w2_workout_range_start_input.value,
+					end: this.w2_workout_range_end_input.value,
+					configStart: 'w2_workout_range_start',
+					configEnd: 'w2_workout_range_end',
+					fieldName: '下班打卡',
+					startInput: this.w2_workout_range_start_input,
+					endInput: this.w2_workout_range_end_input
+				},
+				{
+					start: this.w2_meal_range_start_input.value,
+					end: this.w2_meal_range_end_input.value,
+					configStart: 'w2_meal_range_start',
+					configEnd: 'w2_meal_range_end',
+					fieldName: '前往用餐',
+					startInput: this.w2_meal_range_start_input,
+					endInput: this.w2_meal_range_end_input
+				},
+				{
+					start: this.w2_working_range_start_input.value,
+					end: this.w2_working_range_end_input.value,
+					configStart: 'w2_working_range_start',
+					configEnd: 'w2_working_range_end',
+					fieldName: '切换标注',
+					startInput: this.w2_working_range_start_input,
+					endInput: this.w2_working_range_end_input
+				}
+			];
+			
+			// 将时间字符串转换为秒数进行比较的函数
+			function timeToSeconds(timeStr) {
+				const parts = timeStr.split(':');
+				if (parts.length !== 3) return 0;
+				return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+			}
+			
+			// 循环检查所有时间字段
+			for (const field of timeFields) {
+				if (timeToSeconds(field.start) > timeToSeconds(field.end)) {
+					DomHelper.bySelectorFromParent(w2_advanced_error_message, "span").innerText = field.fieldName + " 开始时间不能晚于结束时间";
+					w2_advanced_error_message.classList.remove("hidden");
+					w2_advanced_info_message.classList.add("hidden");
+					field.startInput.classList.add("border-red-500");
+					field.endInput.classList.add("border-red-500");
+					return;
+				} else {
+					field.startInput.classList.remove("border-red-500");
+					field.endInput.classList.remove("border-red-500");
+				}
+			}
+			
+			// 如果没有错误, 保存配置
+			for (const field of timeFields) {
+				Global.config.w2[field.configStart] = field.start;
+				Global.config.w2[field.configEnd] = field.end;
+			}
+			// w2_info_message.querySelector("span").innerText = "W2连通性测试无误, 已为邮箱发送验证码";
+			DomHelper.bySelectorFromParent(w2_advanced_info_message, "span").innerText = "时间段配置已保存";
+			w2_advanced_info_message.classList.remove("hidden");
+			w2_advanced_error_message.classList.add("hidden");
+			// 重新开始任务
+			Global.value.w2_current_task_flag = true;
+			await W2.currentTask();
+		});
 	}
 	updateUIElement() {
 		// this.w2_user_id_HtmlDom = DomHelper.bySelector("#w2_userid_setting");
@@ -665,6 +863,30 @@ class Setting extends Page {
 			this.w2_email_api_secret.value = Global.config.w2.w2_email_api_secret;
 			this.w2_email_address.value = Global.config.w2.w2_email_address;
 			this.w2_email_pop3_auth_code.value = Global.config.w2.w2_email_pop3_auth_code;
+		}
+		if (Global.config.w2.w2_login_range_start !== null && Global.config.w2.w2_login_range_end !== null) {
+			this.w2_login_range_start_input.value = Global.config.w2.w2_login_range_start;
+			this.w2_login_range_end_input.value = Global.config.w2.w2_login_range_end;
+		}
+		if (Global.config.w2.w2_logout_range_start !== null && Global.config.w2.w2_logout_range_end !== null) {
+			this.w2_logout_range_start_input.value = Global.config.w2.w2_logout_range_start;
+			this.w2_logout_range_end_input.value = Global.config.w2.w2_logout_range_end;
+		}
+		if (Global.config.w2.w2_workin_range_start !== null && Global.config.w2.w2_workin_range_end !== null) {
+			this.w2_workin_range_start_input.value = Global.config.w2.w2_workin_range_start;
+			this.w2_workin_range_end_input.value = Global.config.w2.w2_workin_range_end;
+		}
+		if (Global.config.w2.w2_workout_range_start !== null && Global.config.w2.w2_workout_range_end !== null) {
+			this.w2_workout_range_start_input.value = Global.config.w2.w2_workout_range_start;
+			this.w2_workout_range_end_input.value = Global.config.w2.w2_workout_range_end;
+		} 
+		if (Global.config.w2.w2_meal_range_start !== null && Global.config.w2.w2_meal_range_end !== null) {
+			this.w2_meal_range_start_input.value = Global.config.w2.w2_meal_range_start;
+			this.w2_meal_range_end_input.value = Global.config.w2.w2_meal_range_end;
+		}
+		if (Global.config.w2.w2_working_range_start !== null && Global.config.w2.w2_working_range_end !== null) {
+			this.w2_working_range_start_input.value = Global.config.w2.w2_working_range_start;
+			this.w2_working_range_end_input.value = Global.config.w2.w2_working_range_end;
 		}
 	}
 	init() {

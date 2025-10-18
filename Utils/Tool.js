@@ -808,7 +808,7 @@ class Time {
 		const endSeconds = parseTimeToSeconds(endTimeStr);
 		
 		// 验证时间区间有效性
-		if (startSeconds >= endSeconds) {
+		if (startSeconds > endSeconds) {
 			throw new Error(`Time.getRandomTimeInRange: 开始时间 "${startTimeStr}" 不能晚于或等于结束时间 "${endTimeStr}"`);
 		}
 		
@@ -905,8 +905,8 @@ class TimerScheduler {
 			type: 'daily',
 			hour,
 			minute,
-			second,  // 新增秒信息
-			timeString,  // 保存原始时间字符串
+			second,
+			timeString,
 			name: taskName
 		});
 		
@@ -1039,38 +1039,15 @@ class TimerScheduler {
 	 */
 	static getActiveTasks() {
 		return Array.from(this.timers.entries()).map(([name, info]) => ({
-		name,
-		type: info.type,
-		intervalMs: info.intervalMs,
-		maxCount: info.maxCount,
-		hour: info.hour,
-		minute: info.minute,
-		second: info.second,
-		timeString: info.timeString,
-		internalId: info.internalId
+			name,
+			type: info.type,
+			intervalMs: info.intervalMs,
+			maxCount: info.maxCount,
+			hour: info.hour,
+			minute: info.minute,
+			second: info.second,
+			timeString: info.timeString,
+			internalId: info.internalId
 		}));
-	}
-
-	/**
-	 * 重启指定任务（先停止再重新开始）
-	 * @param {string} taskName - 任务名称
-	 * @returns {boolean} 重启是否成功
-	 */
-	static restartTask(taskName) {
-		const timerInfo = this.timers.get(taskName);
-		if (!timerInfo) {
-		this.log.warn(`找不到名称为 "${taskName}" 的任务，无法重启`);
-		return false;
-		}
-		
-		// 保存任务配置
-		const { type, intervalMs, maxCount, timeString, name } = timerInfo;
-		
-		// 停止当前任务
-		this.stopTask(taskName);
-		
-		// 重新创建任务（这里需要外部提供回调函数，所以无法自动重启）
-		this.log.warn(`任务 "${taskName}" 已停止，但需要外部提供回调函数来重新启动`);
-		return false;
 	}
 }

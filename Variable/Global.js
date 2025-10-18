@@ -29,7 +29,6 @@ class Global {
 			w2_work_hour_status: null, // 工作时长状态
 			w2_personal_informat: null, // 个人信息
 			w2_current_task_status: null, // 定时打卡任务, 当前任务选项卡
-			// 累加器
 			// 任务状态
 			w2_token_check_task: false,
 			w2_personal_status_task: false,
@@ -40,18 +39,25 @@ class Global {
 			w2_calendar_container_task: false, // 日历任务
 			// 模块设置
 			w2_login_range_start: "08:50:00",
-			w2_login_range_end: "08:55:00",
-			w2_workin_range_start: "08:50:00",
-			w2_workin_range_end: "12:00:00",
-			w2_workout_range_start: "12:00:00",
-			w2_workout_range_end: "18:35:00",
-			w2_meal_range_start: "08:50:00",
+			w2_login_range_end: "08:50:00",
+			w2_workin_range_start: "08:55:00",
+			w2_workin_range_end: "08:55:00",
+			w2_meal_range_start: "12:00:00",
 			w2_meal_range_end: "12:00:00",
+			w2_working_range_start: "13:30:00",
+			w2_working_range_end: "13:30:59",
+			w2_workout_range_start: "18:30:00",
+			w2_workout_range_end: "18:30:00",
+			w2_logout_range_start: "18:35:00",
+			w2_logout_range_end: "18:35:00",
 		},
 		ui: {},
 	};
-
+	
 	static value = {
+		// 累加器 && 标志位
+		// 待优化: 可以用别的方法实现Setting类中的刷新定时任务的功能, 目前用这个标志位太捞了
+		w2_current_task_flag: true, // 定时任务标志位, 当它为true时, 表示定时任务中callback需要更新
 		month: Time.getCurrentMonth(), // 当前月份
 	}
 

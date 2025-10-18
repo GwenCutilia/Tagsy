@@ -181,6 +181,8 @@ class W2Request extends HttpRequest {
 		return result;
 	}
 
+	
+
 	// 构建请求头
 	static _buildHeader(additionalData = {}) {
 		return {
