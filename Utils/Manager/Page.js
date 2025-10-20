@@ -50,7 +50,7 @@ class Template {
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
 		// 添加一个重新登录的按钮监听事件
 		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
-		await W2.currentTask.bind(this)();
+		await W2.currentTask();
 		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
     static isTemplatePage() {
@@ -196,7 +196,7 @@ class W2 extends Page {
 	bindEvents() {
 		w2_login_btn.addEventListener("click", async () => {
 			await W2.login();
-			W2.currentTask.bind(this);
+			await W2.currentTask.bind(this);
 			TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 		});
 		w2_relogin_btn.addEventListener("click", async () => {
@@ -459,21 +459,26 @@ class W2 extends Page {
 				name: "W2_LOG_OUT_TASK"
 			}
 		];
-		if (Global.config.w2.w2_login_status === W2.status.login_success && !await W2.isTodayOff()) {
-			if (Global.value.w2_current_task_flag === true) {
-				for (const config of taskConfigs) {
-					TimerScheduler.setDailyTask(
-						Time.getRandomTimeInRange(config.start, config.end),
-						config.action,
-						config.name
-					);
+
+		if (await this.isLogin()) {
+			if (!await W2.isTodayOff()) {
+				if (Global.value.w2_current_task_flag === true) {
+					for (const config of taskConfigs) {
+						TimerScheduler.setDailyTask(
+							Time.getRandomTimeInRange(config.start, config.end),
+							config.action,
+							config.name
+						);
+					}
+					Global.value.w2_current_task_flag = false;
 				}
-				Global.value.w2_current_task_flag = false;
+				this.log.log("今天是工作日, 定时任务已启动");
+			} else {
+				this.log.log("今天是休息日");
 			}
-			this.log.log("今天是工作日, 定时任务已启动");
 		} else {
 			TimerScheduler.stopAllTasks();
-			this.log.log("未登录或今天是休息日, 定时任务已停止");
+			this.log.log("未登录, 定时任务已停止");
 		}
 	}
 	static async isLogin() {
