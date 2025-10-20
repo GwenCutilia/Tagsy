@@ -16,8 +16,8 @@ class Page {
 	}
 
 	// 静态方法: 初始化页面路由
-	static init() {
-		Template.init();
+	static async init() {
+		await Template.init();
 		const page = location.pathname.split("/").pop();
 		if (this.routes[page]) {
 			this.routes[page]();
@@ -36,20 +36,21 @@ class Page {
 }
 class Template {
     static log = new Logger("Template");
-    static init() {
+    static async init() {
 		if (!this.isTemplatePage()) {
             return;
         }
-        Template.loadTask();
+        await Template.loadTask();
         this.log.log('Template初始化完成');
     }
 	static async loadTask() {
 		await W2Request.getLoginPage();
-		W2.login();
+		await W2.login();
 		// 为每日任务写单独的函数出来
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
 		// 添加一个重新登录的按钮监听事件
 		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
+		await W2.currentTask.bind(this)();
 		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
     static isTemplatePage() {
@@ -139,25 +140,25 @@ class Index extends Template {
 	}
 }
 class W2 extends Page {
-	card_login_status_value = DomHelper.bySelector("#card_login_status_value"); // 登录状态
-	card_working_status_value = DomHelper.bySelector("#card_working_status_value"); // 考勤打卡状态
-	card_work_status_value = DomHelper.bySelector("#card_work_status_value"); // 工作状态
-	card_login_btn = DomHelper.bySelector("#card_login_btn"); // 登录按钮
-	card_relogin_btn = DomHelper.bySelector("#card_relogin_btn"); // 重新登录按钮
-	card_login_out_btn = DomHelper.bySelector("#card_login_out_btn"); // 退出登录按钮
-	card_switch_status_btn = DomHelper.bySelector("#card_switch_status_btn"); // 切换状态按钮
-	task_icon_0 = DomHelper.bySelector("#task_icon_0"); // 任务1图标
-	task_icon_1 = DomHelper.bySelector("#task_icon_1"); // 任务2图标
-	task_icon_2 = DomHelper.bySelector("#task_icon_2"); // 任务3图标
-	task_icon_3 = DomHelper.bySelector("#task_icon_3"); // 任务4图标
-	task_arrow_0 = DomHelper.bySelector("#task_arrow_0"); // 任务1箭头
-	task_arrow_1 = DomHelper.bySelector("#task_arrow_1"); // 任务2箭头
-	task_arrow_2 = DomHelper.bySelector("#task_arrow_2"); // 任务3箭头
-	task_arrow_3 = DomHelper.bySelector("#task_arrow_3"); // 任务4箭头
-	task_label_0 = DomHelper.bySelector("#task_label_0"); // 任务1标签
-	task_label_1 = DomHelper.bySelector("#task_label_1"); // 任务2标签
-	task_label_2 = DomHelper.bySelector("#task_label_2"); // 任务3标签
-	task_label_3 = DomHelper.bySelector("#task_label_3"); // 任务4标签
+	w2_login_status_label = DomHelper.bySelector("#w2_login_status_label"); // 登录状态
+	w2_check_in_out_label = DomHelper.bySelector("#w2_check_in_out_label"); // 考勤打卡状态
+	w2_meal_working_status_label = DomHelper.bySelector("#w2_meal_working_status_label"); // 工作状态
+	w2_login_btn = DomHelper.bySelector("#w2_login_btn"); // 登录按钮
+	w2_relogin_btn = DomHelper.bySelector("#w2_relogin_btn"); // 重新登录按钮
+	w2_login_out_btn = DomHelper.bySelector("#w2_login_out_btn"); // 退出登录按钮
+	w2_meal_working_status_btn = DomHelper.bySelector("#w2_meal_working_status_btn"); // 切换状态按钮
+	current_time_line_task_icon_0 = DomHelper.bySelector("#current_time_line_task_icon_0"); // 任务1图标
+	current_time_line_task_icon_1 = DomHelper.bySelector("#current_time_line_task_icon_1"); // 任务2图标
+	current_time_line_task_icon_2 = DomHelper.bySelector("#current_time_line_task_icon_2"); // 任务3图标
+	current_time_line_task_icon_3 = DomHelper.bySelector("#current_time_line_task_icon_3"); // 任务4图标
+	current_time_line_task_arrow_0 = DomHelper.bySelector("#current_time_line_task_arrow_0"); // 任务1箭头
+	current_time_line_task_arrow_1 = DomHelper.bySelector("#current_time_line_task_arrow_1"); // 任务2箭头
+	current_time_line_task_arrow_2 = DomHelper.bySelector("#current_time_line_task_arrow_2"); // 任务3箭头
+	current_time_line_task_arrow_3 = DomHelper.bySelector("#current_time_line_task_arrow_3"); // 任务4箭头
+	current_time_line_task_label_0 = DomHelper.bySelector("#current_time_line_task_label_0"); // 任务1标签
+	current_time_line_task_label_1 = DomHelper.bySelector("#current_time_line_task_label_1"); // 任务2标签
+	current_time_line_task_label_2 = DomHelper.bySelector("#current_time_line_task_label_2"); // 任务3标签
+	current_time_line_task_label_3 = DomHelper.bySelector("#current_time_line_task_label_3"); // 任务4标签
 	calendar_month_title = DomHelper.bySelector("#calendar_month_title"); // 日历月份
 	calendar_month_dates = DomHelper.bySelector("#calendar_month_dates"); // 日历主体
 	prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
@@ -193,29 +194,32 @@ class W2 extends Page {
 		this.updateUIElement();
 	}
 	bindEvents() {
-		card_login_btn.addEventListener("click", async () => {
+		w2_login_btn.addEventListener("click", async () => {
 			await W2.login();
+			W2.currentTask.bind(this);
+			TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 		});
-		card_relogin_btn.addEventListener("click", async () => {
+		w2_relogin_btn.addEventListener("click", async () => {
 			await W2.login(); // 再写一个relogin函数
 		});
-		card_login_out_btn.addEventListener("click", async () => {
-			await W2Request.logout();
+		w2_login_out_btn.addEventListener("click", async () => {
+			await W2Request.loginOut();
 			// 将UI置为默认状态
-			this.card_work_status_value.innerText = W2.status.unknown;
-			this.card_work_status_value.innerText = W2.status.unknown;
+			this.w2_meal_working_status_label.innerText = W2.status.unknown;
+			this.w2_meal_working_status_label.innerText = W2.status.unknown;
 			calendar_month_title.innerText = W2.status.unknown;
 			calendar_month_dates.innerHTML = "";
 
 			Global.config.w2.w2_login_status = W2.status.not_login;
 			Global.config.w2.w2_token_check_task = false;
 
+			TimerScheduler.stopAllTasks();
 		});
-		card_switch_status_btn.addEventListener("click", async () => {
-			if (card_work_status_value.innerText === "正在标注") {
-				await W2Request.goMeal();
-			} else if (card_work_status_value.innerText === "前往用餐") {
-				await W2Request.goWork();
+		w2_meal_working_status_btn.addEventListener("click", async () => {
+			if (w2_meal_working_status_label.innerText === "正在标注") {
+				await W2Request.meal();
+			} else if (w2_meal_working_status_label.innerText === "前往用餐") {
+				await W2Request.working();
 			}
 		});
 		prev_month_btn.addEventListener("click", async () => {
@@ -250,7 +254,7 @@ class W2 extends Page {
 	async loginStatusTask() {
 		Global.config.w2.w2_login_status_task = true;
 		while (Global.config.w2.w2_login_status_task) {
-			this.card_login_status_value.innerText = Global.config.w2.w2_login_status || "--";
+			this.w2_login_status_label.innerText = Global.config.w2.w2_login_status || "--";
 			await System.sleepSeconds(3);
 		}
 	}
@@ -262,12 +266,12 @@ class W2 extends Page {
 				if (Global.config.w2.w2_personal_informat === null) {
 					await System.sleepSeconds(3);
 				} else if (Global.config.w2.w2_personal_informat.code === 200) {
-					this.card_working_status_value.innerText = W2.workingStatus[Global.config.w2.w2_personal_informat.data.working_status] || W2.status.unknown;
+					this.w2_check_in_out_label.innerText = W2.workingStatus[Global.config.w2.w2_personal_informat.data.working_status] || W2.status.unknown;
 				} else {
-					this.card_working_status_value.innerText = W2.status.unknown;
+					this.w2_check_in_out_label.innerText = W2.status.unknown;
 				}
 			} else {
-				this.card_working_status_value.innerText = W2.status.unknown;
+				this.w2_check_in_out_label.innerText = W2.status.unknown;
 			}
 			await System.sleepSeconds(3);
 		}
@@ -279,12 +283,12 @@ class W2 extends Page {
 				if (Global.config.w2.w2_personal_informat === null) {
 					await System.sleepSeconds(3);
 				} else if (Global.config.w2.w2_personal_informat.code === 200) {
-					this.card_work_status_value.innerText = W2.workHourStatus[Global.config.w2.w2_personal_informat.data.work_hour_status] || W2.status.unknown;
+					this.w2_meal_working_status_label.innerText = W2.workHourStatus[Global.config.w2.w2_personal_informat.data.work_hour_status] || W2.status.unknown;
 				} else {
-					this.card_work_status_value.innerText = W2.status.unknown;
+					this.w2_meal_working_status_label.innerText = W2.status.unknown;
 				}
 			} else {
-				this.card_work_status_value.innerText = W2.status.unknown;
+				this.w2_meal_working_status_label.innerText = W2.status.unknown;
 			}
 			await System.sleepSeconds(3);
 		}
@@ -294,9 +298,9 @@ class W2 extends Page {
 		while (Global.config.w2.w2_current_task_status_task) {
 			if (Global.config.w2.w2_login_status === W2.status.login_success) {
 				for (let i = 0; i < 4; i++) {
-					const icon = this["task_icon_" + i];
-					const arrow = this["task_arrow_" + i];
-					const label = this["task_label_" + i];
+					const icon = this["current_time_line_task_icon_" + i];
+					const arrow = this["current_time_line_task_arrow_" + i];
+					const label = this["current_time_line_task_label_" + i];
 					// currentTask的值是currentTaskStatus枚举体中的键值, 由定时任务currentTask()变更
 					if (label.innerText === Global.config.w2.w2_current_task_status) {
 						icon.classList.replace("bg-blue-600", "bg-green-600");
@@ -308,8 +312,8 @@ class W2 extends Page {
 				}
 			} else {
 				for (let i = 0; i < 4; i++) {
-					const icon = this["task_icon_" + i];
-					const arrow = this["task_arrow_" + i];
+					const icon = this["current_time_line_task_icon_" + i];
+					const arrow = this["current_time_line_task_arrow_" + i];
 					icon.classList.replace("bg-green-600", "bg-blue-600");
 					arrow.classList.replace("border-b-green-600", "border-b-blue-600");
 				}
@@ -320,7 +324,7 @@ class W2 extends Page {
 	async calendarTask() {
 		Global.config.w2.w2_calendar_container_task = true;
 		while (Global.config.w2.w2_calendar_container_task) {
-			let result = await W2Request.queryCurrentMonthSchedule();
+			let result = await W2Request.queryPersonalSchedule();
 			if (Global.config.w2.w2_login_status === W2.status.login_success && result.code === 200) {
 				// 日历标题实现
 				calendar_month_title.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
@@ -416,7 +420,7 @@ class W2 extends Page {
 				start: Global.config.w2.w2_workin_range_start,
 				end: Global.config.w2.w2_workin_range_end,
 				action: async () => { 
-					await W2Request.workIn();
+					await W2Request.checkIn();
 					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workIn;
 				},
 				name: "W2_WORK_IN_TASK"
@@ -425,7 +429,7 @@ class W2 extends Page {
 				start: Global.config.w2.w2_meal_range_start,
 				end: Global.config.w2.w2_meal_range_end,
 				action: async () => { 
-					await W2Request.goMeal();
+					await W2Request.meal();
 					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.meal;
 				},
 				name: "W2_GO_MEAL_TASK"
@@ -434,7 +438,7 @@ class W2 extends Page {
 				start: Global.config.w2.w2_working_range_start,
 				end: Global.config.w2.w2_working_range_end,
 				action: async () => { 
-					await W2Request.goWork();
+					await W2Request.working();
 					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.working;
 				},
 				name: "W2_GO_WORK_TASK"
@@ -443,7 +447,7 @@ class W2 extends Page {
 				start: Global.config.w2.w2_workout_range_start,
 				end: Global.config.w2.w2_workout_range_end,
 				action: async () => { 
-					await W2Request.workOut();
+					await W2Request.checkOut();
 					Global.config.w2.w2_current_task_status = W2.currentTaskStatus.workOut;
 				},
 				name: "W2_WORK_OUT_TASK"
@@ -451,7 +455,7 @@ class W2 extends Page {
 			{
 				start: Global.config.w2.w2_logout_range_start,
 				end: Global.config.w2.w2_logout_range_end,
-				action: async () => { await W2Request.logout(); },
+				action: async () => { await W2Request.loginOut(); },
 				name: "W2_LOG_OUT_TASK"
 			}
 		];
@@ -473,7 +477,7 @@ class W2 extends Page {
 		}
 	}
 	static async isLogin() {
-		let result = await W2Request.getTokenCheck();
+		let result = await W2Request.loginCheck();
 		if (result.code === 200) {
 			Global.config.w2.w2_token = result.data.token;
 			return true;
@@ -487,7 +491,7 @@ class W2 extends Page {
 		let saveMonth = Global.value.month;
 		Global.value.month = Time.getCurrentMonth();
 		// 获取当前月份的排班数据
-		const scheduleResult = await W2Request.queryCurrentMonthSchedule();
+		const scheduleResult = await W2Request.queryPersonalSchedule();
 		// 恢复之前记录的月份
 		Global.value.month = saveMonth;
 		// 检查返回数据是否有效
@@ -523,7 +527,7 @@ class W2 extends Page {
 			workingStatus: null,
 			workHourStatus: null
 		};
-		let getTokenResult = await W2Request.getToken();
+		let getTokenResult = await W2Request.login();
 		if (getTokenResult.code !== 200) {
 			this.log.error("获取登录状态失败, 请检查是否登录");
 			return false;
@@ -542,7 +546,7 @@ class W2 extends Page {
 	static async tokenCheck() {
 		Global.config.w2.w2_token_check_task = true; // 开启任务
 		while (Global.config.w2.w2_token_check_task === true) {
-			let result = await W2Request.getTokenCheck();
+			let result = await W2Request.loginCheck();
 			this.log.log("result: ", result);
 			if (result.code === 200) {
 				Global.config.w2.w2_token = result.data.token;
@@ -584,9 +588,9 @@ class W2 extends Page {
 		this.log.debug("邮箱API结果: ", result);
 		Global.config.w2.w2_email_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
 		this.log.log("正在登录");
-		await W2Request.getToken();
+		await W2Request.login();
 		this.log.log("获取心跳");
-		await W2Request.getTokenCheck();
+		await W2Request.loginCheck();
 		W2.tokenCheck();
 		this.log.log("心跳正常, 登录成功");
 	}

@@ -62,7 +62,7 @@ class W2Request extends HttpRequest {
 		return result;
 	}
 	// 获取心跳令牌
-	static async getToken() {
+	static async login() {
 		const url = this.CONFIG.BASE_URL + "/user_center/login";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 
@@ -81,7 +81,7 @@ class W2Request extends HttpRequest {
 		return result;
 	}
 	// 退出登录
-	static async logout() {
+	static async loginOut() {
 		const url = this.CONFIG.BASE_URL + "/user_center/login_out";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 
@@ -96,7 +96,7 @@ class W2Request extends HttpRequest {
 		return result;
 	}
 	// 获取心跳检查
-	static async getTokenCheck() {
+	static async loginCheck() {
 		const url = this.CONFIG.BASE_URL + "/user_center/login_check";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
@@ -106,39 +106,39 @@ class W2Request extends HttpRequest {
 		
 		return await this._request("POST", url, headers, data);
 	}
-	// 打卡
-	static async workIn() {
-		return await this._checkInOut("check_in", 8, 55, 0);
+	// 打卡 - 使用当前时间
+	static async checkIn() {
+		return await this._checkInOut("check_in");
 	}
-	// 下班
-	static async workOut() {
-		return await this._checkInOut("check_out", 18, 55, 0);
+	// 下班 - 使用当前时间
+	static async checkOut() {
+		return await this._checkInOut("check_out");
 	}
 
-	static async _checkInOut(eventType, hour, minute, second) {
+	static async _checkInOut(eventType) {
 		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/check_in_out";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 
 		const data = {
-			event_datetime: Time.getTodayTimestamp(hour, minute, second),
+			event_datetime: Math.floor(Date.now()),
 			event_type: eventType,
 			header: this._buildHeader()
 		};
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.log(`${eventType === "check_in" ? "workIn" : "workOut"} result: `, result);
+		this.log.log(eventType + " result: ", result);
 		return result;
 	}
 	// 前往用餐
-	static async goMeal() {
-		return await this._goMealWork("meal");
+	static async meal() {
+		return await this._mealWorkingStatus("meal");
 	}
 	// 前往工作
-	static async goWork() {
-		return await this._goMealWork("working");
+	static async working() {
+		return await this._mealWorkingStatus("working");
 	}
 
-	static async _goMealWork(type) {
+	static async _mealWorkingStatus(type) {
 		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/set_work_hour_status";
 
 		const headers = this.CONFIG.DEFAULT_HEADERS;
@@ -163,7 +163,7 @@ class W2Request extends HttpRequest {
 		return await this._request("POST", url, headers, data);
 	}
 	// 查询当前月份的日程
-	static async queryCurrentMonthSchedule() {
+	static async queryPersonalSchedule() {
 		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/query_personal_schedule";
 		const headers = {
 			...this.CONFIG.DEFAULT_HEADERS,
@@ -180,8 +180,6 @@ class W2Request extends HttpRequest {
 		this.log.log("queryCurrentMonthSchedule result: ", result);
 		return result;
 	}
-
-	
 
 	// 构建请求头
 	static _buildHeader(additionalData = {}) {

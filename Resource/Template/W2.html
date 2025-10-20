@@ -55,42 +55,42 @@
 			class="fixed z-50 max-w-xs px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-sm opacity-0 pointer-events-none transition-opacity duration-200">
 		</div> -->
 		<!-- 主内容区域 -->
-		<main id="main_content" class="flex-1 ml-64 p-6 space-y-6">
-			<div id="dashboard_grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
+		<main class="flex-1 ml-64 p-6 space-y-6">
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
 				<!-- 第一行: 卡片 -->
-				<div id="card_login_status" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+				<div class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 					<div class="flex items-center justify-between">
-						<div id="card_login_status_label" class="text-gray-500 text-sm mb-1">当前登录状态</div>
+						<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
 						<div class="flex space-x-2">
-							<button id="card_login_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
+							<button id="w2_login_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
 								<i class="fa-solid fa-right-to-bracket"></i> <!-- 登录账号 -->
 							</button>
-							<button id="card_relogin_btn" class="ml-auto bg-yellow-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-yellow-700 transition">
+							<button id="w2_relogin_btn" class="ml-auto bg-yellow-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-yellow-700 transition">
 								<i class="fa-solid fa-arrows-rotate"></i> <!-- 重新登录 -->
 							</button>
-							<button id="card_login_out_btn" class="ml-auto bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-700 transition">
+							<button id="w2_login_out_btn" class="ml-auto bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-700 transition">
 								<i class="fa-solid fa-right-from-bracket"></i> <!-- 退出登录 -->
 							</button>
 						</div>
 					</div>
-					<div id="card_login_status_value" class="text-2xl font-bold text-blue-600">--</div>
+					<div id="w2_login_status_label" class="text-2xl font-bold text-blue-600">--</div>
 				</div>
 
-				<div id="card_working_status" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-					<div id="card_working_status_label" class="text-gray-500 text-sm mb-1">考勤打卡状态</div>
-					<div id="card_working_status_value" class="text-2xl font-bold text-green-600">--</div>
+				<div class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+					<div class="text-gray-500 text-sm mb-1">考勤打卡状态</div>
+					<div id="w2_check_in_out_label" class="text-2xl font-bold text-green-600">--</div>
 				</div>
 				
-				<div id="card_work_status" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+				<div class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 					<div class="flex items-center justify-between">
-						<div id="card_work_status_label" class="text-gray-500 text-sm mb-1">当前工作状态</div>
+						<div class="text-gray-500 text-sm mb-1">当前工作状态</div>
 						<div class="flex space-x-2">
-							<button id="card_switch_status_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
+							<button id="w2_meal_working_status_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
 								<i class="fa-solid fa-exchange"></i> <!-- 切换状态 -->
 							</button>
 						</div>
 					</div>
-					<div id="card_work_status_value" class="text-2xl font-bold text-blue-600">--</div>
+					<div id="w2_meal_working_status_label" class="text-2xl font-bold text-blue-600">--</div>
 				</div>
 
 				<!-- <div id="card_running_time" class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
@@ -99,11 +99,11 @@
 				</div> -->
 
 				<!-- 第二行: 申请抽调卡片 -->
-				<div id="card_apply_transfer_container" class="flex flex-col space-y-4 col-span-1">
-					<div id="card_apply_transfer" class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]">
+				<!-- <div class="flex flex-col space-y-4 col-span-1">
+					<div class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]">
 						<div class="flex items-center justify-between">
-							<div id="apply_transfer_title" class="text-gray-500 text-sm">申请抽调</div>
-							<button id="submit_transfer_btn" class="ml-auto bg-blue-600 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-700 transition">
+							<div class="text-gray-500 text-sm">申请抽调</div>
+							<button class="ml-auto bg-blue-600 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-700 transition">
 								提交申请
 							</button>
 						</div>
@@ -135,43 +135,43 @@
 								<input type="text" id="transfer_content_field" placeholder="请输入内容" class="w-32 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
 							</div>
 						</div>
-					</div>
+					</div> -->
 
 					<!-- 当前任务时间线 -->
-					<div id="current_task" class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]">
-						<div id="current_task_title" class="text-gray-500 text-sm mb-2">当前任务</div>
-						<div id="current_task_timeline" class="flex-1 flex items-center justify-between relative">
-							<div id="current_task_line" class="absolute top-10 left-4 right-4 h-0.5 bg-gray-300 z-0"></div>
+					<div class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]">
+						<div class="text-gray-500 text-sm mb-2">当前任务</div>
+						<div class="flex-1 flex items-center justify-between relative">
+							<div class="absolute top-10 left-4 right-4 h-0.5 bg-gray-300 z-0"></div>
 
-							<div id="task_item_0" class="flex flex-col items-center relative z-10">
-								<div id="task_icon_0" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="task_arrow_0" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
-								<div id="task_label_0" class="mt-2 text-gray-700 text-sm">上班打卡</div>
+							<div class="flex flex-col items-center relative z-10">
+								<div id="current_time_line_task_icon_0" class="w-4 h-4 bg-blue-600 rounded-full"></div>
+								<div id="current_time_line_task_arrow_0" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<div id="current_time_line_task_label_0" class="mt-2 text-gray-700 text-sm">上班打卡</div>
 							</div>
 
-							<div id="task_item_1" class="flex flex-col items-center relative z-10">
-								<div id="task_icon_1" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="task_arrow_1" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
-								<div id="task_label_1" class="mt-2 text-gray-700 text-sm">前往用餐</div>
+							<div class="flex flex-col items-center relative z-10">
+								<div id="current_time_line_task_icon_1" class="w-4 h-4 bg-blue-600 rounded-full"></div>
+								<div id="current_time_line_task_arrow_1" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<div id="current_time_line_task_label_1" class="mt-2 text-gray-700 text-sm">前往用餐</div>
 							</div>
 
-							<div id="task_item_2" class="flex flex-col items-center relative z-10">
-								<div id="task_icon_2" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="task_arrow_2" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
-								<div id="task_label_2" class="mt-2 text-gray-700 text-sm">切换标注</div>
+							<div class="flex flex-col items-center relative z-10">
+								<div id="current_time_line_task_icon_2" class="w-4 h-4 bg-blue-600 rounded-full"></div>
+								<div id="current_time_line_task_arrow_2" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<div id="current_time_line_task_label_2" class="mt-2 text-gray-700 text-sm">切换标注</div>
 							</div>
 
-							<div id="task_item_3" class="flex flex-col items-center relative z-10">
-								<div id="task_icon_3" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="task_arrow_3" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
-								<div id="task_label_3" class="mt-2 text-gray-700 text-sm">下班打卡</div>
+							<div class="flex flex-col items-center relative z-10">
+								<div id="current_time_line_task_icon_3" class="w-4 h-4 bg-blue-600 rounded-full"></div>
+								<div id="current_time_line_task_arrow_3" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<div id="current_time_line_task_label_3" class="mt-2 text-gray-700 text-sm">下班打卡</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<!-- 申请记录表格 -->
-				<div id="attendance_table_container" class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4 col-span-1">
+				<!-- <div id="attendance_table_container" class="bg-white shadow rounded-xl p-5 flex flex-col space-y-4 col-span-1">
 					<div id="attendance_table_title" class="text-gray-500 text-sm mb-2">申请记录</div>
 					<div id="attendance_table_wrapper" class="overflow-x-auto">
 						<table id="attendance_table" class="min-w-full divide-y divide-gray-200 text-sm">
@@ -205,7 +205,7 @@
 							</tbody>
 						</table>
 					</div>
-				</div>
+				</div> -->
 
 				<!-- 日历 -->
 				<div id="calendar_container" class="bg-white shadow-lg rounded-xl p-6 w-full">
