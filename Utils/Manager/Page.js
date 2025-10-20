@@ -159,8 +159,8 @@ class W2 extends Page {
 	current_time_line_task_label_1 = DomHelper.bySelector("#current_time_line_task_label_1"); // 任务2标签
 	current_time_line_task_label_2 = DomHelper.bySelector("#current_time_line_task_label_2"); // 任务3标签
 	current_time_line_task_label_3 = DomHelper.bySelector("#current_time_line_task_label_3"); // 任务4标签
-	calendar_month_title = DomHelper.bySelector("#calendar_month_title"); // 日历月份
-	calendar_month_dates = DomHelper.bySelector("#calendar_month_dates"); // 日历主体
+	calendar_label = DomHelper.bySelector("#calendar_label"); // 日历月份
+	calendar_table = DomHelper.bySelector("#calendar_table"); // 日历主体
 	prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
 	next_month_btn = DomHelper.bySelector("#next_month_btn"); // 查看下个月排班按钮
 
@@ -207,8 +207,8 @@ class W2 extends Page {
 			// 将UI置为默认状态
 			this.w2_meal_working_status_label.innerText = W2.status.unknown;
 			this.w2_meal_working_status_label.innerText = W2.status.unknown;
-			calendar_month_title.innerText = W2.status.unknown;
-			calendar_month_dates.innerHTML = "";
+			calendar_label.innerText = W2.status.unknown;
+			calendar_table.innerHTML = "";
 
 			Global.config.w2.w2_login_status = W2.status.not_login;
 			Global.config.w2.w2_token_check_task = false;
@@ -327,7 +327,7 @@ class W2 extends Page {
 			let result = await W2Request.queryPersonalSchedule();
 			if (Global.config.w2.w2_login_status === W2.status.login_success && result.code === 200) {
 				// 日历标题实现
-				calendar_month_title.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
+				calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
 				// 按钮逻辑 - 待优化
 				if (Global.value.month >= Time.getCurrentMonth()) {
 					this.next_month_btn.disabled = true;
@@ -352,11 +352,11 @@ class W2 extends Page {
 				let firstWeekDay = Time.getFirstDayOfMonthWeek(result.data.column[0].date);
 				let lastDate = parseInt(result.data.column[result.data.column.length - 1].date.split("-")[2]);
 				let offsetToSaturday = (firstWeekDay) % 7;
-				this.calendar_month_dates.innerHTML = '';
+				this.calendar_table.innerHTML = '';
 				for (let i = 0; i < offsetToSaturday; i++) {
 					const emptyDiv = document.createElement("div");
 					emptyDiv.className = "py-2 rounded";
-					this.calendar_month_dates.appendChild(emptyDiv);
+					this.calendar_table.appendChild(emptyDiv);
 				}
 				// 生成日历页
 				for (let d = 1; d <= lastDate; d++) {
@@ -386,12 +386,12 @@ class W2 extends Page {
 						// 普通工作日
 						dateDiv.classList.add('bg-gray-50', 'hover:bg-blue-100');
 					}
-					this.calendar_month_dates.appendChild(dateDiv);
+					this.calendar_table.appendChild(dateDiv);
 				}
 				await System.sleepSeconds(60 * 60 * 8);
 			} else {
-				calendar_month_title.innerText = W2.status.unknown;
-				calendar_month_dates.innerHTML = "";
+				calendar_label.innerText = W2.status.unknown;
+				calendar_table.innerHTML = "";
 				await System.sleepSeconds(3);
 			}
 		}
