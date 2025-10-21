@@ -1,10 +1,10 @@
 class Global {
 	// w2_user_id: 'lingboweibu(beijing)kejiyouxiangongsi_1101488685013168128',
 	// w2_user_password: 'c3uDfDbKTUICcOoG',
-	// w2_email_api_id: '10008362',
-	// w2_email_api_secret: '1d0c8fec499fb7057027e09fc4662fb0',
-	// w2_email_address: '1778751963@qq.com', 
-	// w2_email_pop3_auth_code: 'rjkiywoldplaceca',
+	// w2_email_api_id_account_setting_input: '10008362',
+	// w2_email_api_secret_account_setting_input: '1d0c8fec499fb7057027e09fc4662fb0',
+	// w2_email_api_address_account_setting_input: '1778751963@qq.com', 
+	// w2_email_api_pop3_auth_code_account_setting_input: 'rjkiywoldplaceca',
 	static config = {
 		cache: {},
 		system: {
@@ -14,21 +14,22 @@ class Global {
 		},
 		w2: {
 			// 登录信息
-			w2_user_id: null,
+			w2_user_name: null,
 			w2_user_password: null,
 			w2_email_api_id: null,
 			w2_email_api_secret: null,
-			w2_email_address: null,
-			w2_email_pop3_auth_code: null,
-			w2_email_verify_code: null,
-			// 登录信息
+			w2_email_api_address: null,
+			w2_email_api_pop3_auth_code: null,
+			// 登录验证码
+			w2_email_api_verify_code: null,
+			w2_personal_informat: null, // 个人信息
 			w2_token: null,
 			w2_tenant_token: null,
+			// 登录信息
 			w2_login_status: null,
-			w2_working_status: null, // 考勤打卡状态
-			w2_work_hour_status: null, // 工作时长状态
-			w2_personal_informat: null, // 个人信息
-			w2_current_task_status: null, // 定时打卡任务, 当前任务选项卡
+			w2_check_in_out_status: null, // 考勤打卡状态
+			w2_meal_working_status: null, // 工作时长状态
+			w2_current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
 			// 任务状态
 			w2_token_check_task: false,
 			w2_personal_status_task: false,
@@ -38,18 +39,18 @@ class Global {
 			w2_current_task_status_task: false, // 当前任务任务
 			w2_calendar_container_task: false, // 日历任务
 			// 模块设置
-			w2_login_range_start: "08:50:00",
-			w2_login_range_end: "08:50:00",
-			w2_workin_range_start: "08:55:00",
-			w2_workin_range_end: "08:55:00",
-			w2_meal_range_start: "12:00:00",
-			w2_meal_range_end: "12:00:00",
-			w2_working_range_start: "13:30:00",
-			w2_working_range_end: "13:30:59",
-			w2_workout_range_start: "18:30:00",
-			w2_workout_range_end: "18:30:00",
-			w2_logout_range_start: "18:35:00",
-			w2_logout_range_end: "18:35:00",
+			w2_time_range_login_start: "08:50:00",
+			w2_time_range_login_end: "08:50:00",
+			w2_time_range_check_in_start: "08:55:00",
+			w2_time_range_check_in_end: "08:55:00",
+			w2_time_range_meal_start: "12:00:00",
+			w2_time_range_meal_end: "12:00:00",
+			w2_time_range_working_start: "13:30:00",
+			w2_time_range_working_end: "13:30:00",
+			w2_time_range_check_out_start: "18:30:00",
+			w2_time_range_check_out_end: "18:30:00",
+			w2_time_range_login_out_start: "18:35:00",
+			w2_time_range_login_out_end: "18:35:00",
 		},
 		ui: {},
 	};
@@ -60,7 +61,14 @@ class Global {
 		w2_current_task_flag: true, // 定时任务标志位, 当它为true时, 表示定时任务中callback需要更新
 		month: Time.getCurrentMonth(), // 当前月份
 	}
-
+	static w2_TaskConfig = {
+		W2_LOGIN_TASK: "W2_LOGIN_TASK",
+		W2_CHECK_IN_TASK: "W2_CHECK_IN_TASK",
+		W2_MEAL_TASK: "W2_MEAL_TASK",
+		W2_WORKING_TASK: "W2_WORKING_TASK",
+		W2_CURRENT_TASK: "W2_CURRENT_TASK",
+		W2_CALENDAR_TASK: "W2_CALENDAR_TASK",
+	}
 	static log = new Logger("Global");
 
 	static init() {

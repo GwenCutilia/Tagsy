@@ -47,8 +47,8 @@ class W2Request extends HttpRequest {
 		const data = {
 			id: Global.config.w2.w2_email_api_id,
 			key: Global.config.w2.w2_email_api_secret,
-			mail: Global.config.w2.w2_email_address,
-			pwd: Global.config.w2.w2_email_pop3_auth_code,
+			mail: Global.config.w2.w2_email_api_address,
+			pwd: Global.config.w2.w2_email_api_pop3_auth_code,
 			popimap: "pop3",
 			ip: "pop.qq.com",
 			port: "995",
@@ -69,7 +69,7 @@ class W2Request extends HttpRequest {
 		const data = this._buildAuthData({
 			login_type: 4,
 			rand_str: "HYWmN2JLmqJAEKF1Y9wzSFduiCFQEmtS",
-			verify_code: Global.config.w2.w2_email_verify_code
+			verify_code: Global.config.w2.w2_email_api_verify_code
 		});
 
 		const result = await this._request("POST", url, headers, data);
@@ -87,7 +87,7 @@ class W2Request extends HttpRequest {
 
 		const data = {
 			header: this._buildHeader({
-				staff: Global.config.w2.w2_user_id
+				staff: Global.config.w2.w2_user_name
 			})
 		};
 
@@ -100,7 +100,7 @@ class W2Request extends HttpRequest {
 		const url = this.CONFIG.BASE_URL + "/user_center/login_check";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
-			staff: Global.config.w2.w2_user_id,
+			staff: Global.config.w2.w2_user_name,
 			header: this._buildHeader()
 		};
 		
@@ -184,7 +184,7 @@ class W2Request extends HttpRequest {
 	// 构建请求头
 	static _buildHeader(additionalData = {}) {
 		return {
-			staff: Global.config.w2.w2_user_id,
+			staff: Global.config.w2.w2_user_name,
 			staff_id: 0,
 			oa_ticket: Global.config.w2.w2_token,
 			tracer: "|7b0f57ef3ac51|1749259397196",
@@ -201,7 +201,7 @@ class W2Request extends HttpRequest {
 
 	static _buildAuthData(additionalData = {}) {
 		return {
-			username: Global.config.w2.w2_user_id,
+			username: Global.config.w2.w2_user_name,
 			password: Global.config.w2.w2_user_password,
 			header: {
 				staff: "",
