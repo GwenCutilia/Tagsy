@@ -751,6 +751,69 @@ class Time {
 		}
 	}
 	/**
+	 * 生成指定日期的 ISO 8601 格式时间戳（支持时间偏移）
+	 * @param {string} [dateStr] - 日期字符串（可选，默认今天）
+	 * - 支持格式: YYYY-MM-DD、YYYY年MM月DD日、YYYYMMDD
+	 * @param {number} [hour=16] - 小时（0-23，默认16）
+	 * @param {number} [offsetDays=1] - 日期偏移天数（默认+1天，表示实际日期）
+	 * @returns {string} ISO 8601 格式的时间戳（如 "2025-10-21T16:00:00.000Z"）
+	 * @throws {Error} 日期格式无效或参数超出范围时抛出错误
+	 * @example
+	 * // 生成表示明天的时间戳（默认今天+1天，16:00）
+	 * const timestamp1 = Time.generateISOTimestamp(); 
+	 * // 可能返回: "2025-10-21T16:00:00.000Z"（如果今天是2025-10-20）
+	 * 
+	 * // 生成指定日期的ISO时间戳（日期会自动+1天）
+	 * const timestamp2 = Time.generateISOTimestamp("2025-10-20"); 
+	 * // 返回: "2025-10-20T16:00:00.000Z"（表示2025-10-21）
+	 * 
+	 * // 自定义小时和偏移天数
+	 * const timestamp3 = Time.generateISOTimestamp("2025-10-20", 14, 2); 
+	 * // 返回: "2025-10-20T14:00:00.000Z"（表示2025-10-22）
+	 * 
+	 * // 用于dacCar函数的recordTime字段
+	 * const recordTime = Time.generateISOTimestamp();
+	 */
+	static generateISOTimestamp(dateStr, hour = 16, offsetDays = 1) {
+		// 参数验证
+		if (hour < 0 || hour > 23) {
+			throw new Error(`Time.generateISOTimestamp: 无效的小时数 "${hour}", 必须在 0-23 之间`);
+		}
+		
+		if (!Number.isInteger(offsetDays)) {
+			throw new Error(`Time.generateISOTimestamp: 偏移天数必须是整数, 当前为 ${offsetDays}`);
+		}
+
+		let baseDate;
+		
+		// 解析基础日期
+		if (dateStr) {
+			baseDate = this._parseDate(dateStr);
+		} else {
+			// 默认使用今天
+			baseDate = new Date();
+			baseDate.setHours(0, 0, 0, 0); // 重置时间为00:00:00
+		}
+
+		// 应用日期偏移
+		const targetDate = new Date(baseDate);
+		targetDate.setDate(targetDate.getDate() + offsetDays);
+		
+		// 设置指定的小时（UTC时间）
+		const utcDate = new Date(Date.UTC(
+			targetDate.getFullYear(),
+			targetDate.getMonth(),
+			targetDate.getDate(),
+			hour,    // 指定小时
+			0,       // 分钟固定为0
+			0,       // 秒固定为0
+			0        // 毫秒固定为0
+		));
+
+		// 生成ISO 8601格式字符串
+		return utcDate.toISOString();
+	}
+	/**
 	 * 在指定时间区间内随机生成一个时间字符串
 	 * @param {string} startTimeStr - 开始时间字符串 (格式: HH:MM:SS 或 HH:MM)
 	 * @param {string} endTimeStr - 结束时间字符串 (格式: HH:MM:SS 或 HH:MM)
@@ -776,7 +839,7 @@ class Time {
 	 */
 	static getRandomTimeInRange(startTimeStr, endTimeStr, format = 'HH:MM:SS') {
 		// 时间解析正则表达式 (支持 HH:MM:SS 和 HH:MM 格式)
-		const timeRegex = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/;
+		const timeRegex = new RegExp("^(\\d{1,2}):(\\d{1,2})(?::(\\d{1,2}))?$");
 		
 		// 将时间字符串转换为秒数的逻辑
 		const parseTimeToSeconds = (timeStr) => {

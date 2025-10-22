@@ -27,12 +27,13 @@
 // @connect		ark.cn-beijing.volces.com
 // @connect		api-wanwei.myapp.com
 // @connect		wanwei.myapp.com
+// @connect		biaoju.labelvibe.com
 // @connect		api.deepseek.com
 // @connect		hunyuan-multimodal-1258344703.cos.ap-guangzhou.myqcloud.com
 // @connect		drive.alittlesnowflake.uk
 // @connect		api.ipify.org
 // @connect		cloud.seatable.cn
-// @run-at 		 document-start
+// @run-at 		document-start
 // @license		CC
 // ==/UserScript==
 

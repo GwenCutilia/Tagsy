@@ -23,19 +23,19 @@
 						<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
 					</a>
 				</li>
-				<li>
-					<a id="menu_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-cog mr-3 w-5 text-center"></i>QLabel标注
+				<li id="menu_qlabel">
+					<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
 					</a>
 				</li>
-				<li>
-					<a id="menu_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-cog mr-3 w-5 text-center"></i>凌波微步日报
+				<li id="menu_ls">
+					<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
 					</a>
 				</li>
-				<li>
-					<a id="menu_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-cog mr-3 w-5 text-center"></i>企业微信日报
+				<li id="menu_wecom">
+					<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
 					</a>
 				</li>
 				<li>
@@ -50,10 +50,87 @@
 				</a>
 			</div>
 		</aside>
+
 		<!-- 主内容区域 -->
-		<main id="main_content" class="flex-1 ml-64 p-6 space-y-6">
-			
+		<main class="flex-1 ml-64 p-6 space-y-6">
+			<div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				
+			</div>
 		</main>
 	</div>
+
+	<!-- <script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// 拖拽功能实现
+			let draggedElement = null;
+			
+			// 获取所有可拖拽元素
+			const draggableElements = document.querySelectorAll('.grid-cell');
+			
+			// 添加拖拽事件监听器
+			draggableElements.forEach(element => {
+				element.addEventListener('dragstart', handleDragStart);
+				element.addEventListener('dragend', handleDragEnd);
+				element.addEventListener('dragover', handleDragOver);
+				element.addEventListener('dragenter', handleDragEnter);
+				element.addEventListener('dragleave', handleDragLeave);
+				element.addEventListener('drop', handleDrop);
+			});
+			
+			// 拖拽事件处理函数
+			function handleDragStart(e) {
+				draggedElement = this;
+				this.style.opacity = '0.5';
+				this.style.transform = 'rotate(5deg)';
+				e.dataTransfer.effectAllowed = 'move';
+				e.dataTransfer.setData('text/html', this.innerHTML);
+			}
+			
+			function handleDragEnd(e) {
+				this.style.opacity = '1';
+				this.style.transform = 'rotate(0deg)';
+				draggableElements.forEach(element => {
+					element.style.border = '';
+					element.style.backgroundColor = '';
+				});
+			}
+			
+			function handleDragOver(e) {
+				e.preventDefault();
+				return false;
+			}
+			
+			function handleDragEnter(e) {
+				this.style.border = '2px dashed #3b82f6';
+				this.style.backgroundColor = '#f0f9ff';
+			}
+			
+			function handleDragLeave(e) {
+				this.style.border = '';
+				this.style.backgroundColor = '';
+			}
+			
+			function handleDrop(e) {
+				e.stopPropagation();
+				
+				if (draggedElement !== this) {
+					// 交换元素位置
+					const grid = document.getElementById('dashboard-grid');
+					const draggedIndex = Array.from(grid.children).indexOf(draggedElement);
+					const dropIndex = Array.from(grid.children).indexOf(this);
+					
+					if (draggedIndex < dropIndex) {
+						grid.insertBefore(draggedElement, this.nextSibling);
+					} else {
+						grid.insertBefore(draggedElement, this);
+					}
+				}
+				
+				this.style.border = '';
+				this.style.backgroundColor = '';
+				return false;
+			}
+		});
+	</script> -->
 </body>
 </html>

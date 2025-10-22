@@ -52,6 +52,14 @@ class Global {
 			w2_time_range_login_out_start: "18:35:00",
 			w2_time_range_login_out_end: "18:35:00",
 		},
+		ls: {
+			// 账号信息
+			ls_user_name: null,
+			ls_user_password: null,
+			// 登录Token
+			ls_token: null, // 令牌
+			ls_sub_task_id: null, // 工作区编号
+		},
 		ui: {},
 	};
 	
@@ -66,8 +74,8 @@ class Global {
 		W2_CHECK_IN_TASK: "W2_CHECK_IN_TASK",
 		W2_MEAL_TASK: "W2_MEAL_TASK",
 		W2_WORKING_TASK: "W2_WORKING_TASK",
-		W2_CURRENT_TASK: "W2_CURRENT_TASK",
-		W2_CALENDAR_TASK: "W2_CALENDAR_TASK",
+		W2_CHECK_OUT_TASK: "W2_CHECK_OUT_TASK",
+		W2_LOGIN_OUT_TASK: "W2_LOGIN_OUT_TASK",
 	}
 	static log = new Logger("Global");
 

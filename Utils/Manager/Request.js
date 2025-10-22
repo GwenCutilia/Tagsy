@@ -120,7 +120,7 @@ class W2Request extends HttpRequest {
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 
 		const data = {
-			event_datetime: Math.floor(Date.now()),
+			event_datetime: Math.floor(Date.now() / 1000),
 			event_type: eventType,
 			header: this._buildHeader()
 		};
@@ -227,4 +227,89 @@ class W2Request extends HttpRequest {
 class LSRequest extends HttpRequest {
 	static log = new Logger("LSRequest");
 	// 从这里继续, 写LS的请求信息
+	static async login() {
+		const url = "http://biaoju.labelvibe.com:8088/prod-api/login";
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8"
+		};
+		const data = {
+			username: Global.config.ls.ls_user_name,
+			password: Global.config.ls.ls_user_password
+		};
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("login result: ", result);
+		if (result.code === 200) {
+			Global.config.ls.ls_token = result.token;
+		} else {
+
+		}
+		return result;
+	}
+	static async getPersonalInformat() {
+		const url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/sub/list";
+
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"Authorization": "Bearer " + Global.config.ls.ls_token,
+			"Cookie": "Admin-Token=" + Global.config.ls.ls_token
+		}
+
+		const data = {
+			"pageNum": 1,
+			"pageSize": 10,
+			"taskName": "",
+			"taskType": ""
+		}
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("getPersonalInformat result: ", result);
+		if (result.code === 200) {
+			Global.config.ls.ls_sub_task_id = result.rows[0].subTaskId;
+		} else {
+
+		}
+		return result;
+	}
+	// 日报打卡
+	static async dacCar() {
+		const url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/record";
+
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"Authorization": "Bearer " + Global.config.ls.ls_token,
+			"Cookie": "Admin-Token=" + Global.config.ls.ls_token
+		};
+		const data = {
+			"workCount": [
+				{
+					"settlementUnit": "人天",
+					"dataCount": "1"
+				}
+			],
+			"checkWorkCount": [
+				{
+					"settlementUnit": "人天",
+					"dataCount": "0"
+				}
+			],
+			"account": Global.config.ls.ls_user_name,
+			"recordTime": Time.generateISOTimestamp(undefined, 16, -1),
+			"subTaskId": Global.config.ls.ls_sub_task_id,
+			"platform": "企鹅标注-在线标注平台",
+			"workHours": "8"
+		}
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("dacCar result: ", result);
+		return result;
+	}
+	static async _request(method, url, headers, data) {
+		return await this.fetch({
+			method,
+			url,
+			headers,
+			data,
+			responseType: "json",
+		});
+	}
 }

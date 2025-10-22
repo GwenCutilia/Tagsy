@@ -196,7 +196,8 @@ class W2 extends Page {
 	bindEvents() {
 		w2_login_btn.addEventListener("click", async () => {
 			await W2.login();
-			await W2.currentTask.bind(this);
+			Global.value.w2_current_task_flag = true;
+			await W2.currentTask();
 			TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 		});
 		w2_relogin_btn.addEventListener("click", async () => {
@@ -596,7 +597,8 @@ class W2 extends Page {
 			return;
 		}
 		this.log.debug("邮箱API结果: ", result);
-		Global.config.w2.w2_email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
+		// Global.config.w2.w2_email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
+		Global.config.w2.w2_email_api_verify_code = "000000";
 		this.log.log("正在登录");
 		await W2Request.login();
 		this.log.log("获取心跳");
@@ -618,7 +620,7 @@ class LS extends Page {
 }
 class Setting extends Page {
 	btn_save_settings = DomHelper.bySelector("#btn_save_settings"); // 保存设置按钮
-	// W2账号账号设置
+	// W2账号设置
 	w2_user_test_account_setting_button = DomHelper.bySelector("#w2_user_test_account_setting_button"); // W2账号测试按钮
 	w2_user_name_account_setting_input = DomHelper.bySelector("#w2_user_name_account_setting_input"); // W2账号输入框 账号
 	w2_user_password_account_setting_input = DomHelper.bySelector("#w2_user_password_account_setting_input"); // W2密码输入框
@@ -645,7 +647,14 @@ class Setting extends Page {
 	w2_time_range_working_end_module_setting_input = DomHelper.bySelector("#w2_time_range_working_end_module_setting_input"); // W2工作时间段结束输入框
 	w2_error_setting_message_box = DomHelper.bySelector("#w2_error_setting_message_box"); // W2高级设置错误提示
 	w2_info_setting_message_box = DomHelper.bySelector("#w2_info_setting_message_box"); // W2高级设置提示信息
-	
+	// LS账号设置
+	ls_user_test_account_setting_button = DomHelper.bySelector("#ls_user_test_account_setting_button"); // LS账号测试按钮
+	ls_user_name_account_setting_input = DomHelper.bySelector("#ls_user_name_account_setting_input"); // LS账号输入框 账号
+	ls_user_password_account_setting_input = DomHelper.bySelector("#ls_user_password_account_setting_input"); // LS密码输入框
+	ls_info_account_setting_message_box = DomHelper.bySelector("#ls_info_account_setting_message_box"); // LS提示信息
+	ls_error_account_setting_message_box = DomHelper.bySelector("#ls_error_account_setting_message_box"); // LS错误提示
+
+
 	constructor() {
 		super();
 		this.bindEvents();
@@ -743,7 +752,7 @@ class Setting extends Page {
 					Global.config.w2.w2_email_api_address = this.w2_email_api_address_account_setting_input.value;
 					Global.config.w2.w2_email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 				} else {
-					w2_error_account_setting_message_box.querySelector("span").innerText = result.code + " " + result.msg;
+					w2_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
 
 					w2_email_api_id_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
 					w2_email_api_secret_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
@@ -772,8 +781,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_login_start_module_setting_input.value,
 					end: this.w2_time_range_login_end_module_setting_input.value,
-					configStart: 'w2_login_range_start',
-					configEnd: 'w2_login_range_end',
+					configStart: 'w2_time_range_login_start',
+					configEnd: 'w2_time_range_login_end',
 					fieldName: '登录',
 					startInput: this.w2_time_range_login_start_module_setting_input,
 					endInput: this.w2_time_range_login_end_module_setting_input
@@ -781,8 +790,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_login_out_start_module_setting_input.value,
 					end: this.w2_time_range_login_out_end_module_setting_input.value,
-					configStart: 'w2_logout_range_start',
-					configEnd: 'w2_logout_range_end',
+					configStart: 'w2_time_range_login_out_start',
+					configEnd: 'w2_time_range_login_out_end',
 					fieldName: '退出登录',
 					startInput: this.w2_time_range_login_out_start_module_setting_input,
 					endInput: this.w2_time_range_login_out_end_module_setting_input
@@ -790,8 +799,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_check_in_start_module_setting_input.value,
 					end: this.w2_time_range_check_in_end_module_setting_input.value,
-					configStart: 'w2_workin_range_start',
-					configEnd: 'w2_workin_range_end',
+					configStart: 'w2_time_range_check_in_start',
+					configEnd: 'w2_time_range_check_in_end',
 					fieldName: '上班打卡',
 					startInput: this.w2_time_range_check_in_start_module_setting_input,
 					endInput: this.w2_time_range_check_in_end_module_setting_input
@@ -799,8 +808,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_check_out_start_module_setting_input.value,
 					end: this.w2_time_range_check_out_end_module_setting_input.value,
-					configStart: 'w2_workout_range_start',
-					configEnd: 'w2_workout_range_end',
+					configStart: 'w2_time_range_check_out_start',
+					configEnd: 'w2_time_range_check_out_end',
 					fieldName: '下班打卡',
 					startInput: this.w2_time_range_check_out_start_module_setting_input,
 					endInput: this.w2_time_range_check_out_end_module_setting_input
@@ -808,8 +817,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_meal_start_module_setting_input.value,
 					end: this.w2_time_range_meal_end_module_setting_input.value,
-					configStart: 'w2_meal_range_start',
-					configEnd: 'w2_meal_range_end',
+					configStart: 'w2_time_range_meal_start',
+					configEnd: 'w2_time_range_meal_end',
 					fieldName: '前往用餐',
 					startInput: this.w2_time_range_meal_start_module_setting_input,
 					endInput: this.w2_time_range_meal_end_module_setting_input
@@ -817,8 +826,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_working_start_module_setting_input.value,
 					end: this.w2_time_range_working_end_module_setting_input.value,
-					configStart: 'w2_working_range_start',
-					configEnd: 'w2_working_range_end',
+					configStart: 'w2_time_range_working_start',
+					configEnd: 'w2_time_range_working_end',
 					fieldName: '切换标注',
 					startInput: this.w2_time_range_working_start_module_setting_input,
 					endInput: this.w2_time_range_working_end_module_setting_input
@@ -858,7 +867,44 @@ class Setting extends Page {
 			w2_error_setting_message_box.classList.add("hidden");
 			// 重新开始任务
 			Global.value.w2_current_task_flag = true;
+			await W2.currentTask();
 		});
+		this.ls_user_test_account_setting_button.addEventListener("click", async () => {
+			Global.config.ls.ls_user_name = this.ls_user_name_account_setting_input.value;
+			Global.config.ls.ls_user_password = this.ls_user_password_account_setting_input.value;
+	
+			let result = await LSRequest.login(); // 返回结果
+			if (result.code === 200) {
+				ls_info_account_setting_message_box.querySelector("span").innerText = "LS连通性测试无误";
+				ls_user_name_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
+				ls_user_password_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
+				
+				
+				ls_user_name_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
+				ls_user_password_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
+				
+
+				ls_info_account_setting_message_box.classList.remove('hidden');
+				ls_error_account_setting_message_box.classList.add('hidden');
+
+				Global.config.ls.ls_user_name = this.ls_user_name_account_setting_input.value;
+				Global.config.ls.ls_user_password = this.ls_user_password_account_setting_input.value;
+			} else {
+				ls_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
+
+				ls_user_name_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+				ls_user_password_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+
+				ls_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+				ls_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+
+				ls_error_account_setting_message_box.classList.remove('hidden');
+				ls_info_account_setting_message_box.classList.add('hidden');
+
+				Global.config.ls.ls_user_name = null;
+				Global.config.ls.ls_user_password = null;
+			}
+		})
 	}
 	updateUIElement() {
 		if (Global.config.w2.w2_user_name !== null && Global.config.w2.w2_user_password !== null) {
@@ -897,6 +943,10 @@ class Setting extends Page {
 		if (Global.config.w2.w2_time_range_working_start !== null && Global.config.w2.w2_time_range_working_end !== null) {
 			this.w2_time_range_working_start_module_setting_input.value = Global.config.w2.w2_time_range_working_start;
 			this.w2_time_range_working_end_module_setting_input.value = Global.config.w2.w2_time_range_working_end;
+		}
+		if (Global.config.ls.ls_user_name !== null && Global.config.ls.ls_user_password !== null) {
+			this.ls_user_name_account_setting_input.value = Global.config.ls.ls_user_name;
+			this.ls_user_password_account_setting_input.value = Global.config.ls.ls_user_password;
 		}
 	}
 	init() {
