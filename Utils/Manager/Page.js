@@ -146,7 +146,12 @@ class W2 extends Page {
 	w2_login_btn = DomHelper.bySelector("#w2_login_btn"); // 登录按钮
 	w2_relogin_btn = DomHelper.bySelector("#w2_relogin_btn"); // 重新登录按钮
 	w2_login_out_btn = DomHelper.bySelector("#w2_login_out_btn"); // 退出登录按钮
+	check_in_btn = DomHelper.bySelector("#check_in_btn"); // 打卡按钮
+	check_out_btn = DomHelper.bySelector("#check_out_btn"); // 下班按钮
 	w2_meal_working_status_btn = DomHelper.bySelector("#w2_meal_working_status_btn"); // 切换状态按钮
+	current_time_line_task_start_btn = DomHelper.bySelector("#current_time_line_task_start_btn"); // 开始W2任务按钮
+	current_time_line_task_stop_btn = DomHelper.bySelector("#current_time_line_task_stop_btn"); // 停止W2任务按钮
+	current_time_line_task_turn_on_off_i = DomHelper.bySelector("#current_time_line_task_turn_on_off_i"); // 任务开关图标
 	current_time_line_task_icon_0 = DomHelper.bySelector("#current_time_line_task_icon_0"); // 任务1图标
 	current_time_line_task_icon_1 = DomHelper.bySelector("#current_time_line_task_icon_1"); // 任务2图标
 	current_time_line_task_icon_2 = DomHelper.bySelector("#current_time_line_task_icon_2"); // 任务3图标
@@ -216,12 +221,32 @@ class W2 extends Page {
 
 			TimerScheduler.stopAllTasks();
 		});
+		check_in_btn.addEventListener("click", async () => {
+			await W2Request.checkIn();
+		});
 		w2_meal_working_status_btn.addEventListener("click", async () => {
 			if (w2_meal_working_status_label.innerText === "正在标注") {
 				await W2Request.meal();
 			} else if (w2_meal_working_status_label.innerText === "前往用餐") {
 				await W2Request.working();
 			}
+		});
+		// 考勤打卡状态 -> 签到按钮 // 添加未登录逻辑
+		this.check_in_btn.addEventListener("click", async () => {
+			await W2Request.checkIn();
+		});
+		// 考勤打卡状态 -> 签退按钮
+		this.check_out_btn.addEventListener("click", async () => {
+			await W2Request.checkOut();
+		});
+		// 当前任务时间线 -> 开始任务按钮
+		this.current_time_line_task_start_btn.addEventListener("click", async () => {
+			Global.value.w2_current_task_flag= true,
+			await W2.currentTask();
+		});
+		// 当前任务时间线 -> 停止任务按钮
+		this.current_time_line_task_stop_btn.addEventListener("click", async () => {
+			await W2.stopAllTask();
 		});
 		prev_month_btn.addEventListener("click", async () => {
 			Global.value.month--;
@@ -298,6 +323,11 @@ class W2 extends Page {
 		Global.config.w2.w2_current_task_status_task = true;
 		while (Global.config.w2.w2_current_task_status_task) {
 			if (Global.config.w2.w2_login_status === W2.status.login_success) {
+				if (TimerScheduler.hasTask(Global.w2_TaskConfig.W2_CHECK_IN_TASK)) {
+					this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
+				} else {
+					this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
+				}
 				for (let i = 0; i < 4; i++) {
 					const icon = this["current_time_line_task_icon_" + i];
 					const arrow = this["current_time_line_task_arrow_" + i];
@@ -312,6 +342,7 @@ class W2 extends Page {
 					}
 				}
 			} else {
+				this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
 				for (let i = 0; i < 4; i++) {
 					const icon = this["current_time_line_task_icon_" + i];
 					const arrow = this["current_time_line_task_arrow_" + i];
@@ -413,7 +444,9 @@ class W2 extends Page {
 			{
 				start: Global.config.w2.w2_time_range_login_start,
 				end: Global.config.w2.w2_time_range_login_end,
-				action: async () => { await W2.login() },
+				action: async () => { 
+					await W2.login() 
+				},
 				name: Global.w2_TaskConfig.W2_LOGIN_TASK
 			},
 			{
@@ -455,7 +488,9 @@ class W2 extends Page {
 			{
 				start: Global.config.w2.w2_time_range_login_out_start,
 				end: Global.config.w2.w2_time_range_login_out_end,
-				action: async () => { await W2Request.loginOut(); },
+				action: async () => { 
+					await W2Request.loginOut(); 
+				},
 				name: Global.w2_TaskConfig.W2_LOGIN_OUT_TASK
 			}
 		];

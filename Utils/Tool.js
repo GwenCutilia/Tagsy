@@ -647,7 +647,7 @@ class Time {
 	}
 
 	/**
-	 * 新增: 获取今天指定时分秒的秒级时间戳（UTC时间戳）
+	 * 获取今天指定时分秒的秒级时间戳（UTC时间戳）
 	 * @param {number} [hour=0] - 小时（0-23, 默认0）
 	 * @param {number} [minute=0] - 分钟（0-59, 默认0）
 	 * @param {number} [second=0] - 秒（0-59, 默认0）
@@ -897,6 +897,23 @@ class Time {
 				throw new Error(`Time.getRandomTimeInRange: 不支持的输出格式 "${format}", 可选格式: HH:MM:SS/HH:MM`);
 		}
 	}
+	/**
+	 * 生成指定时间范围内的随机时间戳
+	 * @param {string} startTime - 开始时间 (格式: HH:MM:SS)
+	 * @param {string} endTime - 结束时间 (格式: HH:MM:SS)
+	 * @returns {number} Unix 时间戳 (秒)
+	 */
+	static generateRandomTimestampInRange(startTime, endTime) {
+		// 使用现有的 getRandomTimeInRange 函数生成随机时间字符串
+		const randomTimeStr = Time.getRandomTimeInRange(startTime, endTime, 'HH:MM:SS');
+		
+		// 将随机时间转换为当天的时间戳
+		const today = new Date();
+		const [hours, minutes, seconds] = randomTimeStr.split(':').map(Number);
+		today.setHours(hours, minutes, seconds, 0);
+		
+		return Math.floor(today.getTime() / 1000);
+	};
 }
 
 class TimerScheduler {

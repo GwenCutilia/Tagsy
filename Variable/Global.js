@@ -60,6 +60,9 @@ class Global {
 			ls_token: null, // 令牌
 			ls_sub_task_id: null, // 工作区编号
 		},
+		setting: {
+			
+		},
 		ui: {},
 	};
 	

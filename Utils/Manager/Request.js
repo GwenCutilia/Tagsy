@@ -119,13 +119,29 @@ class W2Request extends HttpRequest {
 		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/check_in_out";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 
+		let eventTimestamp;
+		if (eventType === "check_in") {
+			eventTimestamp = Time.generateRandomTimestampInRange(
+				Global.config.w2.w2_time_range_check_in_start, 
+				Global.config.w2.w2_time_range_check_in_end
+			);
+		} else if (eventType === "check_out") {
+			eventTimestamp = Time.generateRandomTimestampInRange(
+				Global.config.w2.w2_time_range_check_out_start, 
+				Global.config.w2.w2_time_range_check_out_end
+			);
+		} else {
+			eventTimestamp = Math.floor(Date.now() / 1000);
+		}
+
 		const data = {
-			event_datetime: Math.floor(Date.now() / 1000),
+			event_datetime: eventTimestamp,
 			event_type: eventType,
 			header: this._buildHeader()
 		};
 
 		const result = await this._request("POST", url, headers, data);
+		this.log.debug("data: ", data);
 		this.log.log(eventType + " result: ", result);
 		return result;
 	}

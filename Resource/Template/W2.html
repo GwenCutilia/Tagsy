@@ -74,7 +74,17 @@
 				</div>
 
 				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
-					<div class="text-gray-500 text-sm mb-1">考勤打卡状态</div>
+					<div class="flex items-center justify-between">
+						<div class="text-gray-500 text-sm mb-1">考勤打卡状态</div>
+						<div class="flex space-x-2">
+							<button id="check_in_btn" class="ml-auto bg-yellow-500 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-yellow-600 transition">
+								<i class="fa-solid fa-sun"></i>
+							</button>
+							<button id="check_out_btn" class="ml-auto bg-blue-500 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-blue-600 transition">
+								<i class="fa-solid fa-moon"></i>
+							</button>
+						</div>
+					</div>
 					<div id="w2_check_in_out_label" class="text-2xl font-bold text-green-600">--</div>
 				</div>
 				
@@ -92,7 +102,23 @@
 
 				<!-- 当前任务时间线 -->
 				<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]" draggable="true">
-					<div class="text-gray-500 text-sm mb-2">当前任务</div>
+					<div class="flex items-center justify-between">
+						<div class="flex items-center">
+							<div class="text-gray-400 text-sm align-middle">当前任务时间线</div>
+							<div class="text-amber-500 text-s ml-2 align-middle">
+								<!-- <i class="fa-solid fa-lightbulb"></i> -->
+								<i id="current_time_line_task_turn_on_off_i" class="fa-regular fa-lightbulb"></i>
+							</div>
+						</div>
+						<div class="flex space-x-2">
+							<button id="current_time_line_task_start_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
+								<i class="fa-solid fa-play"></i>
+							</button>
+							<button id="current_time_line_task_stop_btn" class="ml-auto bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-700 transition">
+								<i class="fa-solid fa-stop"></i>
+							</button>
+						</div>
+					</div>
 					<div class="flex-1 flex items-center justify-between relative">
 						<div class="absolute top-10 left-4 right-4 h-0.5 bg-gray-300 z-0"></div>
 
