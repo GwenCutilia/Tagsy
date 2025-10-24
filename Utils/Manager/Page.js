@@ -259,13 +259,25 @@ class W2 extends Page {
 	}
 
 	async updateUIElement() {
-		this.tooltip.addTooltip(this.w2_login_btn, "点击登录W2账号");
+		this.addTooltipMessage();
 		this.loginStatusTask();
 		this.personalStatusTask();
 		this.workingStatusTask();
 		this.workHourStatusTask();
 		this.currentTimeLineTask();
 		this.calendarTask();
+	}
+	async addTooltipMessage() {
+		this.tooltip.addTooltip(this.w2_login_btn, "进行登录");
+		this.tooltip.addTooltip(this.w2_relogin_btn, "重新进行登录");
+		this.tooltip.addTooltip(this.w2_login_out_btn, "进行手动退出登录");
+		this.tooltip.addTooltip(this.check_in_btn, "签到(按设置中的上班时间段签到)");
+		this.tooltip.addTooltip(this.check_out_btn, "签退(按设置中的下班时间段签退)");
+		this.tooltip.addTooltip(this.w2_meal_working_status_btn, "切换状态(可能会延迟几秒)");
+		this.tooltip.addTooltip(this.current_time_line_task_turn_on_off_i, "亮起代表任务正常运行");
+		this.tooltip.addTooltip(this.current_time_line_task_start_btn, "启动任务");
+		this.tooltip.addTooltip(this.current_time_line_task_stop_btn, "停止任务");
+		
 	}
 	// 每三秒更新一次考勤状态和工作状态
 	async personalStatusTask() {

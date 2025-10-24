@@ -465,7 +465,7 @@ class System {
 		const rect = element.getBoundingClientRect();
 		
 		// 计算工具提示位置（在元素上方）
-		const tooltipTop = rect.top - this.tooltip.offsetHeight - 20;
+		const tooltipTop = rect.top - this.tooltip.offsetHeight - 30;
 		let tooltipLeft = rect.left + (rect.width - this.tooltip.offsetWidth) / 2;
 		
 		// 确保工具提示不会超出屏幕边界
