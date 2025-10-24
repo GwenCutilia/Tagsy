@@ -259,6 +259,7 @@ class W2 extends Page {
 	}
 
 	async updateUIElement() {
+		this.tooltip.addTooltip(this.w2_login_btn, "点击登录W2账号");
 		this.loginStatusTask();
 		this.personalStatusTask();
 		this.workingStatusTask();
@@ -430,6 +431,7 @@ class W2 extends Page {
 	}
 
 	async init() {
+		this.tooltip = new ToolTip();
 		// await W2.login();
 		// 为每日任务写单独的函数出来
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能

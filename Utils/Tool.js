@@ -422,6 +422,103 @@ class System {
 	}
 }
 
+ class ToolTip {
+	constructor() {
+		this.tooltip = null;
+		this.tooltipTimeout = null;
+		this.init();
+	}
+	
+	// 初始化工具提示
+	init() {
+		// 创建工具提示元素
+		// this.tooltip = document.createElement('div');
+		// this.tooltip.id = 'tooltip';
+		// this.tooltip.className = 'fixed z-50 bg-gray-900 text-white text-sm rounded-md px-3 py-2 shadow-lg max-w-xs 
+		// pointer-events-none transition-all duration-200 opacity-0 invisible';
+		// document.body.appendChild(this.tooltip);
+		this.tooltip = DomHelper.bySelector("#tooltip");
+		// 防止工具提示在鼠标移动到它上面时隐藏
+		this.tooltip.addEventListener('mouseenter', () => {
+			if (this.tooltipTimeout) {
+				clearTimeout(this.tooltipTimeout);
+				this.tooltipTimeout = null;
+			}
+		});
+		
+		this.tooltip.addEventListener('mouseleave', () => {
+			this.hide();
+		});
+	}
+	
+	// 显示工具提示
+	show(text, element) {
+		// 清除之前的超时
+		if (this.tooltipTimeout) {
+			clearTimeout(this.tooltipTimeout);
+			this.tooltipTimeout = null;
+		}
+		
+		this.tooltip.textContent = text;
+		
+		// 获取元素位置
+		const rect = element.getBoundingClientRect();
+		
+		// 计算工具提示位置（在元素上方）
+		const tooltipTop = rect.top - this.tooltip.offsetHeight - 20;
+		let tooltipLeft = rect.left + (rect.width - this.tooltip.offsetWidth) / 2;
+		
+		// 确保工具提示不会超出屏幕边界
+		if (tooltipLeft < 10) {
+			tooltipLeft = 10;
+		} else if (tooltipLeft + this.tooltip.offsetWidth > window.innerWidth - 10) {
+			tooltipLeft = window.innerWidth - this.tooltip.offsetWidth - 10;
+		}
+		
+		// 设置工具提示位置
+		this.tooltip.style.top = `${tooltipTop}px`;
+		this.tooltip.style.left = `${tooltipLeft}px`;
+		
+		// 显示工具提示
+		this.tooltip.classList.remove('opacity-0', 'invisible');
+		this.tooltip.classList.add('opacity-100', 'visible');
+	}
+	
+	// 隐藏工具提示
+	hide() {
+		// 使用延迟隐藏，防止鼠标快速移动时闪烁
+		this.tooltipTimeout = setTimeout(() => {
+			this.tooltip.classList.remove('opacity-100', 'visible');
+			this.tooltip.classList.add('opacity-0', 'invisible');
+		}, 100);
+	}
+	
+	// 为元素添加工具提示
+	addTooltip(element, text) {
+		element.addEventListener('mouseenter', (e) => {
+			this.show(text, e.currentTarget);
+		});
+		
+		element.addEventListener('mouseleave', () => {
+			this.hide();
+		});
+	}
+	
+	// 批量添加工具提示
+	addTooltips(elements) {
+		elements.forEach(item => {
+			this.addTooltip(item.element, item.text);
+		});
+	}
+	
+	// 销毁工具提示
+	destroy() {
+		if (this.tooltip && this.tooltip.parentNode) {
+			this.tooltip.parentNode.removeChild(this.tooltip);
+		}
+	}
+}
+
 class Time {
 	// 私有构造函数: 禁止实例化（确保静态类特性）
 	constructor() {
@@ -917,15 +1014,103 @@ class Time {
 }
 
 class TimerScheduler {
-	// 存储所有定时器信息，按任务名称存储
-	static timers = new Map();
-	// 生成唯一内部ID的计数器（仅用于内部管理）
+	// 存储所有定时器信息
+	static dailyTasks = new Map();      // 每日任务
+	static intervalTasks = new Map();   // 间隔任务
+	// 主定时器
+	static mainTimer = null;
+	static checkInterval = 500; // 检查间隔(毫秒)
+	
+	// 生成唯一内部ID的计数器
 	static timerIdCounter = 0;
-
 	static log = new Logger("TimerScheduler");
+
 	// 私有构造函数, 防止实例化
 	constructor() {
 		throw new Error('TimerScheduler 是静态类, 不能实例化');
+	}
+
+	/**
+	 * 启动主定时器（如果尚未启动）
+	 */
+	static startMainTimer() {
+		if (!this.mainTimer) {
+			this.mainTimer = setInterval(() => {
+				this.checkDailyTasks();
+				this.checkIntervalTasks();
+			}, this.checkInterval);
+			this.log.log('主定时器已启动');
+		}
+	}
+
+	/**
+	 * 停止主定时器（如果没有任务运行）
+	 */
+	static stopMainTimerIfNoTasks() {
+		if (this.dailyTasks.size === 0 && this.intervalTasks.size === 0) {
+			if (this.mainTimer) {
+				clearInterval(this.mainTimer);
+				this.mainTimer = null;
+				this.log.log('主定时器已停止（无任务运行）');
+			}
+		}
+	}
+
+	/**
+	 * 检查并执行每日任务
+	 */
+	static checkDailyTasks() {
+		const now = new Date();
+		const currentHour = now.getHours();
+		const currentMinute = now.getMinutes();
+		const currentSecond = now.getSeconds();
+		
+		this.dailyTasks.forEach((taskInfo, taskName) => {
+			// 检查时间是否匹配
+			if (currentHour === taskInfo.hour && 
+				currentMinute === taskInfo.minute && 
+				currentSecond === taskInfo.second) {
+				
+				// 防止在同一秒内重复执行
+				if (!taskInfo.hasRunThisSecond) {
+					try {
+						taskInfo.callback();
+					} catch (err) {
+						this.log.error(`每日任务执行错误 (${taskName}):`, err);
+					}
+					taskInfo.hasRunThisSecond = true;
+				}
+			} else {
+				// 时间不匹配时重置标志
+				taskInfo.hasRunThisSecond = false;
+			}
+		});
+	}
+
+	/**
+	 * 检查并执行间隔任务
+	 */
+	static checkIntervalTasks() {
+		const now = Date.now();
+		
+		this.intervalTasks.forEach((taskInfo, taskName) => {
+			// 检查是否到达执行时间
+			if (now - taskInfo.lastExecutionTime >= taskInfo.intervalMs) {
+				try {
+					taskInfo.callback(...taskInfo.args);
+				} catch (err) {
+					this.log.error(`间隔任务执行错误 (${taskName}):`, err);
+				}
+				
+				taskInfo.lastExecutionTime = now;
+				taskInfo.executionCount++;
+				
+				// 检查是否达到最大执行次数
+				if (taskInfo.maxCount !== null && taskInfo.executionCount >= taskInfo.maxCount) {
+					this.stopTask(taskName);
+				}
+			}
+		});
 	}
 
 	/**
@@ -955,40 +1140,25 @@ class TimerScheduler {
 		}
 		
 		// 如果已存在同名任务，先停止它
-		if (this.timers.has(taskName)) {
+		if (this.dailyTasks.has(taskName)) {
 			this.stopTask(taskName);
 		}
 		
-		let hasRun = false;
-		// 每秒钟检查一次时间
-		const timerId = setInterval(() => {
-			const now = new Date();
-			// 检查当前时间是否与目标时间匹配
-			if (now.getHours() === hour && now.getMinutes() === minute && now.getSeconds() === second) {
-				if (!hasRun) {
-					try {
-						callback();
-					} catch (err) {
-						this.log.error('每日任务执行错误:', err);
-					}
-					hasRun = true;
-				}
-			} else {
-				hasRun = false;
-			}
-		}, 1000);
-		
 		const internalId = `daily_${TimerScheduler.timerIdCounter++}`;
-		this.timers.set(taskName, {
-			id: timerId,
+		this.dailyTasks.set(taskName, {
 			internalId: internalId,
 			type: 'daily',
 			hour,
 			minute,
 			second,
 			timeString,
-			name: taskName
+			name: taskName,
+			callback: callback,
+			hasRunThisSecond: false
 		});
+		
+		// 确保主定时器运行
+		this.startMainTimer();
 		
 		this.log.log(`每日任务已设置: ${taskName} (${timeString})`);
 		return true;
@@ -1013,34 +1183,25 @@ class TimerScheduler {
 		}
 		
 		// 如果已存在同名任务，先停止它
-		if (this.timers.has(taskName)) {
+		if (this.intervalTasks.has(taskName)) {
 			this.stopTask(taskName);
 		}
 		
-		let count = 0;
-		const timerId = setInterval(() => {
-			try {
-				taskFn(...args);
-			} catch (err) {
-				this.log.error('间隔任务执行错误:', err);
-			}
-
-			count++;
-			if (maxCount !== null && count >= maxCount) {
-				this.stopTask(taskName);
-			}
-		}, intervalMs);
-		
 		const internalId = `interval_${TimerScheduler.timerIdCounter++}`;
-		this.timers.set(taskName, {
-			id: timerId,
+		this.intervalTasks.set(taskName, {
 			internalId: internalId,
 			type: 'interval',
 			intervalMs,
 			maxCount,
 			name: taskName,
+			callback: taskFn,
+			args: args,
+			lastExecutionTime: Date.now(),
 			executionCount: 0
 		});
+		
+		// 确保主定时器运行
+		this.startMainTimer();
 		
 		this.log.log(`间隔任务已设置: ${taskName} (${intervalMs}ms)`);
 		return true;
@@ -1052,15 +1213,30 @@ class TimerScheduler {
 	 * @returns {boolean} 任务是否成功停止
 	 */
 	static stopTask(taskName) {
-		const timerInfo = this.timers.get(taskName);
-		if (!timerInfo) {
-		this.log.warn(`找不到名称为 "${taskName}" 的任务`);
-		return false;
+		let stopped = false;
+		
+		// 尝试从每日任务中停止
+		if (this.dailyTasks.has(taskName)) {
+			this.dailyTasks.delete(taskName);
+			this.log.log(`每日任务已停止: ${taskName}`);
+			stopped = true;
 		}
 		
-		clearInterval(timerInfo.id);
-		this.timers.delete(taskName);
-		this.log.log(`任务已停止: ${taskName}`);
+		// 尝试从间隔任务中停止
+		if (this.intervalTasks.has(taskName)) {
+			this.intervalTasks.delete(taskName);
+			this.log.log(`间隔任务已停止: ${taskName}`);
+			stopped = true;
+		}
+		
+		if (!stopped) {
+			this.log.warn(`找不到名称为 "${taskName}" 的任务`);
+			return false;
+		}
+		
+		// 检查是否需要停止主定时器
+		this.stopMainTimerIfNoTasks();
+		
 		return true;
 	}
 
@@ -1069,16 +1245,20 @@ class TimerScheduler {
 	 * @returns {number} 停止的任务数量
 	 */
 	static stopAllTasks() {
-		const taskCount = this.timers.size;
+		const dailyCount = this.dailyTasks.size;
+		const intervalCount = this.intervalTasks.size;
+		const totalCount = dailyCount + intervalCount;
 		
-		this.timers.forEach((timerInfo, taskName) => {
-		clearInterval(timerInfo.id);
-		this.log.log(`任务已停止: ${taskName}`);
-		});
+		this.dailyTasks.clear();
+		this.intervalTasks.clear();
 		
-		this.timers.clear();
-		this.log.log(`所有定时任务已停止, 共 ${taskCount} 个任务`);
-		return taskCount;
+		if (this.mainTimer) {
+			clearInterval(this.mainTimer);
+			this.mainTimer = null;
+		}
+		
+		this.log.log(`所有定时任务已停止, 共 ${totalCount} 个任务 (${dailyCount}个每日任务, ${intervalCount}个间隔任务)`);
+		return totalCount;
 	}
 
 	/**
@@ -1087,7 +1267,7 @@ class TimerScheduler {
 	 * @returns {boolean} 任务是否存在
 	 */
 	static hasTask(taskName) {
-		return this.timers.has(taskName);
+		return this.dailyTasks.has(taskName) || this.intervalTasks.has(taskName);
 	}
 
 	/**
@@ -1096,13 +1276,18 @@ class TimerScheduler {
 	 * @returns {Object|null} 任务信息或null
 	 */
 	static getTaskInfo(taskName) {
-		const timerInfo = this.timers.get(taskName);
+		let timerInfo = this.dailyTasks.get(taskName) || this.intervalTasks.get(taskName);
 		if (!timerInfo) {
-		return null;
+			return null;
 		}
 		
 		// 返回副本，避免外部修改
-		return { ...timerInfo };
+		const info = { ...timerInfo };
+		// 移除回调函数，避免暴露
+		delete info.callback;
+		delete info.args;
+		
+		return info;
 	}
 
 	/**
@@ -1110,7 +1295,10 @@ class TimerScheduler {
 	 * @returns {string[]} 所有任务名称的数组
 	 */
 	static getActiveTaskNames() {
-		return Array.from(this.timers.keys());
+		return [
+			...Array.from(this.dailyTasks.keys()),
+			...Array.from(this.intervalTasks.keys())
+		];
 	}
 
 	/**
@@ -1118,16 +1306,39 @@ class TimerScheduler {
 	 * @returns {Array} 所有任务信息的数组
 	 */
 	static getActiveTasks() {
-		return Array.from(this.timers.entries()).map(([name, info]) => ({
+		const dailyTasks = Array.from(this.dailyTasks.entries()).map(([name, info]) => ({
 			name,
 			type: info.type,
-			intervalMs: info.intervalMs,
-			maxCount: info.maxCount,
 			hour: info.hour,
 			minute: info.minute,
 			second: info.second,
 			timeString: info.timeString,
 			internalId: info.internalId
 		}));
+		
+		const intervalTasks = Array.from(this.intervalTasks.entries()).map(([name, info]) => ({
+			name,
+			type: info.type,
+			intervalMs: info.intervalMs,
+			maxCount: info.maxCount,
+			executionCount: info.executionCount,
+			internalId: info.internalId
+		}));
+		
+		return [...dailyTasks, ...intervalTasks];
+	}
+
+	/**
+	 * 获取任务统计信息
+	 * @returns {Object} 任务统计
+	 */
+	static getStats() {
+		return {
+			dailyTasks: this.dailyTasks.size,
+			intervalTasks: this.intervalTasks.size,
+			totalTasks: this.dailyTasks.size + this.intervalTasks.size,
+			mainTimerRunning: this.mainTimer !== null,
+			checkInterval: this.checkInterval
+		};
 	}
 }
