@@ -140,15 +140,15 @@ class Index extends Template {
 	}
 }
 class W2 extends Page {
-	w2_login_status_label = DomHelper.bySelector("#w2_login_status_label"); // 登录状态
-	w2_check_in_out_label = DomHelper.bySelector("#w2_check_in_out_label"); // 考勤打卡状态
-	w2_meal_working_status_label = DomHelper.bySelector("#w2_meal_working_status_label"); // 工作状态
-	w2_login_btn = DomHelper.bySelector("#w2_login_btn"); // 登录按钮
-	w2_relogin_btn = DomHelper.bySelector("#w2_relogin_btn"); // 重新登录按钮
-	w2_login_out_btn = DomHelper.bySelector("#w2_login_out_btn"); // 退出登录按钮
+	login_status_label = DomHelper.bySelector("#login_status_label"); // 登录状态
+	check_in_out_label = DomHelper.bySelector("#check_in_out_label"); // 考勤打卡状态
+	meal_working_status_label = DomHelper.bySelector("#meal_working_status_label"); // 工作状态
+	login_btn = DomHelper.bySelector("#login_btn"); // 登录按钮
+	relogin_btn = DomHelper.bySelector("#relogin_btn"); // 重新登录按钮
+	login_out_btn = DomHelper.bySelector("#login_out_btn"); // 退出登录按钮
 	check_in_btn = DomHelper.bySelector("#check_in_btn"); // 打卡按钮
 	check_out_btn = DomHelper.bySelector("#check_out_btn"); // 下班按钮
-	w2_meal_working_status_btn = DomHelper.bySelector("#w2_meal_working_status_btn"); // 切换状态按钮
+	meal_working_status_btn = DomHelper.bySelector("#meal_working_status_btn"); // 切换状态按钮
 	current_time_line_task_start_btn = DomHelper.bySelector("#current_time_line_task_start_btn"); // 开始W2任务按钮
 	current_time_line_task_stop_btn = DomHelper.bySelector("#current_time_line_task_stop_btn"); // 停止W2任务按钮
 	current_time_line_task_turn_on_off_i = DomHelper.bySelector("#current_time_line_task_turn_on_off_i"); // 任务开关图标
@@ -199,35 +199,35 @@ class W2 extends Page {
 		this.updateUIElement();
 	}
 	bindEvents() {
-		w2_login_btn.addEventListener("click", async () => {
+		login_btn.addEventListener("click", async () => {
 			await W2.login();
 			Global.value.w2_current_task_flag = true;
 			await W2.currentTask();
 			TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 		});
-		w2_relogin_btn.addEventListener("click", async () => {
+		relogin_btn.addEventListener("click", async () => {
 			await W2.login(); // 再写一个relogin函数
 		});
-		w2_login_out_btn.addEventListener("click", async () => {
+		login_out_btn.addEventListener("click", async () => {
 			await W2Request.loginOut();
 			// 将UI置为默认状态
-			this.w2_meal_working_status_label.innerText = W2.status.unknown;
-			this.w2_meal_working_status_label.innerText = W2.status.unknown;
-			calendar_label.innerText = W2.status.unknown;
-			calendar_table.innerHTML = "";
+			this.check_in_out_label.innerText = W2.status.unknown;
+			this.meal_working_status_label.innerText = W2.status.unknown;
+			this.calendar_label.innerText = W2.status.unknown;
+			this.calendar_table.innerHTML = "";
 
 			Global.config.w2.w2_login_status = W2.status.not_login;
 			Global.config.w2.w2_token_check_task = false;
 
-			TimerScheduler.stopAllTasks();
+			W2.stopAllTask();
 		});
 		check_in_btn.addEventListener("click", async () => {
 			await W2Request.checkIn();
 		});
-		w2_meal_working_status_btn.addEventListener("click", async () => {
-			if (w2_meal_working_status_label.innerText === "正在标注") {
+		meal_working_status_btn.addEventListener("click", async () => {
+			if (meal_working_status_label.innerText === "正在标注") {
 				await W2Request.meal();
-			} else if (w2_meal_working_status_label.innerText === "前往用餐") {
+			} else if (meal_working_status_label.innerText === "前往用餐") {
 				await W2Request.working();
 			}
 		});
@@ -260,185 +260,164 @@ class W2 extends Page {
 
 	async updateUIElement() {
 		this.addTooltipMessage();
-		this.loginStatusTask();
-		this.personalStatusTask();
-		this.workingStatusTask();
-		this.workHourStatusTask();
-		this.currentTimeLineTask();
-		this.calendarTask();
+		TimerScheduler.setIntervalTask(async () => { this.personalStatusTask() }, 3000, "W2_PERSONAL_STATUS_TASK");
+		TimerScheduler.setIntervalTask(async () => { this.loginStatusTask() }, 3000, "W2_LOGIN_STATUS_TASK");
+		TimerScheduler.setIntervalTask(async () => { this.workingStatusTask() }, 3000, "W2_WORKING_STATUS_TASK");
+		TimerScheduler.setIntervalTask(async () => { this.workHourStatusTask() }, 3000, "W2_WORK_HOUR_STATUS_TASK");
+		TimerScheduler.setIntervalTask(async () => { this.currentTimeLineTask() }, 3000, "W2_CURRENT_TIME_LINE_TASK");
+		TimerScheduler.setIntervalTask(async () => { this.calendarTask() }, 10 * 1000, "W2_CALENDAR_TASK");
 	}
+	// 常驻的提示栏
 	async addTooltipMessage() {
-		this.tooltip.addTooltip(this.w2_login_btn, "进行登录");
-		this.tooltip.addTooltip(this.w2_relogin_btn, "重新进行登录");
-		this.tooltip.addTooltip(this.w2_login_out_btn, "进行手动退出登录");
+		this.tooltip.addTooltip(this.login_btn, "进行登录");
+		this.tooltip.addTooltip(this.relogin_btn, "重新进行登录");
+		this.tooltip.addTooltip(this.login_out_btn, "进行手动退出登录");
 		this.tooltip.addTooltip(this.check_in_btn, "签到(按设置中的上班时间段签到)");
 		this.tooltip.addTooltip(this.check_out_btn, "签退(按设置中的下班时间段签退)");
-		this.tooltip.addTooltip(this.w2_meal_working_status_btn, "切换状态(可能会延迟几秒)");
+		this.tooltip.addTooltip(this.meal_working_status_btn, "切换状态(可能会延迟几秒)");
 		this.tooltip.addTooltip(this.current_time_line_task_turn_on_off_i, "亮起代表任务正常运行");
 		this.tooltip.addTooltip(this.current_time_line_task_start_btn, "启动任务");
 		this.tooltip.addTooltip(this.current_time_line_task_stop_btn, "停止任务");
-		
+		this.tooltip.addTooltip(this.prev_month_btn, "查看上个月排班");
+		this.tooltip.addTooltip(this.next_month_btn, "查看下个月排班");
 	}
 	// 每三秒更新一次考勤状态和工作状态
 	async personalStatusTask() {
-		Global.config.w2.w2_personal_status_task = true;
-		while (Global.config.w2.w2_personal_status_task) {
-			if (Global.config.w2.w2_login_status === W2.status.login_success) {
-				Global.config.w2.w2_personal_informat = await W2Request.getPersonalInformat();
-			}
-			await System.sleepSeconds(3);
+		if (Global.config.w2.w2_login_status === W2.status.login_success) {
+			Global.config.w2.w2_personal_informat = await W2Request.getPersonalInformat();
 		}
 	}
 	// 登录选项卡的状态显示
 	async loginStatusTask() {
-		Global.config.w2.w2_login_status_task = true;
-		while (Global.config.w2.w2_login_status_task) {
-			this.w2_login_status_label.innerText = Global.config.w2.w2_login_status || "--";
-			await System.sleepSeconds(3);
-		}
+		this.login_status_label.innerText = Global.config.w2.w2_login_status || "--";
 	}
 	// 考勤打卡选项卡的状态显示
 	async workingStatusTask() {
-		Global.config.w2.w2_working_status_task = true;
-		while (Global.config.w2.w2_working_status_task) {
-			if (Global.config.w2.w2_login_status === W2.status.login_success){
-				if (Global.config.w2.w2_personal_informat === null) {
-					await System.sleepSeconds(3);
-				} else if (Global.config.w2.w2_personal_informat.code === 200) {
-					this.w2_check_in_out_label.innerText = W2.workingStatus[Global.config.w2.w2_personal_informat.data.working_status] || W2.status.unknown;
-				} else {
-					this.w2_check_in_out_label.innerText = W2.status.unknown;
-				}
+		if (Global.config.w2.w2_login_status === W2.status.login_success){
+			if (Global.config.w2.w2_personal_informat === null) {
+				
+			} else if (Global.config.w2.w2_personal_informat.code === 200) {
+				this.check_in_out_label.innerText = W2.workingStatus[Global.config.w2.w2_personal_informat.data.working_status] || W2.status.unknown;
 			} else {
-				this.w2_check_in_out_label.innerText = W2.status.unknown;
+				this.check_in_out_label.innerText = W2.status.unknown;
 			}
-			await System.sleepSeconds(3);
+		} else {
+			this.check_in_out_label.innerText = W2.status.unknown;
 		}
 	}
 	async workHourStatusTask() {
-		Global.config.w2.w2_work_hour_status_task = true;
-		while (Global.config.w2.w2_work_hour_status_task) {
-			if (Global.config.w2.w2_login_status === W2.status.login_success) {
-				if (Global.config.w2.w2_personal_informat === null) {
-					await System.sleepSeconds(3);
-				} else if (Global.config.w2.w2_personal_informat.code === 200) {
-					this.w2_meal_working_status_label.innerText = W2.workHourStatus[Global.config.w2.w2_personal_informat.data.work_hour_status] || W2.status.unknown;
-				} else {
-					this.w2_meal_working_status_label.innerText = W2.status.unknown;
-				}
+		if (Global.config.w2.w2_login_status === W2.status.login_success) {
+			if (Global.config.w2.w2_personal_informat === null) {
+
+			} else if (Global.config.w2.w2_personal_informat.code === 200) {
+				this.meal_working_status_label.innerText = W2.workHourStatus[Global.config.w2.w2_personal_informat.data.work_hour_status] || W2.status.unknown;
 			} else {
-				this.w2_meal_working_status_label.innerText = W2.status.unknown;
+				this.meal_working_status_label.innerText = W2.status.unknown;
 			}
-			await System.sleepSeconds(3);
+		} else {
+			this.meal_working_status_label.innerText = W2.status.unknown;
 		}
 	}
 	async currentTimeLineTask() {
-		Global.config.w2.w2_current_task_status_task = true;
-		while (Global.config.w2.w2_current_task_status_task) {
-			if (Global.config.w2.w2_login_status === W2.status.login_success) {
-				if (TimerScheduler.hasTask(Global.w2_TaskConfig.W2_CHECK_IN_TASK)) {
-					this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
-				} else {
-					this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
-				}
-				for (let i = 0; i < 4; i++) {
-					const icon = this["current_time_line_task_icon_" + i];
-					const arrow = this["current_time_line_task_arrow_" + i];
-					const label = this["current_time_line_task_label_" + i];
-					// currentTask的值是currentTaskStatus枚举体中的键值, 由定时任务currentTask()变更
-					if (label.innerText === Global.config.w2.w2_current_time_line_task_status) {
-						icon.classList.replace("bg-blue-600", "bg-green-600");
-						arrow.classList.replace("border-b-blue-600", "border-b-green-600");
-					} else {
-						icon.classList.replace("bg-green-600", "bg-blue-600");
-						arrow.classList.replace("border-b-green-600", "border-b-blue-600");
-					}
-				}
+		if (Global.config.w2.w2_login_status === W2.status.login_success) {
+			if (TimerScheduler.hasTask(Global.w2_TaskConfig.W2_CHECK_IN_TASK)) {
+				this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
 			} else {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
-				for (let i = 0; i < 4; i++) {
-					const icon = this["current_time_line_task_icon_" + i];
-					const arrow = this["current_time_line_task_arrow_" + i];
+			}
+			for (let i = 0; i < 4; i++) {
+				const icon = this["current_time_line_task_icon_" + i];
+				const arrow = this["current_time_line_task_arrow_" + i];
+				const label = this["current_time_line_task_label_" + i];
+				// currentTask的值是currentTaskStatus枚举体中的键值, 由间隔任务currentTask()变更
+				if (label.innerText === Global.config.w2.w2_current_time_line_task_status) {
+					icon.classList.replace("bg-blue-600", "bg-green-600");
+					arrow.classList.replace("border-b-blue-600", "border-b-green-600");
+				} else {
 					icon.classList.replace("bg-green-600", "bg-blue-600");
 					arrow.classList.replace("border-b-green-600", "border-b-blue-600");
 				}
 			}
-			await System.sleepSeconds(3);
+		} else {
+			this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
+			for (let i = 0; i < 4; i++) {
+				const icon = this["current_time_line_task_icon_" + i];
+				const arrow = this["current_time_line_task_arrow_" + i];
+				icon.classList.replace("bg-green-600", "bg-blue-600");
+				arrow.classList.replace("border-b-green-600", "border-b-blue-600");
+			}
 		}
 	}
 	async calendarTask() {
-		Global.config.w2.w2_calendar_container_task = true;
-		while (Global.config.w2.w2_calendar_container_task) {
-			let result = await W2Request.queryPersonalSchedule();
-			if (Global.config.w2.w2_login_status === W2.status.login_success && result.code === 200) {
-				// 日历标题实现
-				calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
-				// 按钮逻辑 - 待优化
-				if (Global.value.month >= Time.getCurrentMonth()) {
-					this.next_month_btn.disabled = true;
-					this.next_month_btn.classList.add('opacity-50');
-					DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
-				} else {
-					this.next_month_btn.disabled = false;
-					this.next_month_btn.classList.remove('opacity-50');
-					DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.remove('text-gray-400');
-				}
-				if (Global.value.month <= 1) {
-					this.prev_month_btn.disabled = true;
-					this.next_month_btn.classList.add('opacity-50');
-					DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
-				} else {
-					this.prev_month_btn.disabled = false;
-					this.prev_month_btn.classList.remove('opacity-50');
-					DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
-				}
-				// 日历日期实现
-				// 更新日历页需要的<div>框架
-				let firstWeekDay = Time.getFirstDayOfMonthWeek(result.data.column[0].date);
-				let lastDate = parseInt(result.data.column[result.data.column.length - 1].date.split("-")[2]);
-				let offsetToSaturday = (firstWeekDay) % 7;
-				this.calendar_table.innerHTML = '';
-				for (let i = 0; i < offsetToSaturday; i++) {
-					const emptyDiv = document.createElement("div");
-					emptyDiv.className = "py-2 rounded";
-					this.calendar_table.appendChild(emptyDiv);
-				}
-				// 生成日历页
-				for (let d = 1; d <= lastDate; d++) {
-					const dateDiv = document.createElement('div');
-					const current = new Date(Time.getCurrentYear(), Global.value.month - 1, d);
-					dateDiv.id = `calendar_date_${d}`;
-					dateDiv.className = 'py-2 rounded cursor-pointer transition-colors duration-200';
-					dateDiv.textContent = d;
-
-					// 格式化日期为 YYYY-MM-DD 格式
-					// let result = await W2Request.queryCurrentMonthSchedule();
-					// let lastDate = result.data.detail_data_list[0].schedule_infos["2025-10-01"]
-					// console.log(lastDate);
-					const formattedDate = Time.formatDate(Time.getCurrentYear(), Global.value.month, d);
-					
-					// 检查是否为休息日
-					const daySchedule = result.data.detail_data_list[0].schedule_infos[formattedDate];
-					if (daySchedule && daySchedule.schedule_conf_name === "休息") {
-						// 休息日样式 - 使用API返回的颜色
-						dateDiv.style.backgroundColor = '#DCEDC8';  // 明亮的浅绿色
-						dateDiv.style.color = '#689F38';            // 中等绿色文字
-						dateDiv.classList.add('font-semibold', 'shadow-sm');
-					} else if (Time.isToday(current)) {
-						// 今天但不是休息日
-						dateDiv.classList.add('bg-blue-600', 'text-white', 'font-semibold', 'shadow-sm');
-					} else {
-						// 普通工作日
-						dateDiv.classList.add('bg-gray-50', 'hover:bg-blue-100');
-					}
-					this.calendar_table.appendChild(dateDiv);
-				}
-				await System.sleepSeconds(60 * 60 * 8);
+		let result = await W2Request.queryPersonalSchedule();
+		if (Global.config.w2.w2_login_status === W2.status.login_success && result.code === 200) {
+			// 日历标题实现
+			calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
+			// 按钮逻辑 - 待优化
+			if (Global.value.month >= Time.getCurrentMonth()) {
+				this.next_month_btn.disabled = true;
+				this.next_month_btn.classList.add('opacity-50');
+				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
 			} else {
-				calendar_label.innerText = W2.status.unknown;
-				calendar_table.innerHTML = "";
-				await System.sleepSeconds(3);
+				this.next_month_btn.disabled = false;
+				this.next_month_btn.classList.remove('opacity-50');
+				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.remove('text-gray-400');
 			}
+			if (Global.value.month <= 1) {
+				this.prev_month_btn.disabled = true;
+				this.next_month_btn.classList.add('opacity-50');
+				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
+			} else {
+				this.prev_month_btn.disabled = false;
+				this.prev_month_btn.classList.remove('opacity-50');
+				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
+			}
+			// 日历日期实现
+			// 更新日历页需要的<div>框架
+			let firstWeekDay = Time.getFirstDayOfMonthWeek(result.data.column[0].date);
+			let lastDate = parseInt(result.data.column[result.data.column.length - 1].date.split("-")[2]);
+			let offsetToSaturday = (firstWeekDay) % 7;
+			this.calendar_table.innerHTML = '';
+			for (let i = 0; i < offsetToSaturday; i++) {
+				const emptyDiv = document.createElement("div");
+				emptyDiv.className = "py-2 rounded";
+				this.calendar_table.appendChild(emptyDiv);
+			}
+			// 生成日历页
+			for (let d = 1; d <= lastDate; d++) {
+				const dateDiv = document.createElement('div');
+				const current = new Date(Time.getCurrentYear(), Global.value.month - 1, d);
+				dateDiv.id = `calendar_date_${d}`;
+				dateDiv.className = 'py-2 rounded cursor-pointer transition-colors duration-200';
+				dateDiv.textContent = d;
+
+				// 格式化日期为 YYYY-MM-DD 格式
+				// let result = await W2Request.queryCurrentMonthSchedule();
+				// let lastDate = result.data.detail_data_list[0].schedule_infos["2025-10-01"]
+				// console.log(lastDate);
+				const formattedDate = Time.formatDate(Time.getCurrentYear(), Global.value.month, d);
+				
+				// 检查是否为休息日
+				const daySchedule = result.data.detail_data_list[0].schedule_infos[formattedDate];
+				if (daySchedule && daySchedule.schedule_conf_name === "休息") {
+					// 休息日样式 - 使用API返回的颜色
+					dateDiv.style.backgroundColor = '#DCEDC8';  // 明亮的浅绿色
+					dateDiv.style.color = '#689F38';            // 中等绿色文字
+					dateDiv.classList.add('font-semibold', 'shadow-sm');
+					this.tooltip.addTooltip(dateDiv, "休息日");
+				} else if (Time.isToday(current)) {
+					// 今天但不是休息日
+					dateDiv.classList.add('bg-blue-600', 'text-white', 'font-semibold', 'shadow-sm');
+					this.tooltip.addTooltip(dateDiv, "这是今天");
+				} else {
+					// 普通工作日
+					dateDiv.classList.add('bg-gray-50', 'hover:bg-blue-100');
+				}
+				this.calendar_table.appendChild(dateDiv);
+			}
+		} else {
+			calendar_label.innerText = W2.status.unknown;
+			calendar_table.innerHTML = "";
 		}
 	}
 

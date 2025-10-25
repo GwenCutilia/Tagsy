@@ -59,18 +59,18 @@
 					<div class="flex items-center justify-between">
 						<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
 						<div class="flex space-x-2">
-							<button id="w2_login_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
+							<button id="login_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
 								<i class="fa-solid fa-right-to-bracket"></i>
 							</button>
-							<button id="w2_relogin_btn" class="ml-auto bg-yellow-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-yellow-700 transition">
+							<button id="relogin_btn" class="ml-auto bg-yellow-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-yellow-700 transition">
 								<i class="fa-solid fa-arrows-rotate"></i>
 							</button>
-							<button id="w2_login_out_btn" class="ml-auto bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-700 transition">
+							<button id="login_out_btn" class="ml-auto bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-700 transition">
 								<i class="fa-solid fa-right-from-bracket"></i>
 							</button>
 						</div>
 					</div>
-					<div id="w2_login_status_label" class="text-2xl font-bold text-blue-600">--</div>
+					<div id="login_status_label" class="text-2xl font-bold text-blue-600">--</div>
 				</div>
 
 				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
@@ -85,26 +85,26 @@
 							</button>
 						</div>
 					</div>
-					<div id="w2_check_in_out_label" class="text-2xl font-bold text-green-600">--</div>
+					<div id="check_in_out_label" class="text-2xl font-bold text-green-600">--</div>
 				</div>
 				
 				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
 					<div class="flex items-center justify-between">
 						<div class="text-gray-500 text-sm mb-1">当前工作状态</div>
 						<div class="flex space-x-2">
-							<button id="w2_meal_working_status_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
+							<button id="meal_working_status_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
 								<i class="fa-solid fa-exchange"></i>
 							</button>
 						</div>
 					</div>
-					<div id="w2_meal_working_status_label" class="text-2xl font-bold text-blue-600">--</div>
+					<div id="meal_working_status_label" class="text-2xl font-bold text-blue-600">--</div>
 				</div>
 
 				<!-- 当前任务时间线 -->
 				<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]" draggable="true">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center">
-							<div class="text-gray-400 text-sm align-middle">当前任务时间线</div>
+							<div class="text-gray-500 text-sm align-middle">当前任务时间线</div>
 							<div class="text-amber-500 text-s ml-2 align-middle">
 								<!-- <i class="fa-solid fa-lightbulb"></i> -->
 								<i id="current_time_line_task_turn_on_off_i" class="fa-regular fa-lightbulb"></i>

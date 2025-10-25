@@ -32,12 +32,6 @@ class Global {
 			w2_current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
 			// 任务状态
 			w2_token_check_task: false,
-			w2_personal_status_task: false,
-			w2_login_status_task: false, // 登录状态任务
-			w2_working_status_task: false, // 考勤打卡任务
-			w2_work_hour_status_task: false, // 工作时长任务
-			w2_current_task_status_task: false, // 当前任务任务
-			w2_calendar_container_task: false, // 日历任务
 			// 模块设置
 			w2_time_range_login_start: "08:50:00",
 			w2_time_range_login_end: "08:50:00",

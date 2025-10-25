@@ -193,7 +193,7 @@ class W2Request extends HttpRequest {
 		};
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("queryCurrentMonthSchedule result: ", result);
+		// this.log.log("queryCurrentMonthSchedule result: ", result);
 		return result;
 	}
 
