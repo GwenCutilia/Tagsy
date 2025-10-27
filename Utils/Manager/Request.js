@@ -45,10 +45,10 @@ class W2Request extends HttpRequest {
 		};
 
 		const data = {
-			id: Global.config.w2.w2_email_api_id,
-			key: Global.config.w2.w2_email_api_secret,
-			mail: Global.config.w2.w2_email_api_address,
-			pwd: Global.config.w2.w2_email_api_pop3_auth_code,
+			id: Global.config.w2.email_api_id,
+			key: Global.config.w2.email_api_secret,
+			mail: Global.config.w2.email_api_address,
+			pwd: Global.config.w2.email_api_pop3_auth_code,
 			popimap: "pop3",
 			ip: "pop.qq.com",
 			port: "995",
@@ -69,14 +69,14 @@ class W2Request extends HttpRequest {
 		const data = this._buildAuthData({
 			login_type: 4,
 			rand_str: "HYWmN2JLmqJAEKF1Y9wzSFduiCFQEmtS",
-			verify_code: Global.config.w2.w2_email_api_verify_code
+			verify_code: Global.config.w2.email_api_verify_code
 		});
 
 		const result = await this._request("POST", url, headers, data);
 		
 		// 保存token
-		Global.config.w2.w2_token = result.data.token;
-		Global.config.w2.w2_tenant_token = result.data.tenant_token;
+		Global.config.w2.token = result.data.token;
+		Global.config.w2.tenant_token = result.data.tenant_token;
 
 		return result;
 	}
@@ -87,7 +87,7 @@ class W2Request extends HttpRequest {
 
 		const data = {
 			header: this._buildHeader({
-				staff: Global.config.w2.w2_user_name
+				staff: Global.config.w2.user_name
 			})
 		};
 
@@ -100,7 +100,7 @@ class W2Request extends HttpRequest {
 		const url = this.CONFIG.BASE_URL + "/user_center/login_check";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
-			staff: Global.config.w2.w2_user_name,
+			staff: Global.config.w2.user_name,
 			header: this._buildHeader()
 		};
 		
@@ -122,13 +122,13 @@ class W2Request extends HttpRequest {
 		let eventTimestamp;
 		if (eventType === "check_in") {
 			eventTimestamp = Time.generateRandomTimestampInRange(
-				Global.config.w2.w2_time_range_check_in_start, 
-				Global.config.w2.w2_time_range_check_in_end
+				Global.config.w2.time_range_check_in_start, 
+				Global.config.w2.time_range_check_in_end
 			);
 		} else if (eventType === "check_out") {
 			eventTimestamp = Time.generateRandomTimestampInRange(
-				Global.config.w2.w2_time_range_check_out_start, 
-				Global.config.w2.w2_time_range_check_out_end
+				Global.config.w2.time_range_check_out_start, 
+				Global.config.w2.time_range_check_out_end
 			);
 		} else {
 			eventTimestamp = Math.floor(Date.now() / 1000);
@@ -200,11 +200,11 @@ class W2Request extends HttpRequest {
 	// 构建请求头
 	static _buildHeader(additionalData = {}) {
 		return {
-			staff: Global.config.w2.w2_user_name,
+			staff: Global.config.w2.user_name,
 			staff_id: 0,
-			oa_ticket: Global.config.w2.w2_token,
+			oa_ticket: Global.config.w2.token,
 			tracer: "|7b0f57ef3ac51|1749259397196",
-			tenant_token: Global.config.w2.w2_tenant_token,
+			tenant_token: Global.config.w2.tenant_token,
 			...additionalData
 		};
 	}
@@ -217,8 +217,8 @@ class W2Request extends HttpRequest {
 
 	static _buildAuthData(additionalData = {}) {
 		return {
-			username: Global.config.w2.w2_user_name,
-			password: Global.config.w2.w2_user_password,
+			username: Global.config.w2.user_name,
+			password: Global.config.w2.user_password,
 			header: {
 				staff: "",
 				staff_id: 0,
@@ -249,26 +249,45 @@ class LSRequest extends HttpRequest {
 			"Content-Type": "application/json;charset=UTF-8"
 		};
 		const data = {
-			username: Global.config.ls.ls_user_name,
-			password: Global.config.ls.ls_user_password
+			username: Global.config.ls.user_name,
+			password: Global.config.ls.user_password
 		};
 
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("login result: ", result);
 		if (result.code === 200) {
-			Global.config.ls.ls_token = result.token;
+			Global.config.ls.token = result.token;
 		} else {
 
 		}
 		return result;
 	}
+	// 获取个人信息
+	static async getInfo() {
+		const url = "http://biaoju.labelvibe.com:8088/prod-api/getInfo";
+
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"Authorization": "Bearer " + Global.config.ls.token,
+			"Cookie": "Admin-Token=" + Global.config.ls.token
+		}
+
+		const result = await this._request("GET", url, headers);
+		if (result.code === 200) {
+			Global.config.ls.user_id = result.user.userId;
+		}
+		this.log.log("getInfo result: ", result);
+		this.log.log("userid: ", result.user.userId);
+		return result;
+	}
+	// 获取项目工作区信息
 	static async getPersonalInformat() {
 		const url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/sub/list";
 
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.ls_token,
-			"Cookie": "Admin-Token=" + Global.config.ls.ls_token
+			"Authorization": "Bearer " + Global.config.ls.token,
+			"Cookie": "Admin-Token=" + Global.config.ls.token
 		}
 
 		const data = {
@@ -281,20 +300,21 @@ class LSRequest extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getPersonalInformat result: ", result);
 		if (result.code === 200) {
-			Global.config.ls.ls_sub_task_id = result.rows[0].subTaskId;
+			Global.config.ls.sub_task_id = result.rows[0].subTaskId;
+			Global.config.ls.task_id = result.rows[0].taskId;
 		} else {
 
 		}
 		return result;
 	}
-	// 日报打卡
-	static async dacCar() {
+	// 填写日报
+	static async fillDailyReport() {
 		const url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/record";
 
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.ls_token,
-			"Cookie": "Admin-Token=" + Global.config.ls.ls_token
+			"Authorization": "Bearer " + Global.config.ls.token,
+			"Cookie": "Admin-Token=" + Global.config.ls.token
 		};
 		const data = {
 			"workCount": [
@@ -309,14 +329,36 @@ class LSRequest extends HttpRequest {
 					"dataCount": "0"
 				}
 			],
-			"account": Global.config.ls.ls_user_name,
+			"account": Global.config.ls.user_name,
 			"recordTime": Time.generateISOTimestamp(undefined, 16, -1),
-			"subTaskId": Global.config.ls.ls_sub_task_id,
+			"subTaskId": Global.config.ls.sub_task_id,
 			"platform": "企鹅标注-在线标注平台",
 			"workHours": "8"
 		}
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("dacCar result: ", result);
+		this.log.log("fillDailyReport result: ", result);
+		return result;
+	}
+	// 获取日报列表
+	static async getDailyReportList() {
+		const url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/person/count";
+
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"Authorization": "Bearer " + Global.config.ls.token,
+			"Cookie": "Admin-Token=" + Global.config.ls.token
+		}
+
+		const data = {
+			"taskId": Global.config.ls.task_id,
+			"pageSize": Global.config.ls.daily_report_page_size,
+			"pageNum": Global.config.ls.daily_report_page_num,
+			"recordDate": "",
+			"userId": Global.config.ls.user_id
+		}
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("getDailyReportList result: ", result);
 		return result;
 	}
 	static async _request(method, url, headers, data) {

@@ -8,10 +8,10 @@
  * Message.init();
  * 
  * // 获取设置值
- * const status = Message.getKey('system_status');
+ * const status = Message.getKey('status');
  * 
  * // 修改设置值
- * Message.setKey('SYSTEM_RUNNING_TIME', 3600);
+ * Message.setKey('running_time', 3600);
  * 
  * // 请求通知权限
  * Message.requestNotificationPermission();

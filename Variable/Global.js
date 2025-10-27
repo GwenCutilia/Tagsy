@@ -1,6 +1,6 @@
 class Global {
 	// w2_user_id: 'lingboweibu(beijing)kejiyouxiangongsi_1101488685013168128',
-	// w2_user_password: 'c3uDfDbKTUICcOoG',
+	// user_password: 'c3uDfDbKTUICcOoG',
 	// w2_email_api_id_account_setting_input: '10008362',
 	// w2_email_api_secret_account_setting_input: '1d0c8fec499fb7057027e09fc4662fb0',
 	// w2_email_api_address_account_setting_input: '1778751963@qq.com', 
@@ -8,51 +8,56 @@ class Global {
 	static config = {
 		cache: {},
 		system: {
-			system_status: false,
-			system_operating_status: false,
-			system_running_time: 0,
+			status: false,
+			operating_status: false,
+			running_time: 0,
 		},
 		w2: {
 			// 登录信息
-			w2_user_name: null,
-			w2_user_password: null,
-			w2_email_api_id: null,
-			w2_email_api_secret: null,
-			w2_email_api_address: null,
-			w2_email_api_pop3_auth_code: null,
+			user_name: null,
+			user_password: null,
+			email_api_id: null,
+			email_api_secret: null,
+			email_api_address: null,
+			email_api_pop3_auth_code: null,
 			// 登录验证码
-			w2_email_api_verify_code: null,
-			w2_personal_informat: null, // 个人信息
-			w2_token: null,
-			w2_tenant_token: null,
+			email_api_verify_code: null,
+			personal_informat: null, // 个人信息
+			token: null,
+			tenant_token: null,
 			// 登录信息
-			w2_login_status: null,
-			w2_check_in_out_status: null, // 考勤打卡状态
-			w2_meal_working_status: null, // 工作时长状态
-			w2_current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
+			login_status: null,
+			check_in_out_status: null, // 考勤打卡状态
+			meal_working_status: null, // 工作时长状态
+			current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
 			// 任务状态
-			w2_token_check_task: false,
+			token_check_task: false,
 			// 模块设置
-			w2_time_range_login_start: "08:50:00",
-			w2_time_range_login_end: "08:50:00",
-			w2_time_range_check_in_start: "08:55:00",
-			w2_time_range_check_in_end: "08:55:00",
-			w2_time_range_meal_start: "12:00:00",
-			w2_time_range_meal_end: "12:00:00",
-			w2_time_range_working_start: "13:30:00",
-			w2_time_range_working_end: "13:30:00",
-			w2_time_range_check_out_start: "18:30:00",
-			w2_time_range_check_out_end: "18:30:00",
-			w2_time_range_login_out_start: "18:35:00",
-			w2_time_range_login_out_end: "18:35:00",
+			time_range_login_start: "08:50",
+			time_range_login_end: "08:50",
+			time_range_check_in_start: "08:55",
+			time_range_check_in_end: "08:55",
+			time_range_meal_start: "12:00",
+			time_range_meal_end: "12:00",
+			time_range_working_start: "13:30",
+			time_range_working_end: "13:30",
+			time_range_check_out_start: "18:30",
+			time_range_check_out_end: "18:30",
+			time_range_login_out_start: "18:35",
+			time_range_login_out_end: "18:35",
 		},
 		ls: {
 			// 账号信息
-			ls_user_name: null,
-			ls_user_password: null,
+			user_name: null,
+			user_password: null,
+			// 日报列表的页数 && 页大小
+			daily_report_page_num: 1,
+			daily_report_page_size: 10,
 			// 登录Token
-			ls_token: null, // 令牌
-			ls_sub_task_id: null, // 工作区编号
+			token: null, // 令牌
+			user_id: null, // 用户编号
+			sub_task_id: null, // 子工作区编号
+			task_id: null, // 工作区编号
 		},
 		setting: {
 			
@@ -81,18 +86,18 @@ class Global {
 		this.setupConfigProxy(); // 初始化代理
 	}
 
-	static traverseConfig(configObj, parentKey = '') {
+	static async traverseConfig(configObj, parentKey = '') {
 		for (const key in configObj) {
 			const fullKey = parentKey ? `${parentKey}.${key}` : key;
 			if (typeof configObj[key] === 'object' && configObj[key] !== null && !Array.isArray(configObj[key])) {
-				this.traverseConfig(configObj[key], fullKey);
+				await this.traverseConfig(configObj[key], fullKey);
 			} else {
-				const storedValue = GM.GetValue(fullKey);
+				const storedValue = await GM.GetValue(fullKey);
 				if (storedValue !== undefined) {
 					configObj[key] = storedValue;
 					this.log.log(`已从存储加载配置: ${fullKey}`);
 				} else {
-					GM.SetValue(fullKey, configObj[key]);
+					await GM.SetValue(fullKey, configObj[key]);
 					this.log.log(`已初始化配置: ${fullKey} = ${configObj[key]}`);
 				}
 			}
@@ -135,7 +140,7 @@ class Global {
 	/**
 	 * 获取指定路径的配置值（可选，用于兼容旧代码）
 	 * @static
-	 * @param {string} path - 配置路径，如 'system.system_status'
+	 * @param {string} path - 配置路径，如 'system.status'
 	 * @returns {any|null} 对应的值，若路径不存在则返回null并记录错误
 	 */
 	static getKey(path) {
@@ -157,7 +162,7 @@ class Global {
 	/**
 	 * 设置指定路径的配置值（可选，用于兼容旧代码）
 	 * @static
-	 * @param {string} path - 配置路径，如 'system.system_status'
+	 * @param {string} path - 配置路径，如 'system.status'
 	 * @param {any} value - 要设置的新值
 	 */
 	static setKey(path, value) {
@@ -178,4 +183,27 @@ class Global {
 		const lastKey = keys[keys.length - 1];
 		obj[lastKey] = value;
 	}
+	// /**
+	//  * 清空配置，将所有值恢复为初始默认值或 null
+	//  * 并同步更新到 GM 存储
+	//  */
+	// static clearConfig() {
+	// 	const clearObj = (obj, parentKey = '') => {
+	// 		for (const key in obj) {
+	// 			const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+	// 			if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key]) && !(obj[key] instanceof Date)) {
+	// 				clearObj(obj[key], fullKey); // 递归清空嵌套对象
+	// 			} else {
+	// 				// 重置值为 null
+	// 				obj[key] = null;
+	// 				GM.SetValue(fullKey, null);
+	// 				this.log.log(`已清空配置: ${fullKey}`);
+	// 			}
+	// 		}
+	// 	};
+
+	// 	clearObj(this.config);
+	// 	this.log.log("全局配置已全部清空");
+	// }
 }

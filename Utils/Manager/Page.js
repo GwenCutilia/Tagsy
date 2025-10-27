@@ -78,7 +78,7 @@ class Index extends Template {
 		}
 		if (DomHelper.exists(this.btnLoadID)) {
 			DomHelper.bySelector(this.btnLoadID).addEventListener("click", async () => {
-				Global.config.system.system_status = false;
+				Global.config.system.status = false;
 				await LoadGlobalAllScripts();
 				Resource.AllLoaded();
 				DomHelper.bySelector(this.loadingStatusValueID).innerText = "已加载";
@@ -86,7 +86,7 @@ class Index extends Template {
 		}
 		if (DomHelper.exists(this.btnUnloadID)) {
 			DomHelper.bySelector(this.btnUnloadID).addEventListener("click", () => {
-				Global.config.system.system_status = false;
+				Global.config.system.status = false;
 				Resource.scriptsNum = 0;
 				Resource.scriptsAdd = 0;
 				// 清空日志等全局单例
@@ -124,7 +124,7 @@ class Index extends Template {
 	async init() {
 		this.loggerShow();
 		// 检查W2运行环境
-		if (Global.config.w2.w2_user_name === null) {
+		if (Global.config.w2.user_name === null) {
 			this.runtimeLog.add("W2账号未填写, 请于设置填写账号信息");
 			this.runtimeLog.add("W2模块已停止运行");
 			// 停止W2模块
@@ -216,8 +216,8 @@ class W2 extends Page {
 			this.calendar_label.innerText = W2.status.unknown;
 			this.calendar_table.innerHTML = "";
 
-			Global.config.w2.w2_login_status = W2.status.not_login;
-			Global.config.w2.w2_token_check_task = false;
+			Global.config.w2.login_status = W2.status.not_login;
+			Global.config.w2.token_check_task = false;
 
 			W2.stopAllTask();
 		});
@@ -283,21 +283,21 @@ class W2 extends Page {
 	}
 	// 每三秒更新一次考勤状态和工作状态
 	async personalStatusTask() {
-		if (Global.config.w2.w2_login_status === W2.status.login_success) {
-			Global.config.w2.w2_personal_informat = await W2Request.getPersonalInformat();
+		if (Global.config.w2.login_status === W2.status.login_success) {
+			Global.config.w2.personal_informat = await W2Request.getPersonalInformat();
 		}
 	}
 	// 登录选项卡的状态显示
 	async loginStatusTask() {
-		this.login_status_label.innerText = Global.config.w2.w2_login_status || "--";
+		this.login_status_label.innerText = Global.config.w2.login_status || "--";
 	}
 	// 考勤打卡选项卡的状态显示
 	async workingStatusTask() {
-		if (Global.config.w2.w2_login_status === W2.status.login_success){
-			if (Global.config.w2.w2_personal_informat === null) {
+		if (Global.config.w2.login_status === W2.status.login_success){
+			if (Global.config.w2.personal_informat === null) {
 				
-			} else if (Global.config.w2.w2_personal_informat.code === 200) {
-				this.check_in_out_label.innerText = W2.workingStatus[Global.config.w2.w2_personal_informat.data.working_status] || W2.status.unknown;
+			} else if (Global.config.w2.personal_informat.code === 200) {
+				this.check_in_out_label.innerText = W2.workingStatus[Global.config.w2.personal_informat.data.working_status] || W2.status.unknown;
 			} else {
 				this.check_in_out_label.innerText = W2.status.unknown;
 			}
@@ -306,11 +306,11 @@ class W2 extends Page {
 		}
 	}
 	async workHourStatusTask() {
-		if (Global.config.w2.w2_login_status === W2.status.login_success) {
-			if (Global.config.w2.w2_personal_informat === null) {
+		if (Global.config.w2.login_status === W2.status.login_success) {
+			if (Global.config.w2.personal_informat === null) {
 
-			} else if (Global.config.w2.w2_personal_informat.code === 200) {
-				this.meal_working_status_label.innerText = W2.workHourStatus[Global.config.w2.w2_personal_informat.data.work_hour_status] || W2.status.unknown;
+			} else if (Global.config.w2.personal_informat.code === 200) {
+				this.meal_working_status_label.innerText = W2.workHourStatus[Global.config.w2.personal_informat.data.work_hour_status] || W2.status.unknown;
 			} else {
 				this.meal_working_status_label.innerText = W2.status.unknown;
 			}
@@ -319,7 +319,7 @@ class W2 extends Page {
 		}
 	}
 	async currentTimeLineTask() {
-		if (Global.config.w2.w2_login_status === W2.status.login_success) {
+		if (Global.config.w2.login_status === W2.status.login_success) {
 			if (TimerScheduler.hasTask(Global.w2_TaskConfig.W2_CHECK_IN_TASK)) {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
 			} else {
@@ -330,7 +330,7 @@ class W2 extends Page {
 				const arrow = this["current_time_line_task_arrow_" + i];
 				const label = this["current_time_line_task_label_" + i];
 				// currentTask的值是currentTaskStatus枚举体中的键值, 由间隔任务currentTask()变更
-				if (label.innerText === Global.config.w2.w2_current_time_line_task_status) {
+				if (label.innerText === Global.config.w2.current_time_line_task_status) {
 					icon.classList.replace("bg-blue-600", "bg-green-600");
 					arrow.classList.replace("border-b-blue-600", "border-b-green-600");
 				} else {
@@ -350,7 +350,7 @@ class W2 extends Page {
 	}
 	async calendarTask() {
 		let result = await W2Request.queryPersonalSchedule();
-		if (Global.config.w2.w2_login_status === W2.status.login_success && result.code === 200) {
+		if (Global.config.w2.login_status === W2.status.login_success && result.code === 200) {
 			// 日历标题实现
 			calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
 			// 按钮逻辑 - 待优化
@@ -435,52 +435,52 @@ class W2 extends Page {
 	static async currentTask() {
 		const taskConfigs = [
 			{
-				start: Global.config.w2.w2_time_range_login_start,
-				end: Global.config.w2.w2_time_range_login_end,
+				start: Global.config.w2.time_range_login_start,
+				end: Global.config.w2.time_range_login_end,
 				action: async () => { 
 					await W2.login() 
 				},
 				name: Global.w2_TaskConfig.W2_LOGIN_TASK
 			},
 			{
-				start: Global.config.w2.w2_time_range_check_in_start,
-				end: Global.config.w2.w2_time_range_check_in_end,
+				start: Global.config.w2.time_range_check_in_start,
+				end: Global.config.w2.time_range_check_in_end,
 				action: async () => { 
 					await W2Request.checkIn();
-					Global.config.w2.w2_current_time_line_task_status = W2.currentTaskStatus.workIn;
+					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.workIn;
 				},
 				name: Global.w2_TaskConfig.W2_CHECK_IN_TASK
 			},
 			{
-				start: Global.config.w2.w2_time_range_meal_start,
-				end: Global.config.w2.w2_time_range_meal_end,
+				start: Global.config.w2.time_range_meal_start,
+				end: Global.config.w2.time_range_meal_end,
 				action: async () => { 
 					await W2Request.meal();
-					Global.config.w2.w2_current_time_line_task_status = W2.currentTaskStatus.meal;
+					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.meal;
 				},
 				name: Global.w2_TaskConfig.W2_MEAL_TASK
 			},
 			{
-				start: Global.config.w2.w2_time_range_working_start,
-				end: Global.config.w2.w2_time_range_working_end,
+				start: Global.config.w2.time_range_working_start,
+				end: Global.config.w2.time_range_working_end,
 				action: async () => { 
 					await W2Request.working();
-					Global.config.w2.w2_current_time_line_task_status = W2.currentTaskStatus.working;
+					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.working;
 				},
 				name: Global.w2_TaskConfig.W2_WORKING_TASK
 			},
 			{
-				start: Global.config.w2.w2_time_range_check_out_start,
-				end: Global.config.w2.w2_time_range_check_out_end,
+				start: Global.config.w2.time_range_check_out_start,
+				end: Global.config.w2.time_range_check_out_end,
 				action: async () => { 
 					await W2Request.checkOut();
-					Global.config.w2.w2_current_time_line_task_status = W2.currentTaskStatus.workOut;
+					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.workOut;
 				},
 				name: Global.w2_TaskConfig.W2_CHECK_OUT_TASK
 			},
 			{
-				start: Global.config.w2.w2_time_range_login_out_start,
-				end: Global.config.w2.w2_time_range_login_out_end,
+				start: Global.config.w2.time_range_login_out_start,
+				end: Global.config.w2.time_range_login_out_end,
 				action: async () => { 
 					await W2Request.loginOut(); 
 				},
@@ -518,7 +518,7 @@ class W2 extends Page {
 	static async isLoginStatus() {
 		let result = await W2Request.loginCheck();
 		if (result.code === 200) {
-			Global.config.w2.w2_token = result.data.token;
+			Global.config.w2.token = result.data.token;
 			return true;
 		} else {
 			return false;
@@ -576,24 +576,24 @@ class W2 extends Page {
 			this.log.error("获取工作状态失败, 请检查是否登录");
 			return false;
 		}
-		loginInformat.loginStatus = Global.config.w2.w2_login_status;
+		loginInformat.loginStatus = Global.config.w2.login_status;
 		loginInformat.workingStatus = getPersonalInformatResult.data.working_status;
 		loginInformat.workHourStatus = getPersonalInformatResult.data.work_hour_status;
 		this.log.debug("登录信息: ", loginInformat);
 		return loginInformat;
 	}
 	static async loginCheck() {
-		Global.config.w2.w2_token_check_task = true; // 开启任务
-		while (Global.config.w2.w2_token_check_task === true) {
+		Global.config.w2.token_check_task = true; // 开启任务
+		while (Global.config.w2.token_check_task === true) {
 			let result = await W2Request.loginCheck();
 			this.log.log("result: ", result);
 			if (result.code === 200) {
-				Global.config.w2.w2_token = result.data.token;
-				Global.config.w2.w2_login_status = W2.status.login_success;
+				Global.config.w2.token = result.data.token;
+				Global.config.w2.login_status = W2.status.login_success;
 			} else {
 				this.log.error("Token失效, 请重新登录");
-				Global.config.w2.w2_token_check_task = false; // 关闭任务
-				Global.config.w2.w2_login_status = W2.status.login_failed;
+				Global.config.w2.token_check_task = false; // 关闭任务
+				Global.config.w2.login_status = W2.status.login_failed;
 			}
 			await System.sleepSeconds(60);
 		}
@@ -601,18 +601,18 @@ class W2 extends Page {
 	// 登录W2
 	static async login() {
 		if (await W2.isLoginStatus()) {
-			Global.config.w2.w2_login_status = W2.status.login_success;
+			Global.config.w2.login_status = W2.status.login_success;
 			this.log.log("W2已登录, 无需重复登录");
 			W2.loginCheck();
 			return;
 		}
 		let result;
 		this.log.log("正在进行登录W2操作...");
-		Global.config.w2.w2_login_status = W2.status.logining;
+		Global.config.w2.login_status = W2.status.logining;
 		result = await W2Request.getVerifyCode(); // 直接返回状态信息
 		this.log.debug("getVerifyCode: ", result);
 		if (result.code !== 200) {
-			Global.config.w2.w2_login_status = W2.status.login_failed;
+			Global.config.w2.login_status = W2.status.login_failed;
 			this.log.error("获取验证码失败, 请检查账户信息");
 			return;
 		}
@@ -620,13 +620,13 @@ class W2 extends Page {
 		await System.sleepSeconds(5);
 		result = await W2Request.getEmailApi();
 		if (result.code !== 200) {
-			Global.config.w2.w2_login_status = W2.status.login_failed;
+			Global.config.w2.login_status = W2.status.login_failed;
 			this.log.error("获取邮件失败, 请检查邮箱API信息");
 			return;
 		}
 		this.log.debug("邮箱API结果: ", result);
-		// Global.config.w2.w2_email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
-		Global.config.w2.w2_email_api_verify_code = "000000";
+		// Global.config.w2.email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
+		Global.config.w2.email_api_verify_code = "000000";
 		this.log.log("正在登录");
 		await W2Request.login();
 		this.log.log("获取心跳");
@@ -642,9 +642,29 @@ class LS extends Page {
 		// this.init();
 		// this.updateUIElement();
 	}
+	// 登录
 	async login() {
 		// 从这里继续, 写ls的登录逻辑
+		if (Global.config.ls.user_name == null && Global.config.ls.user_password === null) {
+			this.log.error("LS用户名或密码为失效");
+		}
+		await LSRequest.login();
+		if (Global.config.ls.sub_task_id === null) {
+			let result = await LSRequest.getPersonalInformat();
+			if (result.code === 200) {
+				this.log.log("填写日报成功");
+			}
+		}
 	}
+	// 填写日报
+	async fillDailyReport() {
+		let result = await LSRequest.fillDailyReport();
+		if (result.code === 200) {
+			this.log.log("填写日报成功, 返回信息: ", result.msg);
+		}
+	}
+	// 日报列表
+
 }
 class Setting extends Page {
 	btn_save_settings = DomHelper.bySelector("#btn_save_settings"); // 保存设置按钮
@@ -692,8 +712,8 @@ class Setting extends Page {
 	bindEvents() {
 		if (DomHelper.exists(this.btn_save_settings)) {
 			this.btn_save_settings.addEventListener("click", async () => {
-				Global.config.w2.w2_user_name = this.w2_user_name_account_setting_input.value;
-				Global.config.w2.w2_user_password = this.w2_user_password_account_setting_input.value;
+				Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
+				Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
 				let result = await W2Request.getVerifyCode();
 				if (result === 200) {
 					this.w2_user_name_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
@@ -709,15 +729,15 @@ class Setting extends Page {
 					this.w2_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					this.w2_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					this.w2_info_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.w2_user_name = null;
-					Global.config.w2.w2_user_password = null;
+					Global.config.w2.user_name = null;
+					Global.config.w2.user_password = null;
 				}
 			});
 		}
 		if (DomHelper.exists(this.w2_user_test_account_setting_button)) {
 			this.w2_user_test_account_setting_button.addEventListener("click", async () => {
-				Global.config.w2.w2_user_name = this.w2_user_name_account_setting_input.value;
-				Global.config.w2.w2_user_password = this.w2_user_password_account_setting_input.value;
+				Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
+				Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
 				let result = await W2Request.getVerifyCode(); // 直接返回状态信息
 				this.log.debug("getVerifyCode: ", result);
 				if (result.code === 200) {
@@ -728,8 +748,8 @@ class Setting extends Page {
 					w2_user_name_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
 					w2_user_password_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
 					w2_error_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.w2_user_name = this.w2_user_name_account_setting_input.value;
-					Global.config.w2.w2_user_password = this.w2_user_password_account_setting_input.value;
+					Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
+					Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
 				} else if (result === 5000) {
 					w2_error_account_setting_message_box.querySelector("span").innerText = "W2账号信息错误";
 					w2_error_account_setting_message_box.classList.remove('hidden');
@@ -738,8 +758,8 @@ class Setting extends Page {
 					w2_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					w2_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					w2_info_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.w2_user_name = null;
-					Global.config.w2.w2_user_password = null;
+					Global.config.w2.user_name = null;
+					Global.config.w2.user_password = null;
 				} else {
 					w2_error_account_setting_message_box.querySelector("span").innerText = "其他未知错误, 请重试";
 					w2_error_account_setting_message_box.classList.remove('hidden');
@@ -748,17 +768,17 @@ class Setting extends Page {
 					w2_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					w2_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					w2_info_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.w2_user_name = null;
-					Global.config.w2.w2_user_password = null;
+					Global.config.w2.user_name = null;
+					Global.config.w2.user_password = null;
 				}
 			});
 		}
 		if (DomHelper.exists(this.w2_email_api_test_account_setting_button)) {
 			this.w2_email_api_test_account_setting_button.addEventListener("click", async () => {
-				Global.config.w2.w2_email_api_id = this.w2_email_api_id_account_setting_input.value;
-				Global.config.w2.w2_email_api_secret = this.w2_email_api_secret_account_setting_input.value;
-				Global.config.w2.w2_email_api_address = this.w2_email_api_address_account_setting_input.value;
-				Global.config.w2.w2_email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
+				Global.config.w2.email_api_id = this.w2_email_api_id_account_setting_input.value;
+				Global.config.w2.email_api_secret = this.w2_email_api_secret_account_setting_input.value;
+				Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
+				Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 				let result = await W2Request.getEmailApi(); // 返回结果
 				if (result.code === 200) {
 					w2_info_account_setting_message_box.querySelector("span").innerText = "W2邮箱API连通性测试无误, 已获取邮箱列表";
@@ -775,10 +795,10 @@ class Setting extends Page {
 					w2_info_account_setting_message_box.classList.remove('hidden');
 					w2_error_account_setting_message_box.classList.add('hidden');
 
-					Global.config.w2.w2_email_api_id = this.w2_email_api_id_account_setting_input.value;
-					Global.config.w2.w2_email_api_secret = this.w2_email_api_secret_account_setting_input.value;
-					Global.config.w2.w2_email_api_address = this.w2_email_api_address_account_setting_input.value;
-					Global.config.w2.w2_email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
+					Global.config.w2.email_api_id = this.w2_email_api_id_account_setting_input.value;
+					Global.config.w2.email_api_secret = this.w2_email_api_secret_account_setting_input.value;
+					Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
+					Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 				} else {
 					w2_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
 
@@ -795,22 +815,21 @@ class Setting extends Page {
 					w2_error_account_setting_message_box.classList.remove('hidden');
 					w2_info_account_setting_message_box.classList.add('hidden');
 
-					Global.config.w2.w2_email_api_id = null;
-					Global.config.w2.w2_email_api_secret = null;
-					Global.config.w2.w2_email_api_address = null;
-					Global.config.w2.w2_email_api_pop3_auth_code = null;
+					Global.config.w2.email_api_id = null;
+					Global.config.w2.email_api_secret = null;
+					Global.config.w2.email_api_address = null;
+					Global.config.w2.email_api_pop3_auth_code = null;
 				}
 			});
 		}
 		this.w2_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
-			// 做一个校验, 格式是否正确
 			// 获取所有时间值
 			const timeFields = [
 				{
 					start: this.w2_time_range_login_start_module_setting_input.value,
 					end: this.w2_time_range_login_end_module_setting_input.value,
-					configStart: 'w2_time_range_login_start',
-					configEnd: 'w2_time_range_login_end',
+					configStart: 'time_range_login_start',
+					configEnd: 'time_range_login_end',
 					fieldName: '登录',
 					startInput: this.w2_time_range_login_start_module_setting_input,
 					endInput: this.w2_time_range_login_end_module_setting_input
@@ -818,8 +837,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_login_out_start_module_setting_input.value,
 					end: this.w2_time_range_login_out_end_module_setting_input.value,
-					configStart: 'w2_time_range_login_out_start',
-					configEnd: 'w2_time_range_login_out_end',
+					configStart: 'time_range_login_out_start',
+					configEnd: 'time_range_login_out_end',
 					fieldName: '退出登录',
 					startInput: this.w2_time_range_login_out_start_module_setting_input,
 					endInput: this.w2_time_range_login_out_end_module_setting_input
@@ -827,8 +846,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_check_in_start_module_setting_input.value,
 					end: this.w2_time_range_check_in_end_module_setting_input.value,
-					configStart: 'w2_time_range_check_in_start',
-					configEnd: 'w2_time_range_check_in_end',
+					configStart: 'time_range_check_in_start',
+					configEnd: 'time_range_check_in_end',
 					fieldName: '上班打卡',
 					startInput: this.w2_time_range_check_in_start_module_setting_input,
 					endInput: this.w2_time_range_check_in_end_module_setting_input
@@ -836,8 +855,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_check_out_start_module_setting_input.value,
 					end: this.w2_time_range_check_out_end_module_setting_input.value,
-					configStart: 'w2_time_range_check_out_start',
-					configEnd: 'w2_time_range_check_out_end',
+					configStart: 'time_range_check_out_start',
+					configEnd: 'time_range_check_out_end',
 					fieldName: '下班打卡',
 					startInput: this.w2_time_range_check_out_start_module_setting_input,
 					endInput: this.w2_time_range_check_out_end_module_setting_input
@@ -845,8 +864,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_meal_start_module_setting_input.value,
 					end: this.w2_time_range_meal_end_module_setting_input.value,
-					configStart: 'w2_time_range_meal_start',
-					configEnd: 'w2_time_range_meal_end',
+					configStart: 'time_range_meal_start',
+					configEnd: 'time_range_meal_end',
 					fieldName: '前往用餐',
 					startInput: this.w2_time_range_meal_start_module_setting_input,
 					endInput: this.w2_time_range_meal_end_module_setting_input
@@ -854,8 +873,8 @@ class Setting extends Page {
 				{
 					start: this.w2_time_range_working_start_module_setting_input.value,
 					end: this.w2_time_range_working_end_module_setting_input.value,
-					configStart: 'w2_time_range_working_start',
-					configEnd: 'w2_time_range_working_end',
+					configStart: 'time_range_working_start',
+					configEnd: 'time_range_working_end',
 					fieldName: '切换标注',
 					startInput: this.w2_time_range_working_start_module_setting_input,
 					endInput: this.w2_time_range_working_end_module_setting_input
@@ -898,15 +917,14 @@ class Setting extends Page {
 			await W2.currentTask();
 		});
 		this.ls_user_test_account_setting_button.addEventListener("click", async () => {
-			Global.config.ls.ls_user_name = this.ls_user_name_account_setting_input.value;
-			Global.config.ls.ls_user_password = this.ls_user_password_account_setting_input.value;
+			Global.config.ls.user_name = this.ls_user_name_account_setting_input.value;
+			Global.config.ls.user_password = this.ls_user_password_account_setting_input.value;
 	
 			let result = await LSRequest.login(); // 返回结果
 			if (result.code === 200) {
 				ls_info_account_setting_message_box.querySelector("span").innerText = "LS连通性测试无误";
 				ls_user_name_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
 				ls_user_password_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-				
 				
 				ls_user_name_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
 				ls_user_password_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
@@ -915,8 +933,8 @@ class Setting extends Page {
 				ls_info_account_setting_message_box.classList.remove('hidden');
 				ls_error_account_setting_message_box.classList.add('hidden');
 
-				Global.config.ls.ls_user_name = this.ls_user_name_account_setting_input.value;
-				Global.config.ls.ls_user_password = this.ls_user_password_account_setting_input.value;
+				Global.config.ls.user_name = this.ls_user_name_account_setting_input.value;
+				Global.config.ls.user_password = this.ls_user_password_account_setting_input.value;
 			} else {
 				ls_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
 
@@ -929,52 +947,52 @@ class Setting extends Page {
 				ls_error_account_setting_message_box.classList.remove('hidden');
 				ls_info_account_setting_message_box.classList.add('hidden');
 
-				Global.config.ls.ls_user_name = null;
-				Global.config.ls.ls_user_password = null;
+				Global.config.ls.user_name = null;
+				Global.config.ls.user_password = null;
 			}
 		})
 	}
 	updateUIElement() {
-		if (Global.config.w2.w2_user_name !== null && Global.config.w2.w2_user_password !== null) {
-			this.w2_user_name_account_setting_input.value = Global.config.w2.w2_user_name;
-			this.w2_user_password_account_setting_input.value = Global.config.w2.w2_user_password;
+		if (Global.config.w2.user_name !== null && Global.config.w2.user_password !== null) {
+			this.w2_user_name_account_setting_input.value = Global.config.w2.user_name;
+			this.w2_user_password_account_setting_input.value = Global.config.w2.user_password;
 		}
-		if (Global.config.w2.w2_email_api_id !== null && 
-			Global.config.w2.w2_email_api_secret !== null &&
-		 	Global.config.w2.w2_email_api_address !== null && 
-		 	Global.config.w2.w2_email_api_pop3_auth_code !== null) {
-			this.w2_email_api_id_account_setting_input.value = Global.config.w2.w2_email_api_id;
-			this.w2_email_api_secret_account_setting_input.value = Global.config.w2.w2_email_api_secret;
-			this.w2_email_api_address_account_setting_input.value = Global.config.w2.w2_email_api_address;
-			this.w2_email_api_pop3_auth_code_account_setting_input.value = Global.config.w2.w2_email_api_pop3_auth_code;
+		if (Global.config.w2.email_api_id !== null && 
+			Global.config.w2.email_api_secret !== null &&
+		 	Global.config.w2.email_api_address !== null && 
+		 	Global.config.w2.email_api_pop3_auth_code !== null) {
+			this.w2_email_api_id_account_setting_input.value = Global.config.w2.email_api_id;
+			this.w2_email_api_secret_account_setting_input.value = Global.config.w2.email_api_secret;
+			this.w2_email_api_address_account_setting_input.value = Global.config.w2.email_api_address;
+			this.w2_email_api_pop3_auth_code_account_setting_input.value = Global.config.w2.email_api_pop3_auth_code;
 		}
-		if (Global.config.w2.w2_time_range_login_start !== null && Global.config.w2.w2_time_range_login_end !== null) {
-			this.w2_time_range_login_start_module_setting_input.value = Global.config.w2.w2_time_range_login_start;
-			this.w2_time_range_login_end_module_setting_input.value = Global.config.w2.w2_time_range_login_end;
+		if (Global.config.w2.time_range_login_start !== null && Global.config.w2.time_range_login_end !== null) {
+			this.w2_time_range_login_start_module_setting_input.value = Global.config.w2.time_range_login_start;
+			this.w2_time_range_login_end_module_setting_input.value = Global.config.w2.time_range_login_end;
 		}
-		if (Global.config.w2.w2_time_range_login_out_start !== null && Global.config.w2.w2_time_range_login_out_end !== null) {
-			this.w2_time_range_login_out_start_module_setting_input.value = Global.config.w2.w2_time_range_login_out_start;
-			this.w2_time_range_login_out_end_module_setting_input.value = Global.config.w2.w2_time_range_login_out_end;
+		if (Global.config.w2.time_range_login_out_start !== null && Global.config.w2.time_range_login_out_end !== null) {
+			this.w2_time_range_login_out_start_module_setting_input.value = Global.config.w2.time_range_login_out_start;
+			this.w2_time_range_login_out_end_module_setting_input.value = Global.config.w2.time_range_login_out_end;
 		}
-		if (Global.config.w2.w2_time_range_check_in_start !== null && Global.config.w2.w2_time_range_check_in_end !== null) {
-			this.w2_time_range_check_in_start_module_setting_input.value = Global.config.w2.w2_time_range_check_in_start;
-			this.w2_time_range_check_in_end_module_setting_input.value = Global.config.w2.w2_time_range_check_in_end;
+		if (Global.config.w2.time_range_check_in_start !== null && Global.config.w2.time_range_check_in_end !== null) {
+			this.w2_time_range_check_in_start_module_setting_input.value = Global.config.w2.time_range_check_in_start;
+			this.w2_time_range_check_in_end_module_setting_input.value = Global.config.w2.time_range_check_in_end;
 		}
-		if (Global.config.w2.w2_time_range_check_out_start !== null && Global.config.w2.w2_time_range_check_out_end !== null) {
-			this.w2_time_range_check_out_start_module_setting_input.value = Global.config.w2.w2_time_range_check_out_start;
-			this.w2_time_range_check_out_end_module_setting_input.value = Global.config.w2.w2_time_range_check_out_end;
+		if (Global.config.w2.time_range_check_out_start !== null && Global.config.w2.time_range_check_out_end !== null) {
+			this.w2_time_range_check_out_start_module_setting_input.value = Global.config.w2.time_range_check_out_start;
+			this.w2_time_range_check_out_end_module_setting_input.value = Global.config.w2.time_range_check_out_end;
 		} 
-		if (Global.config.w2.w2_time_range_meal_start !== null && Global.config.w2.w2_time_range_meal_end !== null) {
-			this.w2_time_range_meal_start_module_setting_input.value = Global.config.w2.w2_time_range_meal_start;
-			this.w2_time_range_meal_end_module_setting_input.value = Global.config.w2.w2_time_range_meal_end;
+		if (Global.config.w2.time_range_meal_start !== null && Global.config.w2.time_range_meal_end !== null) {
+			this.w2_time_range_meal_start_module_setting_input.value = Global.config.w2.time_range_meal_start;
+			this.w2_time_range_meal_end_module_setting_input.value = Global.config.w2.time_range_meal_end;
 		}
-		if (Global.config.w2.w2_time_range_working_start !== null && Global.config.w2.w2_time_range_working_end !== null) {
-			this.w2_time_range_working_start_module_setting_input.value = Global.config.w2.w2_time_range_working_start;
-			this.w2_time_range_working_end_module_setting_input.value = Global.config.w2.w2_time_range_working_end;
+		if (Global.config.w2.time_range_working_start !== null && Global.config.w2.time_range_working_end !== null) {
+			this.w2_time_range_working_start_module_setting_input.value = Global.config.w2.time_range_working_start;
+			this.w2_time_range_working_end_module_setting_input.value = Global.config.w2.time_range_working_end;
 		}
-		if (Global.config.ls.ls_user_name !== null && Global.config.ls.ls_user_password !== null) {
-			this.ls_user_name_account_setting_input.value = Global.config.ls.ls_user_name;
-			this.ls_user_password_account_setting_input.value = Global.config.ls.ls_user_password;
+		if (Global.config.ls.user_name !== null && Global.config.ls.user_password !== null) {
+			this.ls_user_name_account_setting_input.value = Global.config.ls.user_name;
+			this.ls_user_password_account_setting_input.value = Global.config.ls.user_password;
 		}
 	}
 	init() {

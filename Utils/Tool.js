@@ -363,11 +363,7 @@ class HttpRequest {
 				data: data || null,
 				responseType: options.responseType || "json",
 				onload(response) {
-					if (response.status >= 200 && response.status < 300) {
-						resolve(response.response);
-					} else {
-						reject(new Error(`请求失败, 状态码: ${response.status}`));
-					}
+					resolve(response.response);
 				},
 				onerror(error) {
 					reject(error);
@@ -911,44 +907,30 @@ class Time {
 		return utcDate.toISOString();
 	}
 	/**
-	 * 在指定时间区间内随机生成一个时间字符串
-	 * @param {string} startTimeStr - 开始时间字符串 (格式: HH:MM:SS 或 HH:MM)
-	 * @param {string} endTimeStr - 结束时间字符串 (格式: HH:MM:SS 或 HH:MM)
-	 * @param {string} [format='HH:MM:SS'] - 返回时间格式
-	 * - 'HH:MM:SS': 完整格式 (如 "08:50:00")
-	 * - 'HH:MM': 简洁格式 (如 "08:50")
-	 * @returns {string} 在区间内随机生成的时间字符串
+	 * 在指定时间区间内随机生成一个时间字符串（仅小时和分钟）
+	 * @param {string} startTimeStr - 开始时间字符串 (格式: HH:MM)
+	 * @param {string} endTimeStr - 结束时间字符串 (格式: HH:MM)
+	 * @returns {string} 在区间内随机生成的时间字符串 (格式: HH:MM)
 	 * @throws {Error} 时间格式无效或开始时间晚于结束时间时抛出错误
 	 * @example
-	 * // 在 08:50:00 到 18:35:00 之间随机生成时间
-	 * const randomTime1 = Time.getRandomTimeInRange('08:50:00', '18:35:00');
-	 * // 可能返回: "14:23:45"
-	 * 
-	 * // 使用简洁格式返回
-	 * const randomTime2 = Time.getRandomTimeInRange('08:50', '18:35', 'HH:MM');
+	 * // 在 08:50 到 18:35 之间随机生成时间
+	 * const randomTime = Time.getRandomTimeInRange('08:50', '18:35');
 	 * // 可能返回: "14:23"
-	 * 
-	 * // 使用您配置中的变量
-	 * const loginTime = Time.getRandomTimeInRange(
-	 *   Global.config.w2.w2_login_range_start, 
-	 *   Global.config.w2.w2_login_range_end
-	 * );
 	 */
-	static getRandomTimeInRange(startTimeStr, endTimeStr, format = 'HH:MM:SS') {
-		// 时间解析正则表达式 (支持 HH:MM:SS 和 HH:MM 格式)
-		const timeRegex = new RegExp("^(\\d{1,2}):(\\d{1,2})(?::(\\d{1,2}))?$");
-		
-		// 将时间字符串转换为秒数的逻辑
-		const parseTimeToSeconds = (timeStr) => {
+	static getRandomTimeInRange(startTimeStr, endTimeStr) {
+		// 时间解析正则表达式 (仅支持 HH:MM 格式)
+		const timeRegex = new RegExp("^(\\d{1,2}):(\\d{1,2})$");
+
+		// 将时间字符串转换为总分钟数
+		const parseTimeToMinutes = (timeStr) => {
 			const match = timeStr.match(timeRegex);
 			if (!match) {
-				throw new Error(`Time.getRandomTimeInRange: 无效的时间格式 "${timeStr}", 支持格式: HH:MM:SS 或 HH:MM`);
+				throw new Error(`Time.getRandomTimeInRange: 无效的时间格式 "${timeStr}", 支持格式: HH:MM`);
 			}
-			
+
 			const hours = parseInt(match[1]);
 			const minutes = parseInt(match[2]);
-			const seconds = match[3] ? parseInt(match[3]) : 0;
-			
+
 			// 参数验证
 			if (hours < 0 || hours > 23) {
 				throw new Error(`Time.getRandomTimeInRange: 小时必须在 0-23 之间, 当前为 ${hours}`);
@@ -956,133 +938,104 @@ class Time {
 			if (minutes < 0 || minutes > 59) {
 				throw new Error(`Time.getRandomTimeInRange: 分钟必须在 0-59 之间, 当前为 ${minutes}`);
 			}
-			if (seconds < 0 || seconds > 59) {
-				throw new Error(`Time.getRandomTimeInRange: 秒必须在 0-59 之间, 当前为 ${seconds}`);
-			}
-			
-			return hours * 3600 + minutes * 60 + seconds;
+
+			return hours * 60 + minutes;
 		};
-		
-		// 将开始时间和结束时间转换为秒数
-		const startSeconds = parseTimeToSeconds(startTimeStr);
-		const endSeconds = parseTimeToSeconds(endTimeStr);
-		
+
+		// 转换开始和结束时间为分钟
+		const startMinutes = parseTimeToMinutes(startTimeStr);
+		const endMinutes = parseTimeToMinutes(endTimeStr);
+
 		// 验证时间区间有效性
-		if (startSeconds > endSeconds) {
-			throw new Error(`Time.getRandomTimeInRange: 开始时间 "${startTimeStr}" 不能晚于或等于结束时间 "${endTimeStr}"`);
+		if (startMinutes > endMinutes) {
+			throw new Error(`Time.getRandomTimeInRange: 开始时间 "${startTimeStr}" 不能晚于结束时间 "${endTimeStr}"`);
 		}
-		
-		// 在区间内随机生成秒数 (包含边界)
-		const randomSeconds = Math.floor(Math.random() * (endSeconds - startSeconds + 1)) + startSeconds;
-		
-		// 将秒数转换为时间字符串
-		const hours = Math.floor(randomSeconds / 3600);
-		const minutes = Math.floor((randomSeconds % 3600) / 60);
-		const seconds = randomSeconds % 60;
-		
-		const hourStr = this._padZero(hours);
-		const minuteStr = this._padZero(minutes);
-		const secondStr = this._padZero(seconds);
-		
-		// 根据格式返回结果
-		switch (format.toUpperCase()) {
-			case 'HH:MM:SS':
-				return `${hourStr}:${minuteStr}:${secondStr}`;
-			case 'HH:MM':
-				return `${hourStr}:${minuteStr}`;
-			default:
-				throw new Error(`Time.getRandomTimeInRange: 不支持的输出格式 "${format}", 可选格式: HH:MM:SS/HH:MM`);
-		}
+
+		// 在区间内随机生成分钟值（包含边界）
+		const randomMinutes = Math.floor(Math.random() * (endMinutes - startMinutes + 1)) + startMinutes;
+
+		// 转换为小时和分钟
+		const hours = Math.floor(randomMinutes / 60);
+		const minutes = randomMinutes % 60;
+
+		return `${this._padZero(hours)}:${this._padZero(minutes)}`;
 	}
 	/**
-	 * 生成指定时间范围内的随机时间戳
-	 * @param {string} startTime - 开始时间 (格式: HH:MM:SS)
-	 * @param {string} endTime - 结束时间 (格式: HH:MM:SS)
+	 * 生成指定时间范围内的随机时间戳 
+	 * @param {string} startTime - 开始时间 (格式: HH:MM)
+	 * @param {string} endTime - 结束时间 (格式: HH:MM)
 	 * @returns {number} Unix 时间戳 (秒)
 	 */
 	static generateRandomTimestampInRange(startTime, endTime) {
-		// 使用现有的 getRandomTimeInRange 函数生成随机时间字符串
-		const randomTimeStr = Time.getRandomTimeInRange(startTime, endTime, 'HH:MM:SS');
+		// 使用现有的 getRandomTimeInRange 函数生成随机时间字符串 (格式: HH:MM)
+		const randomTimeStr = Time.getRandomTimeInRange(startTime, endTime, 'HH:MM');
 		
-		// 将随机时间转换为当天的时间戳
+		// 将随机时间转换为当天的时间戳 (不含秒)
 		const today = new Date();
-		const [hours, minutes, seconds] = randomTimeStr.split(':').map(Number);
-		today.setHours(hours, minutes, seconds, 0);
+		const [hours, minutes] = randomTimeStr.split(':').map(Number);
+		today.setHours(hours, minutes, 0, 0);
 		
 		return Math.floor(today.getTime() / 1000);
 	};
 }
 
 class TimerScheduler {
-	// 存储所有定时器信息
 	static dailyTasks = new Map();      // 每日任务
 	static intervalTasks = new Map();   // 间隔任务
-	// 主定时器
 	static mainTimer = null;
-	static checkInterval = 500; // 检查间隔(毫秒)
-	
-	// 生成唯一内部ID的计数器
+	static checkInterval = 1000; // 每秒检查一次
 	static timerIdCounter = 0;
 	static log = new Logger("TimerScheduler");
 
-	// 私有构造函数, 防止实例化
 	constructor() {
-		throw new Error('TimerScheduler 是静态类, 不能实例化');
+		throw new Error("TimerScheduler 是静态类, 不能实例化");
 	}
 
-	/**
-	 * 启动主定时器（如果尚未启动）
-	 */
+	// 启动主定时器
 	static startMainTimer() {
 		if (!this.mainTimer) {
 			this.mainTimer = setInterval(() => {
 				this.checkDailyTasks();
 				this.checkIntervalTasks();
 			}, this.checkInterval);
-			this.log.log('主定时器已启动');
+			this.log.log("主定时器已启动");
 		}
 	}
 
-	/**
-	 * 停止主定时器（如果没有任务运行）
-	 */
+	// 若无任务则停止主定时器
 	static stopMainTimerIfNoTasks() {
 		if (this.dailyTasks.size === 0 && this.intervalTasks.size === 0) {
 			if (this.mainTimer) {
 				clearInterval(this.mainTimer);
 				this.mainTimer = null;
-				this.log.log('主定时器已停止（无任务运行）');
+				this.log.log("主定时器已停止（无任务运行）");
 			}
 		}
 	}
 
 	/**
-	 * 检查并执行每日任务
+	 * 检查并执行每日任务 (按小时和分钟)
 	 */
 	static checkDailyTasks() {
 		const now = new Date();
 		const currentHour = now.getHours();
 		const currentMinute = now.getMinutes();
-		const currentSecond = now.getSeconds();
-		
+
 		this.dailyTasks.forEach((taskInfo, taskName) => {
-			// 检查时间是否匹配
-			if (currentHour === taskInfo.hour && 
-				currentMinute === taskInfo.minute && 
-				currentSecond === taskInfo.second) {
-				
-				// 防止在同一秒内重复执行
-				if (!taskInfo.hasRunThisSecond) {
+			// 如果时间匹配
+			if (currentHour === taskInfo.hour && currentMinute === taskInfo.minute) {
+				// 防止同一分钟多次执行
+				if (!taskInfo.hasRunThisMinute) {
 					try {
 						taskInfo.callback();
 					} catch (err) {
 						this.log.error(`每日任务执行错误 (${taskName}):`, err);
 					}
-					taskInfo.hasRunThisSecond = true;
+					taskInfo.hasRunThisMinute = true;
 				}
 			} else {
 				// 时间不匹配时重置标志
-				taskInfo.hasRunThisSecond = false;
+				taskInfo.hasRunThisMinute = false;
 			}
 		});
 	}
@@ -1092,20 +1045,15 @@ class TimerScheduler {
 	 */
 	static checkIntervalTasks() {
 		const now = Date.now();
-		
 		this.intervalTasks.forEach((taskInfo, taskName) => {
-			// 检查是否到达执行时间
 			if (now - taskInfo.lastExecutionTime >= taskInfo.intervalMs) {
 				try {
 					taskInfo.callback(...taskInfo.args);
 				} catch (err) {
 					this.log.error(`间隔任务执行错误 (${taskName}):`, err);
 				}
-				
 				taskInfo.lastExecutionTime = now;
 				taskInfo.executionCount++;
-				
-				// 检查是否达到最大执行次数
 				if (taskInfo.maxCount !== null && taskInfo.executionCount >= taskInfo.maxCount) {
 					this.stopTask(taskName);
 				}
@@ -1114,209 +1062,129 @@ class TimerScheduler {
 	}
 
 	/**
-	 * 每天指定时间点执行任务（支持秒级精度）
-	 * @param {string} timeString - 时间字符串，格式为"HH:MM:SS"或"H:M:S"（如"08:00:00"或"8:5:30"）
-	 * @param {() => void} callback - 到达指定时间时执行的回调函数
-	 * @param {string} taskName - 任务名称, 用于标识和停止任务
-	 * @returns {boolean} 任务是否成功设置
+	 * 每天指定时间点执行任务（按分钟）
+	 * @param {string} timeString - 格式: "HH:MM"
+	 * @param {() => void} callback - 到达时间时执行的回调
+	 * @param {string} taskName - 任务名称
+	 * @returns {boolean}
 	 */
 	static setDailyTask(timeString, callback, taskName) {
-		// 验证时间字符串格式
-		const timeParts = timeString.split(':').map(part => parseInt(part, 10));
-		
-		if (timeParts.length !== 3 || timeParts.some(isNaN)) {
-			throw new Error('无效的时间格式, 请使用"HH:MM:SS"格式');
+		const timeParts = timeString.split(":").map(part => parseInt(part, 10));
+		if (timeParts.length !== 2 || timeParts.some(isNaN)) {
+			throw new Error('无效的时间格式, 请使用 "HH:MM"');
 		}
-		
-		const [hour, minute, second] = timeParts;
-		
-		// 验证时间范围
-		if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
-			throw new Error('无效的时间参数, 小时应在0-23之间, 分钟和秒应在0-59之间');
+		const [hour, minute] = timeParts;
+		if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+			throw new Error("无效的时间参数, 小时应在0-23之间, 分钟应在0-59之间");
 		}
-		
-		if (!taskName || typeof taskName !== 'string') {
-			throw new Error('任务名称必须是非空字符串');
+		if (!taskName || typeof taskName !== "string") {
+			throw new Error("任务名称必须是非空字符串");
 		}
-		
-		// 如果已存在同名任务，先停止它
 		if (this.dailyTasks.has(taskName)) {
 			this.stopTask(taskName);
 		}
-		
 		const internalId = `daily_${TimerScheduler.timerIdCounter++}`;
 		this.dailyTasks.set(taskName, {
-			internalId: internalId,
-			type: 'daily',
+			internalId,
+			type: "daily",
 			hour,
 			minute,
-			second,
 			timeString,
 			name: taskName,
-			callback: callback,
-			hasRunThisSecond: false
+			callback,
+			hasRunThisMinute: false
 		});
-		
-		// 确保主定时器运行
 		this.startMainTimer();
-		
 		this.log.log(`每日任务已设置: ${taskName} (${timeString})`);
 		return true;
 	}
 
-	/**
-	 * 按固定间隔执行任务
-	 * @param {(...args: any[]) => void} taskFn - 要执行的任务函数
-	 * @param {number} intervalMs - 任务执行间隔, 单位毫秒
-	 * @param {string} taskName - 任务名称, 用于标识和停止任务
-	 * @param {number|null} [maxCount=null] - 最大执行次数, null表示无限执行
-	 * @param {...any} args - 传递给任务函数的参数
-	 * @returns {boolean} 任务是否成功设置
-	 */
+	// 设置间隔任务
 	static setIntervalTask(taskFn, intervalMs, taskName, maxCount = null, ...args) {
-		if (intervalMs <= 0) {
-			throw new Error('时间间隔必须大于0');
-		}
-		
-		if (!taskName || typeof taskName !== 'string') {
-			throw new Error('任务名称必须是非空字符串');
-		}
-		
-		// 如果已存在同名任务，先停止它
-		if (this.intervalTasks.has(taskName)) {
-			this.stopTask(taskName);
-		}
-		
+		if (intervalMs <= 0) throw new Error("时间间隔必须大于0");
+		if (!taskName || typeof taskName !== "string") throw new Error("任务名称必须是非空字符串");
+		if (this.intervalTasks.has(taskName)) this.stopTask(taskName);
+
 		const internalId = `interval_${TimerScheduler.timerIdCounter++}`;
 		this.intervalTasks.set(taskName, {
-			internalId: internalId,
-			type: 'interval',
+			internalId,
+			type: "interval",
 			intervalMs,
 			maxCount,
 			name: taskName,
 			callback: taskFn,
-			args: args,
+			args,
 			lastExecutionTime: Date.now(),
 			executionCount: 0
 		});
-		
-		// 确保主定时器运行
 		this.startMainTimer();
-		
 		this.log.log(`间隔任务已设置: ${taskName} (${intervalMs}ms)`);
 		return true;
 	}
 
-	/**
-	 * 停止指定的定时任务
-	 * @param {string} taskName - 任务名称
-	 * @returns {boolean} 任务是否成功停止
-	 */
+	// 停止单个任务
 	static stopTask(taskName) {
 		let stopped = false;
-		
-		// 尝试从每日任务中停止
 		if (this.dailyTasks.has(taskName)) {
 			this.dailyTasks.delete(taskName);
 			this.log.log(`每日任务已停止: ${taskName}`);
 			stopped = true;
 		}
-		
-		// 尝试从间隔任务中停止
 		if (this.intervalTasks.has(taskName)) {
 			this.intervalTasks.delete(taskName);
 			this.log.log(`间隔任务已停止: ${taskName}`);
 			stopped = true;
 		}
-		
 		if (!stopped) {
 			this.log.warn(`找不到名称为 "${taskName}" 的任务`);
 			return false;
 		}
-		
-		// 检查是否需要停止主定时器
 		this.stopMainTimerIfNoTasks();
-		
 		return true;
 	}
 
-	/**
-	 * 停止所有定时任务
-	 * @returns {number} 停止的任务数量
-	 */
+	// 停止所有任务
 	static stopAllTasks() {
 		const dailyCount = this.dailyTasks.size;
 		const intervalCount = this.intervalTasks.size;
 		const totalCount = dailyCount + intervalCount;
-		
 		this.dailyTasks.clear();
 		this.intervalTasks.clear();
-		
 		if (this.mainTimer) {
 			clearInterval(this.mainTimer);
 			this.mainTimer = null;
 		}
-		
-		this.log.log(`所有定时任务已停止, 共 ${totalCount} 个任务 (${dailyCount}个每日任务, ${intervalCount}个间隔任务)`);
+		this.log.log(`所有定时任务已停止, 共 ${totalCount} 个任务`);
 		return totalCount;
 	}
 
-	/**
-	 * 检查指定任务是否存在且正在运行
-	 * @param {string} taskName - 任务名称
-	 * @returns {boolean} 任务是否存在
-	 */
 	static hasTask(taskName) {
 		return this.dailyTasks.has(taskName) || this.intervalTasks.has(taskName);
 	}
 
-	/**
-	 * 获取指定任务的信息
-	 * @param {string} taskName - 任务名称
-	 * @returns {Object|null} 任务信息或null
-	 */
 	static getTaskInfo(taskName) {
-		let timerInfo = this.dailyTasks.get(taskName) || this.intervalTasks.get(taskName);
-		if (!timerInfo) {
-			return null;
-		}
-		
-		// 返回副本，避免外部修改
-		const info = { ...timerInfo };
-		// 移除回调函数，避免暴露
-		delete info.callback;
-		delete info.args;
-		
-		return info;
+		const info = this.dailyTasks.get(taskName) || this.intervalTasks.get(taskName);
+		if (!info) return null;
+		const copy = { ...info };
+		delete copy.callback;
+		delete copy.args;
+		return copy;
 	}
 
-	/**
-	 * 获取当前所有活跃的定时任务名称列表
-	 * @returns {string[]} 所有任务名称的数组
-	 */
 	static getActiveTaskNames() {
-		return [
-			...Array.from(this.dailyTasks.keys()),
-			...Array.from(this.intervalTasks.keys())
-		];
+		return [...this.dailyTasks.keys(), ...this.intervalTasks.keys()];
 	}
 
-	/**
-	 * 获取当前所有活跃的定时任务信息
-	 * @returns {Array} 所有任务信息的数组
-	 */
 	static getActiveTasks() {
-		const dailyTasks = Array.from(this.dailyTasks.entries()).map(([name, info]) => ({
+		const daily = Array.from(this.dailyTasks.entries()).map(([name, info]) => ({
 			name,
 			type: info.type,
 			hour: info.hour,
 			minute: info.minute,
-			second: info.second,
 			timeString: info.timeString,
 			internalId: info.internalId
 		}));
-		
-		const intervalTasks = Array.from(this.intervalTasks.entries()).map(([name, info]) => ({
+		const interval = Array.from(this.intervalTasks.entries()).map(([name, info]) => ({
 			name,
 			type: info.type,
 			intervalMs: info.intervalMs,
@@ -1324,14 +1192,9 @@ class TimerScheduler {
 			executionCount: info.executionCount,
 			internalId: info.internalId
 		}));
-		
-		return [...dailyTasks, ...intervalTasks];
+		return [...daily, ...interval];
 	}
 
-	/**
-	 * 获取任务统计信息
-	 * @returns {Object} 任务统计
-	 */
 	static getStats() {
 		return {
 			dailyTasks: this.dailyTasks.size,

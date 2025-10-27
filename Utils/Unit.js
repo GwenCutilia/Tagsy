@@ -5,7 +5,7 @@ class Resource {
 	static log = new Logger("Resource");
 	static AllLoaded() {
 		if (this.scriptsNum && this.scriptsAdd && this.scriptsAdd === this.scriptsNum) {
-			Global.config.system.system_status = true;
+			Global.config.system.status = true;
 			this.log.log("资源加载成功");
 			return true;
 		} else {
