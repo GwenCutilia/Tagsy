@@ -5,6 +5,7 @@ class Page {
 	static routes = {
 		"Index.html": () => new Index(),
 		"W2.html": () => new W2(),
+		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
 		// 可添加其他页面路由
 	};
@@ -35,14 +36,14 @@ class Page {
 	}
 }
 class Template {
-    static log = new Logger("Template");
-    static async init() {
+	static log = new Logger("Template");
+	static async init() {
 		if (!this.isTemplatePage()) {
-            return;
-        }
-        await Template.loadTask();
-        this.log.log('Template初始化完成');
-    }
+			return;
+		}
+		await Template.loadTask();
+		this.log.log('Template初始化完成');
+	}
 	static async loadTask() {
 		await W2Request.getLoginPage();
 		await W2.login();
@@ -51,11 +52,13 @@ class Template {
 		// 添加一个重新登录的按钮监听事件
 		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
 		await W2.currentTask();
+		await LS.login();
+		await LS.currentTask();
 		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
-    static isTemplatePage() {
-        return location.pathname.includes('/Template/');
-    }
+	static isTemplatePage() {
+		return location.pathname.includes('/Template/');
+	}
 }
 class Index extends Template {
 	clearID = "#clear_log_btn"; // 清空日志按钮
@@ -194,9 +197,83 @@ class W2 extends Page {
 
 	constructor() {
 		super();
-		this.bindEvents();
 		this.init();
+		this.bindEvents();
 		this.updateUIElement();
+	}
+
+	async init() {
+		this.tooltip = new ToolTip();
+		// await W2.login();
+		// 为每日任务写单独的函数出来
+		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
+		// 添加一个重新登录的按钮监听事件
+		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
+		// this.currentTask();
+		// 其他的html变量统一
+	}
+	// 登录W2
+	static async login() {
+		if (await W2.isLoginStatus()) {
+			Global.config.w2.login_status = W2.status.login_success;
+			this.log.log("W2已登录, 无需重复登录");
+			W2.loginCheck();
+			return;
+		}
+		let result;
+		this.log.log("正在进行登录W2操作...");
+		Global.config.w2.login_status = W2.status.logining;
+		result = await W2Request.getVerifyCode(); // 直接返回状态信息
+		this.log.debug("getVerifyCode: ", result);
+		if (result.code !== 200) {
+			Global.config.w2.login_status = W2.status.login_failed;
+			this.log.error("获取验证码失败, 请检查账户信息");
+			return;
+		}
+		this.log.log("验证码已发送, 等待接收");
+		await System.sleepSeconds(5);
+		result = await W2Request.getEmailApi();
+		if (result.code !== 200) {
+			Global.config.w2.login_status = W2.status.login_failed;
+			this.log.error("获取邮件失败, 请检查邮箱API信息");
+			return;
+		}
+		this.log.debug("邮箱API结果: ", result);
+		// Global.config.w2.email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
+		Global.config.w2.email_api_verify_code = "000000";
+		this.log.log("正在登录");
+		await W2Request.login();
+		this.log.log("获取心跳");
+		await W2Request.loginCheck();
+		W2.loginCheck();
+		this.log.log("心跳正常, 登录成功");
+	}
+	// 查询是否是登录状态
+	static async isLoginStatus() {
+		let result = await W2Request.loginCheck();
+		if (result.code === 200) {
+			Global.config.w2.token = result.data.token;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// 心跳
+	static async loginCheck() {
+		Global.config.w2.token_check_task = true; // 开启任务
+		while (Global.config.w2.token_check_task === true) {
+			let result = await W2Request.loginCheck();
+			this.log.log("result: ", result);
+			if (result.code === 200) {
+				Global.config.w2.token = result.data.token;
+				Global.config.w2.login_status = W2.status.login_success;
+			} else {
+				this.log.error("Token失效, 请重新登录");
+				Global.config.w2.token_check_task = false; // 关闭任务
+				Global.config.w2.login_status = W2.status.login_failed;
+			}
+			await System.sleepSeconds(60);
+		}
 	}
 	bindEvents() {
 		login_btn.addEventListener("click", async () => {
@@ -235,7 +312,7 @@ class W2 extends Page {
 		this.check_in_btn.addEventListener("click", async () => {
 			await W2Request.checkIn();
 		});
-		// 考勤打卡状态 -> 签退按钮
+		// 考勤打卡状态 -> 签出按钮
 		this.check_out_btn.addEventListener("click", async () => {
 			await W2Request.checkOut();
 		});
@@ -267,13 +344,36 @@ class W2 extends Page {
 		TimerScheduler.setIntervalTask(async () => { this.currentTimeLineTask() }, 3000, "W2_CURRENT_TIME_LINE_TASK");
 		TimerScheduler.setIntervalTask(async () => { this.calendarTask() }, 10 * 1000, "W2_CALENDAR_TASK");
 	}
+	// 获取工作信息
+	static async getPersonalInformat() {
+		let loginInformat = {
+			loginStatus: null,
+			workingStatus: null,
+			workHourStatus: null
+		};
+		let getTokenResult = await W2Request.login();
+		if (getTokenResult.code !== 200) {
+			this.log.error("获取登录状态失败, 请检查是否登录");
+			return false;
+		}
+		let getPersonalInformatResult = await W2Request.getPersonalInformat();
+		if (getPersonalInformatResult.code !== 200) {
+			this.log.error("获取工作状态失败, 请检查是否登录");
+			return false;
+		}
+		loginInformat.loginStatus = Global.config.w2.login_status;
+		loginInformat.workingStatus = getPersonalInformatResult.data.working_status;
+		loginInformat.workHourStatus = getPersonalInformatResult.data.work_hour_status;
+		this.log.debug("登录信息: ", loginInformat);
+		return loginInformat;
+	}
 	// 常驻的提示栏
 	async addTooltipMessage() {
 		this.tooltip.addTooltip(this.login_btn, "进行登录");
 		this.tooltip.addTooltip(this.relogin_btn, "重新进行登录");
 		this.tooltip.addTooltip(this.login_out_btn, "进行手动退出登录");
 		this.tooltip.addTooltip(this.check_in_btn, "签到(按设置中的上班时间段签到)");
-		this.tooltip.addTooltip(this.check_out_btn, "签退(按设置中的下班时间段签退)");
+		this.tooltip.addTooltip(this.check_out_btn, "签出(按设置中的下班时间段签出)");
 		this.tooltip.addTooltip(this.meal_working_status_btn, "切换状态(可能会延迟几秒)");
 		this.tooltip.addTooltip(this.current_time_line_task_turn_on_off_i, "亮起代表任务正常运行");
 		this.tooltip.addTooltip(this.current_time_line_task_start_btn, "启动任务");
@@ -348,6 +448,43 @@ class W2 extends Page {
 			}
 		}
 	}
+	// 判断今天是否是休息日
+	static async isTodayOff() {
+		// 记录之前通过其他函数更改的月份
+		let saveMonth = Global.value.month;
+		Global.value.month = Time.getCurrentMonth();
+		// 获取当前月份的排班数据
+		const scheduleResult = await W2Request.queryPersonalSchedule();
+		// 恢复之前记录的月份
+		Global.value.month = saveMonth;
+		// 检查返回数据是否有效
+		if (!scheduleResult || !scheduleResult.data || 
+			!scheduleResult.data.detail_data_list || 
+			scheduleResult.data.detail_data_list.length === 0) {
+			this.log.warn("无法获取排班数据");
+			return false;
+		}
+
+		const detailData = scheduleResult.data.detail_data_list[0];
+		const scheduleInfos = detailData.schedule_infos;
+		
+		// 获取今天的日期字符串（格式：YYYY-MM-DD）
+		const today = Time.getCurrentDate('default');
+		
+		// 检查今天是否有排班信息
+		if (!scheduleInfos[today]) {
+			this.log.warn(`今天 ${today} 没有排班信息`);
+			return false;
+		}
+
+		const todaySchedule = scheduleInfos[today];
+		
+		// 判断是否是休息日
+		const isOff = todaySchedule.schedule_conf_name === "休息";
+		
+		return isOff;
+	}
+	// 我的排班日历
 	async calendarTask() {
 		let result = await W2Request.queryPersonalSchedule();
 		if (Global.config.w2.login_status === W2.status.login_success && result.code === 200) {
@@ -419,17 +556,6 @@ class W2 extends Page {
 			calendar_label.innerText = W2.status.unknown;
 			calendar_table.innerHTML = "";
 		}
-	}
-
-	async init() {
-		this.tooltip = new ToolTip();
-		// await W2.login();
-		// 为每日任务写单独的函数出来
-		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
-		// 添加一个重新登录的按钮监听事件
-		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
-		// this.currentTask();
-		// 其他的html变量统一
 	}
 	// 定时任务
 	static async currentTask() {
@@ -510,161 +636,189 @@ class W2 extends Page {
 			this.log.log("未登录, 定时任务已停止");
 		}
 	}
+	// 停止所有W2时间线任务
 	static async stopAllTask() {
 		Object.values(Global.w2_TaskConfig).forEach(taskName => {
 			TimerScheduler.stopTask(taskName);
 		});
 	}
-	static async isLoginStatus() {
-		let result = await W2Request.loginCheck();
-		if (result.code === 200) {
-			Global.config.w2.token = result.data.token;
-			return true;
-		} else {
-			return false;
-		}
-	}
-	// 判断今天是否是休息日
-	static async isTodayOff() {
-		// 记录之前通过其他函数更改的月份
-		let saveMonth = Global.value.month;
-		Global.value.month = Time.getCurrentMonth();
-		// 获取当前月份的排班数据
-		const scheduleResult = await W2Request.queryPersonalSchedule();
-		// 恢复之前记录的月份
-		Global.value.month = saveMonth;
-		// 检查返回数据是否有效
-		if (!scheduleResult || !scheduleResult.data || 
-			!scheduleResult.data.detail_data_list || 
-			scheduleResult.data.detail_data_list.length === 0) {
-			this.log.warn("无法获取排班数据");
-			return false;
-		}
 
-		const detailData = scheduleResult.data.detail_data_list[0];
-		const scheduleInfos = detailData.schedule_infos;
-		
-		// 获取今天的日期字符串（格式：YYYY-MM-DD）
-		const today = Time.getCurrentDate('default');
-		
-		// 检查今天是否有排班信息
-		if (!scheduleInfos[today]) {
-			this.log.warn(`今天 ${today} 没有排班信息`);
-			return false;
-		}
-
-		const todaySchedule = scheduleInfos[today];
-		
-		// 判断是否是休息日
-		const isOff = todaySchedule.schedule_conf_name === "休息";
-		
-		return isOff;
-	}
-	static async getPersonalInformat() {
-		let loginInformat = {
-			loginStatus: null,
-			workingStatus: null,
-			workHourStatus: null
-		};
-		let getTokenResult = await W2Request.login();
-		if (getTokenResult.code !== 200) {
-			this.log.error("获取登录状态失败, 请检查是否登录");
-			return false;
-		}
-		let getPersonalInformatResult = await W2Request.getPersonalInformat();
-		if (getPersonalInformatResult.code !== 200) {
-			this.log.error("获取工作状态失败, 请检查是否登录");
-			return false;
-		}
-		loginInformat.loginStatus = Global.config.w2.login_status;
-		loginInformat.workingStatus = getPersonalInformatResult.data.working_status;
-		loginInformat.workHourStatus = getPersonalInformatResult.data.work_hour_status;
-		this.log.debug("登录信息: ", loginInformat);
-		return loginInformat;
-	}
-	static async loginCheck() {
-		Global.config.w2.token_check_task = true; // 开启任务
-		while (Global.config.w2.token_check_task === true) {
-			let result = await W2Request.loginCheck();
-			this.log.log("result: ", result);
-			if (result.code === 200) {
-				Global.config.w2.token = result.data.token;
-				Global.config.w2.login_status = W2.status.login_success;
-			} else {
-				this.log.error("Token失效, 请重新登录");
-				Global.config.w2.token_check_task = false; // 关闭任务
-				Global.config.w2.login_status = W2.status.login_failed;
-			}
-			await System.sleepSeconds(60);
-		}
-	}
-	// 登录W2
-	static async login() {
-		if (await W2.isLoginStatus()) {
-			Global.config.w2.login_status = W2.status.login_success;
-			this.log.log("W2已登录, 无需重复登录");
-			W2.loginCheck();
-			return;
-		}
-		let result;
-		this.log.log("正在进行登录W2操作...");
-		Global.config.w2.login_status = W2.status.logining;
-		result = await W2Request.getVerifyCode(); // 直接返回状态信息
-		this.log.debug("getVerifyCode: ", result);
-		if (result.code !== 200) {
-			Global.config.w2.login_status = W2.status.login_failed;
-			this.log.error("获取验证码失败, 请检查账户信息");
-			return;
-		}
-		this.log.log("验证码已发送, 等待接收");
-		await System.sleepSeconds(5);
-		result = await W2Request.getEmailApi();
-		if (result.code !== 200) {
-			Global.config.w2.login_status = W2.status.login_failed;
-			this.log.error("获取邮件失败, 请检查邮箱API信息");
-			return;
-		}
-		this.log.debug("邮箱API结果: ", result);
-		// Global.config.w2.email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
-		Global.config.w2.email_api_verify_code = "000000";
-		this.log.log("正在登录");
-		await W2Request.login();
-		this.log.log("获取心跳");
-		await W2Request.loginCheck();
-		W2.loginCheck();
-		this.log.log("心跳正常, 登录成功");
-	}
 }
 class LS extends Page {
+	check_in_out_label = DomHelper.bySelector("#check_in_out_label"); // 签到签出标签
+	daily_report_list_label = DomHelper.bySelector("#daily_report_list_label"); // 日报列表标题
+	daily_report_list_table = DomHelper.bySelector("#daily_report_list_table"); // 日报列表表格
+
+	static status = {
+		login_success: "登录成功",
+		login_failed: "登录失败",
+		not_loginfill_daily_report: "未打卡",
+		already_fill_daily_report: "已打卡",
+		failed_fill_daily_report: "打卡失败", // 打卡失败
+		unknown: "--"
+	};
+
 	constructor() {
 		super();
 		// this.bindEvents();
-		// this.init();
-		// this.updateUIElement();
+		this.init();
+		this.updateUIElement();
+	}
+	async init() {
+		
 	}
 	// 登录
-	async login() {
+	static async login() {
 		// 从这里继续, 写ls的登录逻辑
 		if (Global.config.ls.user_name == null && Global.config.ls.user_password === null) {
 			this.log.error("LS用户名或密码为失效");
+			Global.config.ls.login_status = LS.status.login_failed;
+			return;
 		}
-		await LSRequest.login();
+		const result = await LSRequest.login();
+		if (result.code === 200) {
+			this.log.log("LS登录成功");
+			Global.config.ls.login_status = LS.status.login_success;
+		} else {
+			this.log.error("LS登录失败");
+			Global.config.ls.login_status = LS.status.login_failed;
+		}
 		if (Global.config.ls.sub_task_id === null) {
 			let result = await LSRequest.getPersonalInformat();
 			if (result.code === 200) {
-				this.log.log("填写日报成功");
+				this.log.log("获取项目工作区信息成功");
+			} else {
+				this.log.error("LS -> login() -> 获取项目工作区信息失败");
+			}
+		}
+		if (Global.config.ls.user_id === null || Global.config.ls.task_id === null) {
+			let result = await LSRequest.getInfo();
+			if (result.code === 200) {
+				this.log.log("获取个人信息成功");
+			} else {
+				this.log.error("LS -> login() -> 获取个人信息失败");
 			}
 		}
 	}
+	// 心跳 如果LS的掉线了再做
+	static async loginCheck() {
+		
+	}
 	// 填写日报
-	async fillDailyReport() {
+	static async fillDailyReport() {
 		let result = await LSRequest.fillDailyReport();
 		if (result.code === 200) {
 			this.log.log("填写日报成功, 返回信息: ", result.msg);
+			Global.config.ls.fill_daily_report_status = LS.status.already_fill_daily_report;
+		} else {
+			Global.config.ls.fill_daily_report_status = LS.status.failed_fill_daily_report;
 		}
 	}
+	// 刷新UI
+	async updateUIElement() {
+		// 登录状态UI
+		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 3000, Global.ls_TaskConfig.LS_LOGIN_STATUS_TASK);
+		// 打卡任务UI
+		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 3000, Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_STATUS_TASK);
+		// 日报列表UI
+		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 10000, Global.ls_TaskConfig.LS_DAILY_REPORT_LIST_TASK);
+	}
+	// 登录状态刷新
+	async loginStatus() {
+		this.check_in_out_label.innerText = Global.config.ls.login_status;
+	}
+	// 日报打卡状态
+	async fillDailyReportStatus() {
+		// 如果检测到当天的记录, 就更新打卡成功
+		this.check_in_out_label.innerText = LS.status.unknown;
+		if (Global.config.ls.fill_daily_report_status === LS.status.already_fill_daily_report) {
+			this.check_in_out_label.innerText = Global.config.ls.fill_daily_report_status;
+		} else if (Global.config.ls.fill_daily_report_status === LS.status.failed_fill_daily_report) {
+			this.check_in_out_label.innerText = Global.config.ls.failed_fill_daily_report;
+		} else {
+			this.check_in_out_label.innerText = LS.status.unknown;
+		}
+	}
+	// 清除打卡状态
+	async clearDailyReportStatus() {
+		Global.config.ls.login_status = LS.status.unknown;
+		Global.config.ls.fill_daily_report_status = LS.status.unknown;
+	}
+	// 定时任务
+	static async currentTask() {
+		// TimerScheduler.setDailyTask(async () => { await LS.login() }, "08:00", Global.ls_TaskConfig.LS_LOGIN_TASK);
+		// TimerScheduler.setDailyTask(async () => { await LS.fillDailyReport() }, Time.generateRandomTimestampInRange("17:00", "17:50"), Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_TASK);
+		// TimerScheduler.setDailyTask(async () => { await LS.clearDailyReportStatus() }, Time.generateRandomTimestampInRange("18:50", "18:50"), Global.ls_TaskConfig.LS_CLEAR_DAILY_REPORT_STATUS_TASK);
+	}
 	// 日报列表
+	async dailyReportList() {
+		let result = await LSRequest.getDailyReportList();
+		this.daily_report_list_table.innerHTML = '';
+		if (result.code === 200) {
+			result.rows.forEach(item => {
+				const date = item.recordTime.split('T')[0];
+				const hours = Math.floor(item.workHours);
+				const minutes = Math.round((item.workHours - hours) * 60);
+				// 创建单条记录容器
+				const recordDiv = document.createElement('div');
+				recordDiv.className = 'flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100';
+				// 时间
+				const timeDiv = document.createElement('div');
+				timeDiv.className = 'flex flex-col';
+				const timeLabel = document.createElement('span');
+				timeLabel.className = 'text-gray-500 text-xs';
+				timeLabel.textContent = '时间';
+				const timeValue = document.createElement('span');
+				timeValue.className = 'text-base font-semibold text-gray-800';
+				timeValue.textContent = date;
+				timeDiv.appendChild(timeLabel);
+				timeDiv.appendChild(timeValue);
+				// 标注数据量
+				const labelDiv = document.createElement('div');
+				labelDiv.className = 'flex flex-col text-center';
+				const labelLabel = document.createElement('span');
+				labelLabel.className = 'text-gray-500 text-xs';
+				labelLabel.textContent = '标注数据量';
+				const labelValue = document.createElement('span');
+				labelValue.className = 'text-green-600 font-semibold text-base';
+				labelValue.textContent = item.labelCount;
+				labelDiv.appendChild(labelLabel);
+				labelDiv.appendChild(labelValue);
 
+				// 质检数据量
+				const checkDiv = document.createElement('div');
+				checkDiv.className = 'flex flex-col text-center';
+				const checkLabel = document.createElement('span');
+				checkLabel.className = 'text-gray-500 text-xs';
+				checkLabel.textContent = '质检数据量';
+				const checkValue = document.createElement('span');
+				checkValue.className = 'text-blue-600 font-semibold text-base';
+				checkValue.textContent = item.checkCount;
+				checkDiv.appendChild(checkLabel);
+				checkDiv.appendChild(checkValue);
+
+				// 工作时长
+				const workDiv = document.createElement('div');
+				workDiv.className = 'flex flex-col text-center';
+				const workLabel = document.createElement('span');
+				workLabel.className = 'text-gray-500 text-xs';
+				workLabel.textContent = '工作时长';
+				const workValue = document.createElement('span');
+				workValue.className = 'text-gray-800 font-semibold text-base';
+				workValue.textContent = `${hours}h ${minutes}m`;
+				workDiv.appendChild(workLabel);
+				workDiv.appendChild(workValue);
+				// 组合所有子元素
+				recordDiv.appendChild(timeDiv);
+				recordDiv.appendChild(labelDiv);
+				recordDiv.appendChild(checkDiv);
+				recordDiv.appendChild(workDiv);
+
+				// 添加到容器
+				this.daily_report_list_table.appendChild(recordDiv);
+			})
+		}
+	}
 }
 class Setting extends Page {
 	btn_save_settings = DomHelper.bySelector("#btn_save_settings"); // 保存设置按钮

@@ -52,12 +52,15 @@ class Global {
 			user_password: null,
 			// 日报列表的页数 && 页大小
 			daily_report_page_num: 1,
-			daily_report_page_size: 10,
-			// 登录Token
+			daily_report_page_size: 3,
+			// 登录状态
+			login_status: null,
+			fill_daily_report_status: null, // 日报打卡状态
+			// cookie缓存
 			token: null, // 令牌
 			user_id: null, // 用户编号
-			sub_task_id: null, // 子工作区编号
 			task_id: null, // 工作区编号
+			sub_task_id: null, // 子工作区编号
 		},
 		setting: {
 			
@@ -79,6 +82,14 @@ class Global {
 		W2_CHECK_OUT_TASK: "W2_CHECK_OUT_TASK",
 		W2_LOGIN_OUT_TASK: "W2_LOGIN_OUT_TASK",
 	}
+	static ls_TaskConfig = {
+		LS_LOGIN_STATUS_TASK: "LS_LOGIN_STATUS_TASK",
+		LS_FILL_DAILY_REPORT_STATUS_TASK: "LS_FILL_DAILY_REPORT_STATUS_TASK",
+		LS_CLEAR_DAILY_REPORT_STATUS_TASK: "LS_CLEAR_DAILY_REPORT_STATUS_TASK",
+		LS_FILL_DAILY_REPORT_TASK: "LS_FILL_DAILY_REPORT_TASK",
+		LS_DAILY_REPORT_LIST_TASK: "LS_DAILY_REPORT_LIST_TASK",
+	}
+
 	static log = new Logger("Global");
 
 	static init() {

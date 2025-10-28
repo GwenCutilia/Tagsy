@@ -258,7 +258,7 @@ class LSRequest extends HttpRequest {
 		if (result.code === 200) {
 			Global.config.ls.token = result.token;
 		} else {
-
+			this.log.error("LS login failed: ", result.message);
 		}
 		return result;
 	}
@@ -356,6 +356,13 @@ class LSRequest extends HttpRequest {
 			"recordDate": "",
 			"userId": Global.config.ls.user_id
 		}
+		// const data = {
+		// 	"taskId": "459",
+		// 	"pageSize": 10,
+		// 	"pageNum": 1,
+		// 	"recordDate": "",
+		// 	"userId": "1149"
+		// }
 
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getDailyReportList result: ", result);
