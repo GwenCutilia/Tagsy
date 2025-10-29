@@ -304,6 +304,52 @@ class DomHelper {
 	}
 
 	/**
+	 * 将指定元素安全地追加到目标容器中（默认追加到 document.body）
+	 * @param {HTMLElement|Node|string|Object} elem - 要追加的元素、HTML字符串或 createDom 的配置对象
+	 * @param {HTMLElement} [parent=document.body] - 目标父元素
+	 * @returns {HTMLElement|Node|null} 返回追加后的节点，若失败返回 null
+	 */
+	static append(elem, parent = document.body) {
+		if (!parent || !(parent instanceof HTMLElement)) {
+			this.log.warn("无效的父元素，必须是 HTMLElement 实例");
+			return null;
+		}
+
+		let node = null;
+
+		// 如果是字符串，当作HTML片段处理
+		if (typeof elem === "string") {
+			const temp = document.createElement("div");
+			temp.innerHTML = elem.trim();
+			node = temp.firstChild;
+		}
+
+		// 如果是 createDom 配置对象
+		else if (elem && typeof elem === "object" && !(elem instanceof Node)) {
+			if (!elem.type) {
+				this.log.warn("createDom 配置对象缺少 type 属性");
+				return null;
+			}
+			node = this.createDom(elem.type, elem);
+		}
+
+		// 如果是已存在的 Node 节点
+		else if (elem instanceof Node) {
+			node = elem;
+		}
+
+		// 其他情况
+		else {
+			this.log.warn("append 参数无效");
+			return null;
+		}
+
+		// 追加到目标父元素
+		parent.appendChild(node);
+		return node;
+	}
+
+	/**
 	 * 判断 DOM 元素是否存在
 	 * @param {string|Element} selectorOrElem - CSS选择器字符串 或 已有元素
 	 * @param {boolean} [warn = true] - 如果不存在是否打印警告
@@ -428,11 +474,11 @@ class System {
 	// 初始化工具提示
 	init() {
 		// 创建工具提示元素
-		// this.tooltip = document.createElement('div');
-		// this.tooltip.id = 'tooltip';
-		// this.tooltip.className = 'fixed z-50 bg-gray-900 text-white text-sm rounded-md px-3 py-2 shadow-lg max-w-xs 
-		// pointer-events-none transition-all duration-200 opacity-0 invisible';
-		// document.body.appendChild(this.tooltip);
+		this.tooltip = DomHelper.createDom('div');
+		this.tooltip.id = 'tooltip';
+		this.tooltip.className = "fixed z-50 bg-white text-gray-900 text-sm rounded-md px-3 py-2 " +
+		"shadow border border-gray-200 max-w-xs pointer-events-none transition-all duration-200 opacity-0 invisible";
+		DomHelper.append(this.tooltip);
 		this.tooltip = DomHelper.bySelector("#tooltip");
 		// 防止工具提示在鼠标移动到它上面时隐藏
 		this.tooltip.addEventListener('mouseenter', () => {
@@ -461,7 +507,7 @@ class System {
 		const rect = element.getBoundingClientRect();
 		
 		// 计算工具提示位置（在元素上方）
-		const tooltipTop = rect.top - this.tooltip.offsetHeight - 30;
+		const tooltipTop = rect.top - this.tooltip.offsetHeight - 7;
 		let tooltipLeft = rect.left + (rect.width - this.tooltip.offsetWidth) / 2;
 		
 		// 确保工具提示不会超出屏幕边界
@@ -529,159 +575,136 @@ class Time {
 	 * @throws {Error} 日期格式无效时抛出错误
 	 */
 	static _parseDate(dateStr) {
-		// 修复正则: 移除多余斜杠, 修正简洁格式匹配（字符串中 \d 需转义为 \\d）
 		let normalizedDate = dateStr.trim()
-		.replace(new RegExp("年|月", "g"), '-')  // 中文格式转 "-": "2024年09月25日" → "2024-09-25日"
-		.replace(new RegExp("日", "g"), '');     // 去掉 "日": "2024-09-25日" → "2024-09-25"
+			.replace(new RegExp("年|月", "g"), '-')
+			.replace(new RegExp("日", "g"), '');
 		
-		// 处理简洁格式（YYYYMMDD）: "20240925" → "2024-09-25"（修复正则转义）
 		if (new RegExp("^\\d{8}$").test(normalizedDate)) {
-		normalizedDate = `${normalizedDate.slice(0,4)}-${normalizedDate.slice(4,6)}-${normalizedDate.slice(6,8)}`;
+			normalizedDate = `${normalizedDate.slice(0,4)}-${normalizedDate.slice(4,6)}-${normalizedDate.slice(6,8)}`;
 		}
 
-		// 验证解析结果（排除无效日期, 如 "2024-02-30"）
 		const parsedDate = new Date(normalizedDate);
 		if (isNaN(parsedDate.getTime())) {
-		throw new Error(`Time._parseDate: 无效的日期格式 "${dateStr}", 支持格式: YYYY-MM-DD/YYYY年MM月DD日/YYYYMMDD`);
+			throw new Error(`Time._parseDate: 无效的日期格式 "${dateStr}", 支持格式: YYYY-MM-DD/YYYY年MM月DD日/YYYYMMDD`);
 		}
 
-		// 重置时间为 00:00:00（确保仅对比“日期”, 不对比“时间”）
 		parsedDate.setHours(0, 0, 0, 0);
 		return parsedDate;
 	}
 
 	/**
-	 * 私有静态工具: 给数字补零（用于月份/日期/时分秒的两位数格式）
-	 * @param {number} num - 需补零的数字（如 5 → 05, 12 → 12）
-	 * @returns {string} 补零后的两位数字符串
+	 * 内部工具: 安全解析任意日期字符串 (含 ISO 8601)
+	 * @param {string|Date} input - 日期输入 (如 '2025-10-28T00:00:00.000+08:00' 或 '2025-10-28')
+	 * @returns {Date} 标准 Date 对象 (时间重置为 00:00:00)
+	 */
+	static _safeParseDate(input) {
+		if (input instanceof Date) {
+			const d = new Date(input);
+			d.setHours(0, 0, 0, 0);
+			return d;
+		}
+
+		if (typeof input !== 'string') {
+			throw new Error(`Time._safeParseDate: 无效的输入类型 "${typeof input}"`);
+		}
+
+		let date;
+		try {
+			date = new Date(input);
+			if (isNaN(date.getTime())) {
+				date = this._parseDate(input);
+			}
+		} catch {
+			date = this._parseDate(input);
+		}
+
+		date.setHours(0, 0, 0, 0);
+		return date;
+	}
+
+	/**
+	 * 判断两个日期是否为同一天（支持 ISO 字符串）
+	 * @param {string|Date} dateA - 日期 A（可为 '2025-10-28T00:00:00.000+08:00'）
+	 * @param {string|Date} dateB - 日期 B（同上）
+	 * @returns {boolean} true=同一天, false=不同天
+	 */
+	static isSameDay(dateA, dateB) {
+		const a = this._safeParseDate(dateA);
+		const b = this._safeParseDate(dateB);
+		return a.getTime() === b.getTime();
+	}
+
+	/**
+	 * 私有静态工具: 给数字补零
 	 */
 	static _padZero(num) {
 		return num.toString().padStart(2, '0');
 	}
 
-	/**
-	 * 核心方法: 获取当前日期（支持多种格式）
-	 * @param {string} [format='default'] - 日期格式（可选）
-	 * - 'default': 默认格式 → YYYY-MM-DD（如 2024-09-25）
-	 * - 'cn': 中文格式 → YYYY年MM月DD日（如 2024年09月25日）
-	 * - 'short': 简洁格式 → YYYYMMDD（如 20240925）
-	 * @returns {string} 格式化后的当前日期字符串
-	 * @throws {Error} 传入不支持的格式时抛出错误
-	 */
 	static getCurrentDate(format = 'default') {
 		const now = new Date();
 		const year = now.getFullYear();
-		const month = this._padZero(now.getMonth() + 1); // 修复月份 0-11 → 1-12
+		const month = this._padZero(now.getMonth() + 1);
 		const date = this._padZero(now.getDate());
 
 		switch (format.toLowerCase()) {
-		case 'default':
-			return `${year}-${month}-${date}`;
-		case 'cn':
-			return `${year}年${month}月${date}日`;
-		case 'short':
-			return `${year}${month}${date}`;
-		default:
-			throw new Error(`Time.getCurrentDate: 不支持的格式 "${format}", 可选格式: default/cn/short`);
+			case 'default':
+				return `${year}-${month}-${date}`;
+			case 'cn':
+				return `${year}年${month}月${date}日`;
+			case 'short':
+				return `${year}${month}${date}`;
+			default:
+				throw new Error(`Time.getCurrentDate: 不支持的格式 "${format}", 可选格式: default/cn/short`);
 		}
 	}
 
-	/**
-	 * 获取当前月份
-	 * @param {string} [format='default'] - 日期格式
-	 * - 'default': 默认格式 → MM（如 09）
-	 * - 'cn': 中文格式 → MM（如 09）
-	 * - 'number': 数字格式 → 1-12（如 9）
-	 * @returns {string} 格式化后的当前月份字符串
-	 * @throws {Error} 传入不支持的格式时抛出错误
-	 */
 	static getCurrentMonth(format = 'default') {
 		const now = new Date();
-		const month = now.getMonth() + 1; // 月份从 0-11 转为 1-12
+		const month = now.getMonth() + 1;
 
 		switch (format.toLowerCase()) {
-		case 'default':
-			return this._padZero(month);
-		case 'cn':
-			return this._padZero(month);
-		case 'number':
-			return month.toString();
-		default:
-			throw new Error(`Time.getCurrentMonth: 不支持的格式 "${format}", 可选格式: default/cn/number`);
+			case 'default':
+			case 'cn':
+				return this._padZero(month);
+			case 'number':
+				return month.toString();
+			default:
+				throw new Error(`Time.getCurrentMonth: 不支持的格式 "${format}", 可选格式: default/cn/number`);
 		}
 	}
 
-	/**
-	 * 获取当前年份
-	 * @param {string} [format='default'] - 日期格式
-	 * - 'default': 默认格式 → YYYY（如 2024）
-	 * - 'cn': 中文格式 → YYYY（如 2024）
-	 * @returns {string} 格式化后的当前年份字符串
-	 * @throws {Error} 传入不支持的格式时抛出错误
-	 */
 	static getCurrentYear(format = 'default') {
 		const now = new Date();
 		const year = now.getFullYear();
 
 		switch (format.toLowerCase()) {
-		case 'default':
-			return year.toString();
-		case 'cn':
-			return year.toString();
-		default:
-			throw new Error(`Time.getCurrentYear: 不支持的格式 "${format}", 可选格式: default/cn`);
+			case 'default':
+			case 'cn':
+				return year.toString();
+			default:
+				throw new Error(`Time.getCurrentYear: 不支持的格式 "${format}", 可选格式: default/cn`);
 		}
 	}
 
-	/**
-	 * 获取指定月份或当前月份的开始日期/结束日期（支持多种格式）
-	 * @param {number|string} monthOrType - 月份数字(1-12)或日期类型
-	 * - 数字: 指定月份 (如 10 表示10月)
-	 * - 'beginDate': 返回当前月份的第一天
-	 * - 'endDate': 返回当前月份的最后一天
-	 * @param {string} [typeOrFormat] - 日期类型或格式
-	 * - 当第一个参数是数字时: 'beginDate' 或 'endDate'
-	 * - 当第一个参数是字符串时: 日期格式 ('default'/'cn'/'short')
-	 * @param {string} [format='default'] - 日期格式 (仅在第一个参数是数字时需要)
-	 * - 'default': 默认格式 → YYYY-MM-DD（如 2024-09-25）
-	 * - 'cn': 中文格式 → YYYY年MM月DD日（如 2024年09月25日）
-	 * - 'short': 简洁格式 → YYYYMMDD（如 20240925）
-	 * @returns {string} 格式化后的日期字符串
-	 * @throws {Error} 参数不合法时抛出错误
-	 * @example
-	 * // 获取当前月份的第一天
-	 * const beginDate1 = Time.getCurrentMonthBoundary("beginDate"); // 返回 "2024-09-01"
-	 * const beginDate2 = Time.getCurrentMonthBoundary("beginDate", "cn"); // 返回 "2024年09月01日"
-	 * 
-	 * // 获取指定月份的第一天或最后一天
-	 * const octBegin = Time.getCurrentMonthBoundary(10, "beginDate"); // 返回 "2024-10-01"
-	 * const octEnd = Time.getCurrentMonthBoundary(10, "endDate", "cn"); // 返回 "2024年10月31日"
-	 */
 	static getCurrentMonthBoundary(monthOrType, typeOrFormat, format = 'default') {
 		let month, type, finalFormat;
 		
-		// 参数解析逻辑 - 增强对字符串数字的处理
 		if (typeof monthOrType === 'number' || (typeof monthOrType === 'string' && !isNaN(monthOrType))) {
-			// 第一种调用方式: getCurrentMonthBoundary(10, "beginDate", "cn")
-			// 或者 getCurrentMonthBoundary("10", "beginDate", "cn")
-			month = Number(monthOrType); // 确保转换为数字
+			month = Number(monthOrType);
 			type = typeOrFormat;
 			finalFormat = format;
-			
-			// 校验月份范围
 			if (month < 1 || month > 12) {
 				throw new Error(`Time.getCurrentMonthBoundary: 月份必须在 1-12 之间, 当前为 ${month}`);
 			}
 		} else if (typeof monthOrType === 'string') {
-			// 第二种调用方式: getCurrentMonthBoundary("beginDate", "cn")
-			month = new Date().getMonth() + 1; // 当前月份
+			month = new Date().getMonth() + 1;
 			type = monthOrType;
 			finalFormat = typeOrFormat || 'default';
 		} else {
 			throw new Error(`Time.getCurrentMonthBoundary: 第一个参数必须是数字或字符串, 当前为 ${typeof monthOrType}`);
 		}
 		
-		// 校验类型参数
 		if (type !== 'beginDate' && type !== 'endDate') {
 			throw new Error(`Time.getCurrentMonthBoundary: 无效的类型 "${type}", 必须是 "beginDate" 或 "endDate"`);
 		}
@@ -689,15 +712,7 @@ class Time {
 		const now = new Date();
 		const year = now.getFullYear();
 		
-		let dayNumber;
-		
-		if (type === 'beginDate') {
-			dayNumber = 1; // 月份第一天总是1号
-		} else { // endDate
-			// 获取指定月份的最后一天
-			dayNumber = new Date(year, month, 0).getDate();
-		}
-
+		let dayNumber = type === 'beginDate' ? 1 : new Date(year, month, 0).getDate();
 		const monthStr = this._padZero(month);
 		const dayStr = this._padZero(dayNumber);
 
@@ -713,24 +728,12 @@ class Time {
 		}
 	}
 
-	/**
-	 * 获取指定月份的第一天的周几
-	 * @param {string} dateStr - 日期字符串（如 "2024-09-25"、"2024年09月25日"）
-	 * @returns {number} 星期几（0-6, 0代表星期日）
-	 * @throws {Error} 日期格式无效时抛出错误
-	 */
 	static getFirstDayOfMonthWeek(dateStr) {
 		const date = this._parseDate(dateStr);
-		// 创建当月第一天的日期对象
 		const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
 		return firstDay.getDay();
 	}
 
-	/**
-	 * 判断指定日期是否是今天
-	 * @param {Date|string} date - 要判断的日期（Date对象或日期字符串）
-	 * @returns {boolean} true = 是今天, false = 不是今天
-	 */
 	static isToday(date) {
 		if (typeof date === 'string') {
 			date = this._parseDate(date);
@@ -739,94 +742,37 @@ class Time {
 		return date.toDateString() === today.toDateString();
 	}
 
-	/**
-	 * 获取今天指定时分秒的秒级时间戳（UTC时间戳）
-	 * @param {number} [hour=0] - 小时（0-23, 默认0）
-	 * @param {number} [minute=0] - 分钟（0-59, 默认0）
-	 * @param {number} [second=0] - 秒（0-59, 默认0）
-	 * @returns {number} 对应时间的秒级时间戳（如 1727241600 对应 2024-09-25 08:00:00）
-	 * @throws {Error} 时分秒超出有效范围时抛出错误
-	 * @example
-	 * // 获取今天 14:30:00 的时间戳
-	 * const timestamp = Time.getTodayTimestamp(14, 30, 0);
-	 */
 	static getTodayTimestamp(hour = 0, minute = 0, second = 0) {
-		// 参数合法性校验（与类内错误风格统一）
-		if (hour < 0 || hour > 23) {
-		throw new Error(`Time.getTodayTimestamp: 无效的小时数 "${hour}", 必须在 0-23 之间`);
-		}
-		if (minute < 0 || minute > 59) {
-		throw new Error(`Time.getTodayTimestamp: 无效的分钟数 "${minute}", 必须在 0-59 之间`);
-		}
-		if (second < 0 || second > 59) {
-		throw new Error(`Time.getTodayTimestamp: 无效的秒数 "${second}", 必须在 0-59 之间`);
-		}
+		if (hour < 0 || hour > 23) throw new Error(`Time.getTodayTimestamp: 无效的小时数 "${hour}", 必须在 0-23 之间`);
+		if (minute < 0 || minute > 59) throw new Error(`Time.getTodayTimestamp: 无效的分钟数 "${minute}", 必须在 0-59 之间`);
+		if (second < 0 || second > 59) throw new Error(`Time.getTodayTimestamp: 无效的秒数 "${second}", 必须在 0-59 之间`);
 
-		// 基于今天的年/月/日, 创建指定时分秒的时间对象
 		const now = new Date();
-		const targetTime = new Date(
-		now.getFullYear(),    // 今年
-		now.getMonth(),       // 本月（原生 0-11, 无需+1, Date构造函数兼容）
-		now.getDate(),        // 今天
-		hour,                 // 指定小时
-		minute,               // 指定分钟
-		second                // 指定秒
-		);
-
-		// 转换为秒级时间戳（毫秒 → 秒, 向下取整）
+		const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, second);
 		return Math.floor(targetTime.getTime() / 1000);
 	}
 
-	/**
-	 * 判断日期 A 和日期 B 是否相等（仅对比“日期”, 忽略时间）
-	 * @param {string} dateA - 要判断的日期 A（如 "2024-09-25"、"2024年09月25日"）
-	 * @param {string} dateB - 对比基准日期 B（格式同 dateA）
-	 * @returns {boolean} true=相等, false=不相等
-	 */
 	static isEqual(dateA, dateB) {
 		const a = this._parseDate(dateA);
 		const b = this._parseDate(dateB);
 		return a.getTime() === b.getTime();
 	}
 
-	/**
-	 * 根据年月日生成格式化日期字符串
-	 * @param {number|string} year - 年份
-	 * @param {number|string} month - 月份（1-12）
-	 * @param {number|string} day - 日期（1-31）
-	 * @param {string} [format='default'] - 日期格式
-	 * - 'default': 默认格式 → YYYY-MM-DD（如 2024-09-25）
-	 * - 'cn': 中文格式 → YYYY年MM月DD日（如 2024年09月25日）
-	 * - 'short': 简洁格式 → YYYYMMDD（如 20240925）
-	 * @returns {string} 格式化后的日期字符串
-	 * @throws {Error} 参数无效或格式不支持时抛出错误
-	 * @example
-	 * // 生成 2024年10月1日 的默认格式
-	 * const date1 = Time.formatDate(2024, 10, 1); // "2024-10-01"
-	 * // 生成 2024年10月1日 的中文格式
-	 * const date2 = Time.formatDate(2024, 10, 1, 'cn'); // "2024年10月01日"
-	 */
 	static formatDate(year, month, day, format = 'default') {
-		// 参数验证
 		year = parseInt(year);
 		month = parseInt(month);
 		day = parseInt(day);
 		
-		if (isNaN(year) || year < 1000 || year > 9999) {
+		if (isNaN(year) || year < 1000 || year > 9999)
 			throw new Error(`Time.formatDate: 无效的年份 "${year}", 必须是 1000-9999 之间的数字`);
-		}
-		if (isNaN(month) || month < 1 || month > 12) {
+		if (isNaN(month) || month < 1 || month > 12)
 			throw new Error(`Time.formatDate: 无效的月份 "${month}", 必须是 1-12 之间的数字`);
-		}
-		if (isNaN(day) || day < 1 || day > 31) {
+		if (isNaN(day) || day < 1 || day > 31)
 			throw new Error(`Time.formatDate: 无效的日期 "${day}", 必须是 1-31 之间的数字`);
-		}
 
-		// 验证日期是否有效（如 2月30日）
 		const testDate = new Date(year, month - 1, day);
-		if (testDate.getFullYear() !== year || testDate.getMonth() + 1 !== month || testDate.getDate() !== day) {
+		if (testDate.getFullYear() !== year || testDate.getMonth() + 1 !== month || testDate.getDate() !== day)
 			throw new Error(`Time.formatDate: 无效的日期组合 "${year}-${month}-${day}"`);
-		}
 
 		const yearStr = year.toString();
 		const monthStr = this._padZero(month);
@@ -843,141 +789,61 @@ class Time {
 				throw new Error(`Time.formatDate: 不支持的格式 "${format}", 可选格式: default/cn/short`);
 		}
 	}
-	/**
-	 * 生成指定日期的 ISO 8601 格式时间戳（支持时间偏移）
-	 * @param {string} [dateStr] - 日期字符串（可选，默认今天）
-	 * - 支持格式: YYYY-MM-DD、YYYY年MM月DD日、YYYYMMDD
-	 * @param {number} [hour=16] - 小时（0-23，默认16）
-	 * @param {number} [offsetDays=1] - 日期偏移天数（默认+1天，表示实际日期）
-	 * @returns {string} ISO 8601 格式的时间戳（如 "2025-10-21T16:00:00.000Z"）
-	 * @throws {Error} 日期格式无效或参数超出范围时抛出错误
-	 * @example
-	 * // 生成表示明天的时间戳（默认今天+1天，16:00）
-	 * const timestamp1 = Time.generateISOTimestamp(); 
-	 * // 可能返回: "2025-10-21T16:00:00.000Z"（如果今天是2025-10-20）
-	 * 
-	 * // 生成指定日期的ISO时间戳（日期会自动+1天）
-	 * const timestamp2 = Time.generateISOTimestamp("2025-10-20"); 
-	 * // 返回: "2025-10-20T16:00:00.000Z"（表示2025-10-21）
-	 * 
-	 * // 自定义小时和偏移天数
-	 * const timestamp3 = Time.generateISOTimestamp("2025-10-20", 14, 2); 
-	 * // 返回: "2025-10-20T14:00:00.000Z"（表示2025-10-22）
-	 * 
-	 * // 用于dacCar函数的recordTime字段
-	 * const recordTime = Time.generateISOTimestamp();
-	 */
+
 	static generateISOTimestamp(dateStr, hour = 16, offsetDays = 1) {
-		// 参数验证
-		if (hour < 0 || hour > 23) {
+		if (hour < 0 || hour > 23)
 			throw new Error(`Time.generateISOTimestamp: 无效的小时数 "${hour}", 必须在 0-23 之间`);
-		}
-		
-		if (!Number.isInteger(offsetDays)) {
+		if (!Number.isInteger(offsetDays))
 			throw new Error(`Time.generateISOTimestamp: 偏移天数必须是整数, 当前为 ${offsetDays}`);
-		}
 
-		let baseDate;
-		
-		// 解析基础日期
-		if (dateStr) {
-			baseDate = this._parseDate(dateStr);
-		} else {
-			// 默认使用今天
-			baseDate = new Date();
-			baseDate.setHours(0, 0, 0, 0); // 重置时间为00:00:00
-		}
+		let baseDate = dateStr ? this._parseDate(dateStr) : new Date();
+		baseDate.setHours(0, 0, 0, 0);
 
-		// 应用日期偏移
 		const targetDate = new Date(baseDate);
 		targetDate.setDate(targetDate.getDate() + offsetDays);
 		
-		// 设置指定的小时（UTC时间）
 		const utcDate = new Date(Date.UTC(
 			targetDate.getFullYear(),
 			targetDate.getMonth(),
 			targetDate.getDate(),
-			hour,    // 指定小时
-			0,       // 分钟固定为0
-			0,       // 秒固定为0
-			0        // 毫秒固定为0
+			hour, 0, 0, 0
 		));
 
-		// 生成ISO 8601格式字符串
 		return utcDate.toISOString();
 	}
-	/**
-	 * 在指定时间区间内随机生成一个时间字符串（仅小时和分钟）
-	 * @param {string} startTimeStr - 开始时间字符串 (格式: HH:MM)
-	 * @param {string} endTimeStr - 结束时间字符串 (格式: HH:MM)
-	 * @returns {string} 在区间内随机生成的时间字符串 (格式: HH:MM)
-	 * @throws {Error} 时间格式无效或开始时间晚于结束时间时抛出错误
-	 * @example
-	 * // 在 08:50 到 18:35 之间随机生成时间
-	 * const randomTime = Time.getRandomTimeInRange('08:50', '18:35');
-	 * // 可能返回: "14:23"
-	 */
-	static getRandomTimeInRange(startTimeStr, endTimeStr) {
-		// 时间解析正则表达式 (仅支持 HH:MM 格式)
-		const timeRegex = new RegExp("^(\\d{1,2}):(\\d{1,2})$");
 
-		// 将时间字符串转换为总分钟数
+	static getRandomTimeInRange(startTimeStr, endTimeStr) {
+		const timeRegex = new RegExp("^(\\d{1,2}):(\\d{1,2})$");
 		const parseTimeToMinutes = (timeStr) => {
 			const match = timeStr.match(timeRegex);
-			if (!match) {
-				throw new Error(`Time.getRandomTimeInRange: 无效的时间格式 "${timeStr}", 支持格式: HH:MM`);
-			}
-
+			if (!match) throw new Error(`Time.getRandomTimeInRange: 无效的时间格式 "${timeStr}", 支持格式: HH:MM`);
 			const hours = parseInt(match[1]);
 			const minutes = parseInt(match[2]);
-
-			// 参数验证
-			if (hours < 0 || hours > 23) {
-				throw new Error(`Time.getRandomTimeInRange: 小时必须在 0-23 之间, 当前为 ${hours}`);
-			}
-			if (minutes < 0 || minutes > 59) {
-				throw new Error(`Time.getRandomTimeInRange: 分钟必须在 0-59 之间, 当前为 ${minutes}`);
-			}
-
+			if (hours < 0 || hours > 23) throw new Error(`Time.getRandomTimeInRange: 小时必须在 0-23 之间, 当前为 ${hours}`);
+			if (minutes < 0 || minutes > 59) throw new Error(`Time.getRandomTimeInRange: 分钟必须在 0-59 之间, 当前为 ${minutes}`);
 			return hours * 60 + minutes;
 		};
 
-		// 转换开始和结束时间为分钟
 		const startMinutes = parseTimeToMinutes(startTimeStr);
 		const endMinutes = parseTimeToMinutes(endTimeStr);
-
-		// 验证时间区间有效性
-		if (startMinutes > endMinutes) {
+		if (startMinutes > endMinutes)
 			throw new Error(`Time.getRandomTimeInRange: 开始时间 "${startTimeStr}" 不能晚于结束时间 "${endTimeStr}"`);
-		}
 
-		// 在区间内随机生成分钟值（包含边界）
 		const randomMinutes = Math.floor(Math.random() * (endMinutes - startMinutes + 1)) + startMinutes;
-
-		// 转换为小时和分钟
 		const hours = Math.floor(randomMinutes / 60);
 		const minutes = randomMinutes % 60;
-
 		return `${this._padZero(hours)}:${this._padZero(minutes)}`;
 	}
-	/**
-	 * 生成指定时间范围内的随机时间戳 
-	 * @param {string} startTime - 开始时间 (格式: HH:MM)
-	 * @param {string} endTime - 结束时间 (格式: HH:MM)
-	 * @returns {number} Unix 时间戳 (秒)
-	 */
+
 	static generateRandomTimestampInRange(startTime, endTime) {
-		// 使用现有的 getRandomTimeInRange 函数生成随机时间字符串 (格式: HH:MM)
 		const randomTimeStr = Time.getRandomTimeInRange(startTime, endTime, 'HH:MM');
-		
-		// 将随机时间转换为当天的时间戳 (不含秒)
 		const today = new Date();
 		const [hours, minutes] = randomTimeStr.split(':').map(Number);
 		today.setHours(hours, minutes, 0, 0);
-		
 		return Math.floor(today.getTime() / 1000);
 	};
 }
+
 
 class TimerScheduler {
 	static dailyTasks = new Map();      // 每日任务

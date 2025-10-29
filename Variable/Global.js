@@ -32,7 +32,7 @@ class Global {
 			current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
 			// 任务状态
 			token_check_task: false,
-			// 模块设置
+			// 模块时间区间任务设置
 			time_range_login_start: "08:50",
 			time_range_login_end: "08:50",
 			time_range_check_in_start: "08:55",
@@ -55,12 +55,19 @@ class Global {
 			daily_report_page_size: 3,
 			// 登录状态
 			login_status: null,
-			fill_daily_report_status: null, // 日报打卡状态
+			// fill_daily_report_status: null, // 日报打卡状态
 			// cookie缓存
 			token: null, // 令牌
 			user_id: null, // 用户编号
 			task_id: null, // 工作区编号
 			sub_task_id: null, // 子工作区编号
+			// 模块时间区间任务设置
+			time_range_login_start: "08:50",
+			time_range_login_end: "08:50",
+			time_range_login_out_start: "18:35", 
+			time_range_login_out_end: "18:35", 
+			time_range_fill_daily_report_start: "17:00",
+			time_range_fill_daily_report_end: "17:00",
 		},
 		setting: {
 			
@@ -86,8 +93,10 @@ class Global {
 		LS_LOGIN_STATUS_TASK: "LS_LOGIN_STATUS_TASK",
 		LS_FILL_DAILY_REPORT_STATUS_TASK: "LS_FILL_DAILY_REPORT_STATUS_TASK",
 		LS_CLEAR_DAILY_REPORT_STATUS_TASK: "LS_CLEAR_DAILY_REPORT_STATUS_TASK",
+		LS_DAILY_REPORT_LIST_STATUS_TASK: "LS_DAILY_REPORT_LIST_TASK",
+		LS_LOGIN_TASK: "LS_LOGIN_TASK",
+		LS_LOGIN_OUT_TASK: "LS_LOGIN_OUT_TASK",
 		LS_FILL_DAILY_REPORT_TASK: "LS_FILL_DAILY_REPORT_TASK",
-		LS_DAILY_REPORT_LIST_TASK: "LS_DAILY_REPORT_LIST_TASK",
 	}
 
 	static log = new Logger("Global");

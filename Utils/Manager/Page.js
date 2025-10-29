@@ -52,8 +52,6 @@ class Template {
 		// 添加一个重新登录的按钮监听事件
 		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
 		await W2.currentTask();
-		await LS.login();
-		await LS.currentTask();
 		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
 	static isTemplatePage() {
@@ -155,6 +153,7 @@ class W2 extends Page {
 	current_time_line_task_start_btn = DomHelper.bySelector("#current_time_line_task_start_btn"); // 开始W2任务按钮
 	current_time_line_task_stop_btn = DomHelper.bySelector("#current_time_line_task_stop_btn"); // 停止W2任务按钮
 	current_time_line_task_turn_on_off_i = DomHelper.bySelector("#current_time_line_task_turn_on_off_i"); // 任务开关图标
+	// 更改图标
 	current_time_line_task_icon_0 = DomHelper.bySelector("#current_time_line_task_icon_0"); // 任务1图标
 	current_time_line_task_icon_1 = DomHelper.bySelector("#current_time_line_task_icon_1"); // 任务2图标
 	current_time_line_task_icon_2 = DomHelper.bySelector("#current_time_line_task_icon_2"); // 任务3图标
@@ -645,7 +644,8 @@ class W2 extends Page {
 
 }
 class LS extends Page {
-	check_in_out_label = DomHelper.bySelector("#check_in_out_label"); // 签到签出标签
+	login_status_label = DomHelper.bySelector("#login_status_label"); // 签到签出标签
+	fill_daily_report_label = DomHelper.bySelector("#fill_daily_report_label"); // 打卡状态标签
 	daily_report_list_label = DomHelper.bySelector("#daily_report_list_label"); // 日报列表标题
 	daily_report_list_table = DomHelper.bySelector("#daily_report_list_table"); // 日报列表表格
 
@@ -665,7 +665,8 @@ class LS extends Page {
 		this.updateUIElement();
 	}
 	async init() {
-		
+		await LS.login();
+		await LS.currentTask();
 	}
 	// 登录
 	static async login() {
@@ -709,9 +710,9 @@ class LS extends Page {
 		let result = await LSRequest.fillDailyReport();
 		if (result.code === 200) {
 			this.log.log("填写日报成功, 返回信息: ", result.msg);
-			Global.config.ls.fill_daily_report_status = LS.status.already_fill_daily_report;
+			
 		} else {
-			Global.config.ls.fill_daily_report_status = LS.status.failed_fill_daily_report;
+			
 		}
 	}
 	// 刷新UI
@@ -719,25 +720,31 @@ class LS extends Page {
 		// 登录状态UI
 		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 3000, Global.ls_TaskConfig.LS_LOGIN_STATUS_TASK);
 		// 打卡任务UI
-		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 3000, Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_STATUS_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 10000, Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_STATUS_TASK);
 		// 日报列表UI
-		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 10000, Global.ls_TaskConfig.LS_DAILY_REPORT_LIST_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 10000, Global.ls_TaskConfig.LS_DAILY_REPORT_LIST_STATUS_TASK);
 	}
 	// 登录状态刷新
 	async loginStatus() {
-		this.check_in_out_label.innerText = Global.config.ls.login_status;
+		this.login_status_label.innerText = Global.config.ls.login_status;
 	}
 	// 日报打卡状态
 	async fillDailyReportStatus() {
 		// 如果检测到当天的记录, 就更新打卡成功
-		this.check_in_out_label.innerText = LS.status.unknown;
-		if (Global.config.ls.fill_daily_report_status === LS.status.already_fill_daily_report) {
-			this.check_in_out_label.innerText = Global.config.ls.fill_daily_report_status;
-		} else if (Global.config.ls.fill_daily_report_status === LS.status.failed_fill_daily_report) {
-			this.check_in_out_label.innerText = Global.config.ls.failed_fill_daily_report;
+		let result = await LSRequest.getDailyReportList();
+		if (result.code === 200) {
+			if (Time.isSameDay(result.rows[0].recordTime, Time.getCurrentDate())) {
+				this.fill_daily_report_label.innerText = LS.status.already_fill_daily_report;
+			} else {
+				this.fill_daily_report_label.innerText = LS.status.not_loginfill_daily_report;
+			}
 		} else {
-			this.check_in_out_label.innerText = LS.status.unknown;
+			this.fill_daily_report_label.innerText = LS.status.unknown;
 		}
+	}
+	// 退出登录
+	async loginOut() {
+
 	}
 	// 清除打卡状态
 	async clearDailyReportStatus() {
@@ -746,9 +753,46 @@ class LS extends Page {
 	}
 	// 定时任务
 	static async currentTask() {
-		// TimerScheduler.setDailyTask(async () => { await LS.login() }, "08:00", Global.ls_TaskConfig.LS_LOGIN_TASK);
-		// TimerScheduler.setDailyTask(async () => { await LS.fillDailyReport() }, Time.generateRandomTimestampInRange("17:00", "17:50"), Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_TASK);
-		// TimerScheduler.setDailyTask(async () => { await LS.clearDailyReportStatus() }, Time.generateRandomTimestampInRange("18:50", "18:50"), Global.ls_TaskConfig.LS_CLEAR_DAILY_REPORT_STATUS_TASK);
+		// // 模块时间区间任务设置
+		// time_range_login_start: "08:50",
+		// time_range_login_end: "08:50",
+		// time_range_login_out_start: "18:35", 
+		// time_range_login_out_end: "18:35", 
+		// time_range_fill_daily_report_start: "17:00",
+		// time_range_fill_daily_report_end: "17:00",
+		const taskConfigs = [
+			{
+				start: Global.config.ls.time_range_login_start,
+				end: Global.config.ls.time_range_login_end,
+				action: async () => { await LS.login() },
+				name: Global.ls_TaskConfig.LS_LOGIN_TASK
+			},
+			{
+				start: Global.config.ls.time_range_login_out_start,
+				end: Global.config.ls.time_range_login_out_end,
+				action: async () => { await LS.loginOut() },
+				name: Global.ls_TaskConfig.LS_LOGIN_OUT_TASK
+			},
+			{
+				start: Global.config.ls.time_range_fill_daily_report_start,
+				end: Global.config.ls.time_range_fill_daily_report_end,
+				action: async () => { await LS.fillDailyReport() },
+				name: Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_TASK
+			}
+		]
+		if (!await W2.isTodayOff()) {
+			for (const config of taskConfigs) {
+				TimerScheduler.setDailyTask(
+					Time.getRandomTimeInRange(config.start, config.end),
+					config.action,
+					config.name
+				);
+			}
+			this.log.log("今天是工作日, 定时任务已启动");
+		} else {
+			// LS.stopAllTask();
+			this.log.log("今天是休息日");
+		}
 	}
 	// 日报列表
 	async dailyReportList() {
@@ -847,15 +891,23 @@ class Setting extends Page {
 	w2_time_range_meal_end_module_setting_input = DomHelper.bySelector("#w2_time_range_meal_end_module_setting_input"); // W2吃饭时间段结束输入框
 	w2_time_range_working_start_module_setting_input = DomHelper.bySelector("#w2_time_range_working_start_module_setting_input"); // W2工作时间段开始输入框
 	w2_time_range_working_end_module_setting_input = DomHelper.bySelector("#w2_time_range_working_end_module_setting_input"); // W2工作时间段结束输入框
-	w2_error_setting_message_box = DomHelper.bySelector("#w2_error_setting_message_box"); // W2高级设置错误提示
 	w2_info_setting_message_box = DomHelper.bySelector("#w2_info_setting_message_box"); // W2高级设置提示信息
+	w2_error_setting_message_box = DomHelper.bySelector("#w2_error_setting_message_box"); // W2高级设置错误提示
 	// LS账号设置
 	ls_user_test_account_setting_button = DomHelper.bySelector("#ls_user_test_account_setting_button"); // LS账号测试按钮
 	ls_user_name_account_setting_input = DomHelper.bySelector("#ls_user_name_account_setting_input"); // LS账号输入框 账号
 	ls_user_password_account_setting_input = DomHelper.bySelector("#ls_user_password_account_setting_input"); // LS密码输入框
 	ls_info_account_setting_message_box = DomHelper.bySelector("#ls_info_account_setting_message_box"); // LS提示信息
 	ls_error_account_setting_message_box = DomHelper.bySelector("#ls_error_account_setting_message_box"); // LS错误提示
-
+	// LS模块设置
+	ls_time_range_login_start_module_setting_input = DomHelper.bySelector("#ls_time_range_login_start_module_setting_input");
+	ls_time_range_login_end_module_setting_input = DomHelper.bySelector("#ls_time_range_login_end_module_setting_input");
+	ls_time_range_login_out_start_module_setting_input = DomHelper.bySelector("#ls_time_range_login_out_start_module_setting_input");
+	ls_time_range_login_out_end_module_setting_input = DomHelper.bySelector("#ls_time_range_login_out_end_module_setting_input");
+	ls_time_range_fill_daily_report_start_module_setting_input = DomHelper.bySelector("#ls_time_range_fill_daily_report_start_module_setting_input");
+	ls_time_range_fill_daily_report_end_module_setting_input = DomHelper.bySelector("#ls_time_range_fill_daily_report_end_module_setting_input");
+	ls_info_setting_message_box = DomHelper.bySelector("#ls_info_setting_message_box");
+	ls_error_setting_message_box = DomHelper.bySelector("#ls_error_setting_message_box");
 
 	constructor() {
 		super();
@@ -976,6 +1028,74 @@ class Setting extends Page {
 				}
 			});
 		}
+		this.ls_time_range_validate_format_module_setting_button = DomHelper.bySelector("#ls_time_range_validate_format_module_setting_button");
+		this.ls_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
+			
+			// const time_range_login_start = this.ls_time_range_login_start_module_setting_input.value;
+			// const time_range_login_end = this.ls_time_range_login_end_module_setting_input.value;
+			// const time_range_login_out_start = this.ls_time_range_login_out_start_module_setting_input.value;
+			// const time_range_login_out_end = this.ls_time_range_login_out_end_module_setting_input.value;
+			// const time_range_fill_daily_report_start = this.ls_time_range_fill_daily_report_start_module_setting_input.value;
+			// const time_range_fill_daily_report_end = this.ls_time_range_fill_daily_report_end_module_setting_input.value;
+			// 获取所有时间值
+			const timeFields = [
+				{
+					start: this.ls_time_range_login_start_module_setting_input.value,
+					end: this.ls_time_range_login_end_module_setting_input.value,
+					configStart: 'time_range_login_start',
+					configEnd: 'time_range_login_end',
+					fieldName: '登录',
+					startInput: this.ls_time_range_login_start_module_setting_input,
+					endInput: this.ls_time_range_login_end_module_setting_input
+				},
+				{
+					start: this.ls_time_range_login_out_start_module_setting_input.value,
+					end: this.ls_time_range_login_out_end_module_setting_input.value,
+					configStart: 'time_range_login_out_start',
+					configEnd: 'time_range_login_out_end',
+					fieldName: '退出登录',
+					startInput: this.ls_time_range_login_out_start_module_setting_input,
+					endInput: this.ls_time_range_login_out_end_module_setting_input
+				},
+				{
+					start: ls_time_range_fill_daily_report_start_module_setting_input.value,
+					end: ls_time_range_fill_daily_report_end_module_setting_input.value,
+					configStart: 'time_range_fill_daily_report_start',
+					configEnd: 'time_range_fill_daily_report_end',
+					fieldName: '填报日报',
+					startInput: this.ls_time_range_fill_daily_report_start_module_setting_input,
+					endInput: this.ls_time_range_fill_daily_report_end_module_setting_input
+				}
+			];
+			// 将时间字符串转换为秒数进行比较的函数
+			function timeToSeconds(timeStr) {
+				const parts = timeStr.split(':');
+				if (parts.length !== 3) return 0;
+				return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+			}
+			// 循环检查所有时间字段
+			for (const field of timeFields) {
+				if (timeToSeconds(field.start) > timeToSeconds(field.end)) {
+					DomHelper.bySelectorFromParent(ls_error_setting_message_box, "span").innerText = field.fieldName + " 开始时间不能晚于结束时间";
+					ls_error_setting_message_box.classList.remove("hidden");
+					ls_info_setting_message_box.classList.add("hidden");
+					field.startInput.classList.add("border-red-500");
+					field.endInput.classList.add("border-red-500");
+					return;
+				} else {
+					field.startInput.classList.remove("border-red-500");
+					field.endInput.classList.remove("border-red-500");
+				}
+			}
+			// 如果没有错误, 保存配置
+			for (const field of timeFields) {
+				Global.config.ls[field.configStart] = field.start;
+				Global.config.ls[field.configEnd] = field.end;
+			}
+			DomHelper.bySelectorFromParent(ls_info_setting_message_box, "span").innerText = "时间段配置已保存";
+			ls_info_setting_message_box.classList.remove("hidden");
+			ls_error_setting_message_box.classList.add("hidden");
+		});
 		this.w2_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
 			// 获取所有时间值
 			const timeFields = [
@@ -1147,6 +1267,18 @@ class Setting extends Page {
 		if (Global.config.ls.user_name !== null && Global.config.ls.user_password !== null) {
 			this.ls_user_name_account_setting_input.value = Global.config.ls.user_name;
 			this.ls_user_password_account_setting_input.value = Global.config.ls.user_password;
+		}
+		if (Global.config.ls.time_range_login_start !== null && Global.config.ls.time_range_login_end !== null) {
+			this.ls_time_range_login_start_module_setting_input.value = Global.config.ls.time_range_login_start;
+			this.ls_time_range_login_end_module_setting_input.value = Global.config.ls.time_range_login_end;
+		}
+		if (Global.config.ls.time_range_login_out_start !== null && Global.config.ls.time_range_login_out_end !== null) {
+			this.ls_time_range_login_out_start_module_setting_input.value = Global.config.ls.time_range_login_out_start;
+			this.ls_time_range_login_out_end_module_setting_input.value = Global.config.ls.time_range_login_out_end;
+		}
+		if (Global.config.ls.time_range_fill_daily_report_start !== null && Global.config.ls.time_range_fill_daily_report_end !== null) {
+			this.ls_time_range_fill_daily_report_start_module_setting_input.value = Global.config.ls.time_range_fill_daily_report_start;
+			this.ls_time_range_fill_daily_report_end_module_setting_input.value = Global.config.ls.time_range_fill_daily_report_end;
 		}
 	}
 	init() {

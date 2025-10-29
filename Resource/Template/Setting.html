@@ -156,12 +156,12 @@
 							<!-- W2设置分组结束 -->
 							<!-- LS设置分组 -->
 							<div class="p-5">
-							<!-- 第一个板块: 凌波微步(LS)账号设置 -->
+							<!-- 第一个板块: 灵波微步(LS)账号设置 -->
 								<div class="mb-6">
 									<div class="flex items-center justify-between mb-3">
 										<div class="flex items-center">
 											<i class="fas fa-file-alt text-blue-500 mr-2"></i>
-											<h3 class="font-medium text-gray-700">凌波微步(LS)账号设置</h3>
+											<h3 class="font-medium text-gray-700">灵波微步(LS)账号设置</h3>
 										</div>
 										<div class="flex space-x-2">
 											<button id="ls_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
@@ -302,9 +302,75 @@
 									</div>
 								</div>
 							</div>
+							<div class="p-5">
+							<!-- 第二个板块: 灵波微步(LS)模块设置 -->
+								<div id="ls_advanced_settings_block" class="mb-6">
+									<div class="flex items-center justify-between mb-3">
+										<div class="flex items-center">
+											<i class="fas fa-file-alt text-blue-500 mr-2"></i>
+											<h3 class="font-medium text-gray-700">灵波微步(LS)时间区间设置</h3>
+										</div>
+										<div class="flex space-x-2">
+											<button id="ls_time_range_validate_format_module_setting_button" class="px-3.5 py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition flex items-center text-sm">
+												<i class="fas fa-refresh mr-1.5 text-xs"></i>校验格式
+											</button>
+										</div>
+									</div>
+									<div class="space-y-4">
+										<div class="flex flex-wrap gap-4 items-start">
+											<div class="flex-1 min-w-[280px] max-w-[500px]">
+												<label class="block text-sm text-gray-600 mb-1">登录</label>
+												<div class="flex gap-2">
+													<input type="text" id="ls_time_range_login_start_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+													<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+														<i class="fas fa-right-left text-xs"></i>
+													</div>
+													<input type="text" id="ls_time_range_login_end_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+											</div>
+											<div class="flex-1 min-w-[280px] max-w-[500px]">
+												<label class="block text-sm text-gray-600 mb-1">退出登录</label>
+												<div class="flex gap-2">
+													<input type="text" id="ls_time_range_login_out_start_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+													<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+														<i class="fas fa-right-left text-xs"></i>
+													</div>
+													<input type="text" id="ls_time_range_login_out_end_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+											</div>
+										</div>
+										<div class="flex flex-wrap gap-4 items-start">
+											<div class="flex-1 min-w-[280px] max-w-[500px]">
+												<label class="block text-sm text-gray-600 mb-1">填写日报</label>
+												<div class="flex gap-2">
+													<input type="text" id="ls_time_range_fill_daily_report_start_module_setting_input" placeholder="17:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+													<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+														<i class="fas fa-right-left text-xs"></i>
+													</div>
+													<input type="text" id="ls_time_range_fill_daily_report_end_module_setting_input" placeholder="17:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+											</div>
+											<div class="flex-1 min-w-[280px] max-w-[500px]">
+											</div>
+										</div>
+										<!-- 错误提示 -->
+										<div id="ls_error_setting_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+											<div class="flex items-center">
+												<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+												<span class="text-red-700 text-sm">--</span>
+											</div>
+										</div>
+										<div id="ls_info_setting_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+											<div class="flex items-center">
+												<i class="fas fa-info-circle text-blue-500 mr-2"></i>
+												<span class="text-blue-700 text-sm">--</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-					
 				</div>
 			</div>
 		</main>
