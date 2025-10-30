@@ -141,10 +141,36 @@ class W2Request extends HttpRequest {
 		};
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.debug("data: ", data);
 		this.log.log(eventType + " result: ", result);
 		return result;
 	}
+	// W2抽调
+	static async qualityInspection() {
+		return await this._applyActivityTransfer("quality_inspection");
+	}
+	static async training() {
+		return await this._applyActivityTransfer("training");
+	}
+	static async _applyActivityTransfer(activityType) {
+		url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
+		headers = this.CONFIG.DEFAULT_HEADERS;
+		const data = {
+			"activity_type": activityType,
+			"begin_time": 1760662800,
+			"end_time": 1760668200,
+			"memo": "做excel代码题",
+			"header": {
+				"staff": "lingboweibu(beijing)kejiyouxiangongsi_1101488685013168128",
+				"staff_id": 0,
+				"oa_ticket": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjA2OTI3MDUsInN0YWZmIjoibGluZ2Jvd2VpYnUoYmVpamluZylrZWppeW91eGlhbmdvbmdzaV8xMTAxNDg4Njg1MDEzMTY4MTI4Iiwic3RhZmZfaWQiOjAsImV4cCI6MTc2MDY5MzAwNS4xMDc0MzI0fQ.eEG8M2fWPrtbDIbG5XabsITzy5xc9IuLnaWkpP1srqQ",
+				"tracer": "|b077b6d5cc0a68|1760692722212",
+				"tenant_token": "lingboweibu(beijing)kejiyouxiangongsi_8ff28136-0add-11"
+			}
+		}
+		const result = await this._request("POST", url, headers, data);
+		return result;
+	}
+
 	// 前往用餐
 	static async meal() {
 		return await this._mealWorkingStatus("meal");
@@ -365,7 +391,7 @@ class LSRequest extends HttpRequest {
 		// }
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("getDailyReportList result: ", result);
+		// this.log.log("getDailyReportList result: ", result);
 		return result;
 	}
 	static async _request(method, url, headers, data) {

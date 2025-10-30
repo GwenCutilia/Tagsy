@@ -61,6 +61,7 @@ class Global {
 			user_id: null, // 用户编号
 			task_id: null, // 工作区编号
 			sub_task_id: null, // 子工作区编号
+			daily_report_list: null, // 日报列表
 			// 模块时间区间任务设置
 			time_range_login_start: "08:50",
 			time_range_login_end: "08:50",
@@ -91,9 +92,10 @@ class Global {
 	}
 	static ls_TaskConfig = {
 		LS_LOGIN_STATUS_TASK: "LS_LOGIN_STATUS_TASK",
+		LS_GET_DAILY_REPORT_LIST_TASK: "LS_GET_DAILY_REPORT_LIST_TASK",
 		LS_FILL_DAILY_REPORT_STATUS_TASK: "LS_FILL_DAILY_REPORT_STATUS_TASK",
-		LS_CLEAR_DAILY_REPORT_STATUS_TASK: "LS_CLEAR_DAILY_REPORT_STATUS_TASK",
 		LS_DAILY_REPORT_LIST_STATUS_TASK: "LS_DAILY_REPORT_LIST_TASK",
+		LS_CLEAR_DAILY_REPORT_STATUS_TASK: "LS_CLEAR_DAILY_REPORT_STATUS_TASK",
 		LS_LOGIN_TASK: "LS_LOGIN_TASK",
 		LS_LOGIN_OUT_TASK: "LS_LOGIN_OUT_TASK",
 		LS_FILL_DAILY_REPORT_TASK: "LS_FILL_DAILY_REPORT_TASK",
