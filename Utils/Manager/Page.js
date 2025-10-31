@@ -212,6 +212,12 @@ class W2 extends Page {
 		this.prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
 		this.next_month_btn = DomHelper.bySelector("#next_month_btn"); // 查看下个月排班按钮
 
+		this.apply_activity_transfer_btn = DomHelper.bySelector("#apply_activity_transfer_btn"); // 申请抽调按钮
+		this.apply_activity_transfer_type_div = DomHelper.bySelector("#apply_activity_transfer_type_div"); // 申请抽调类型
+		this.apply_activity_transfer_type_label = DomHelper.bySelector("#apply_activity_transfer_type_label"); // 申请抽调类型标签
+		this.apply_activity_transfer_type_ul = DomHelper.bySelector("#apply_activity_transfer_type_ul"); // 申请抽调类型列表
+		this.apply_activity_transfer_time_text = DomHelper.bySelector("#apply_activity_transfer_time_text"); // 申请抽调时间
+		this.apply_activity_transfer_momo_text = DomHelper.bySelector("#apply_activity_transfer_momo_text"); // 申请抽调备注
 
 		this.tooltip = new ToolTip();
 	}
@@ -279,16 +285,15 @@ class W2 extends Page {
 		}
 	}
 	bindEvents() {
-		login_btn.addEventListener("click", async () => {
+		this.login_btn.addEventListener("click", async () => {
 			await W2.login();
-			Global.value.w2_current_task_flag = true;
 			await W2.currentTask();
 			TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 		});
-		relogin_btn.addEventListener("click", async () => {
+		this.relogin_btn.addEventListener("click", async () => {
 			await W2.login(); // 再写一个relogin函数
 		});
-		login_out_btn.addEventListener("click", async () => {
+		this.login_out_btn.addEventListener("click", async () => {
 			await W2Request.loginOut();
 			// 将UI置为默认状态
 			this.check_in_out_label.innerText = W2.status.unknown;
@@ -301,10 +306,10 @@ class W2 extends Page {
 
 			W2.stopAllTask();
 		});
-		check_in_btn.addEventListener("click", async () => {
+		this.check_in_btn.addEventListener("click", async () => {
 			await W2Request.checkIn();
 		});
-		meal_working_status_btn.addEventListener("click", async () => {
+		this.meal_working_status_btn.addEventListener("click", async () => {
 			if (meal_working_status_label.innerText === "正在标注") {
 				await W2Request.meal();
 			} else if (meal_working_status_label.innerText === "前往用餐") {
@@ -321,20 +326,26 @@ class W2 extends Page {
 		});
 		// 当前任务时间线 -> 开始任务按钮
 		this.current_time_line_task_start_btn.addEventListener("click", async () => {
-			Global.value.w2_current_task_flag= true,
 			await W2.currentTask();
 		});
 		// 当前任务时间线 -> 停止任务按钮
 		this.current_time_line_task_stop_btn.addEventListener("click", async () => {
 			await W2.stopAllTask();
 		});
-		prev_month_btn.addEventListener("click", async () => {
+		this.prev_month_btn.addEventListener("click", async () => {
 			Global.value.month--;
 			await this.calendarTask();
 		});
-		next_month_btn.addEventListener("click", async () => {
+		this.next_month_btn.addEventListener("click", async () => {
 			Global.value.month++;
 			await this.calendarTask();
+		});
+		this.apply_activity_transfer_btn.addEventListener("click", async () => {
+			// 从这里继续, 写全局变量, 将sprit加入updataUIElements中
+			this.apply_activity_transfer_type_label.value;
+			this.apply_activity_transfer_time_text.value;
+			this.apply_activity_transfer_momo_text.value;
+			await W2Request.qualityInspection();
 		});
 	}
 
@@ -450,6 +461,9 @@ class W2 extends Page {
 				arrow.classList.replace("border-b-green-600", "border-b-blue-600");
 			}
 		}
+	}
+	async applyActivityTransfer() {
+		
 	}
 	// 判断今天是否是休息日
 	static async isTodayOff() {
@@ -617,9 +631,8 @@ class W2 extends Page {
 			}
 		];
 
-		if (await W2.isLoginStatus()) {
+		// if (await W2.isLoginStatus()) {
 			if (!await W2.isTodayOff()) {
-				if (Global.value.w2_current_task_flag === true) {
 					for (const config of taskConfigs) {
 						TimerScheduler.setDailyTask(
 							Time.getRandomTimeInRange(config.start, config.end),
@@ -627,17 +640,14 @@ class W2 extends Page {
 							config.name
 						);
 					}
-					Global.value.w2_current_task_flag = false;
-				}
 				this.log.log("今天是工作日, 定时任务已启动");
 			} else {
 				W2.stopAllTask();
 				this.log.log("今天是休息日");
 			}
-		} else {
-			W2.stopAllTask();
-			this.log.log("未登录, 定时任务已停止");
-		}
+		// } else {
+		// 	this.log.log("未登录");
+		// }
 	}
 	// 停止所有W2时间线任务
 	static async stopAllTask() {
@@ -645,7 +655,6 @@ class W2 extends Page {
 			TimerScheduler.stopTask(taskName);
 		});
 	}
-
 }
 class LS extends Page {
 
@@ -1205,7 +1214,6 @@ class Setting extends Page {
 			this.w2_info_setting_message_box.classList.remove("hidden");
 			this.w2_error_setting_message_box.classList.add("hidden");
 			// 重新开始任务
-			Global.value.w2_current_task_flag = true;
 			await W2.currentTask();
 		});
 		this.ls_user_test_account_setting_button.addEventListener("click", async () => {

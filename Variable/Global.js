@@ -78,8 +78,6 @@ class Global {
 	
 	static value = {
 		// 累加器 && 标志位
-		// 待优化: 可以用别的方法实现Setting类中的刷新定时任务的功能, 目前用这个标志位太捞了
-		w2_current_task_flag: true, // 定时任务标志位, 当它为true时, 表示定时任务中callback需要更新
 		month: Time.getCurrentMonth(), // 当前月份
 	}
 	static w2_TaskConfig = {
