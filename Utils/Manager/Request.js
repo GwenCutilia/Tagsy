@@ -154,11 +154,13 @@ class W2Request extends HttpRequest {
 	static async _applyActivityTransfer(activityType) {
 		url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
 		headers = this.CONFIG.DEFAULT_HEADERS;
+		let eventTimestamp = Time.getTimeRangeTimestamp(Global.config.w2.apply_activity_transfer_time);
+
 		const data = {
 			"activity_type": activityType,
-			"begin_time": 1760662800,
-			"end_time": 1760668200,
-			"memo": "做excel代码题",
+			"begin_time": eventTimestamp[0],
+			"end_time": eventTimestamp[1],
+			"memo": Global.config.w2.apply_activity_transfer_momo,
 			"header": {
 				"staff": "lingboweibu(beijing)kejiyouxiangongsi_1101488685013168128",
 				"staff_id": 0,
@@ -170,7 +172,38 @@ class W2Request extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		return result;
 	}
+	// 获取抽调列表
+	static async getApplyApprovalList() {
+		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/get_my_apply_approval";
+		const headers = this.CONFIG.DEFAULT_HEADERS;
+		const data = {
+			"page": 1,
+			"page_size": 3,
+			"begin_date": "2025-10-02", // 开始查询的时间
+			"end_date": "2025-11-02", // 结束查询的时间
+			"apply_type_list": [ // 类型
+				"transfer",
+				"holiday",
+				"overtime",
+				"attendance"
+			],
+			"approval_status_list": [ // 状态
+				"pending_approval",
+				"approved_passed",
+				"approved_reject"
+			],
+			"header": {
+				"staff": Global.config.w2.user_name,
+				"staff_id": 0,
+				"oa_ticket": Global.config.w2.token,
+				"tracer": "|b0454389a32168|1762074840048",
+				"tenant_token": Global.config.w2.tenant_token
+			}
+		}
 
+		const result = await this._request("POST", url, headers, data);
+		return result;
+	}
 	// 前往用餐
 	static async meal() {
 		return await this._mealWorkingStatus("meal");

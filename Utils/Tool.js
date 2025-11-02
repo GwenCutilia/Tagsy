@@ -842,8 +842,77 @@ class Time {
 		today.setHours(hours, minutes, 0, 0);
 		return Math.floor(today.getTime() / 1000);
 	};
-}
 
+	/**
+	 * 根据给定的时间范围返回两个时间的时间戳
+	 * @param {string} timeRange - 时间范围，例如 "13:00-14:00" 或 "13001400"
+	 * @returns {[number, number]} 返回的时间戳数组，分别对应时间范围的开始和结束时间
+	 */
+	static getTimeRangeTimestamp(timeRange) {
+		let startTime, endTime;
+
+		// 判断输入格式，若为 'HHMMHHMM' 格式
+		const timeRangeRegex = new RegExp("^\\d{4}\\d{4}$");
+		if (timeRangeRegex.test(timeRange)) {
+			// 将 '13001400' 转换为 '13:00-14:00'
+			startTime = timeRange.slice(0, 2) + ':' + timeRange.slice(2, 4);
+			endTime = timeRange.slice(4, 6) + ':' + timeRange.slice(6, 8);
+		} else {
+			// 判断 'HH:MM-HH:MM' 格式
+			const rangeRegex = new RegExp("^\\d{2}:\\d{2}-\\d{2}:\\d{2}$");
+			if (rangeRegex.test(timeRange)) {
+				// 格式已经是 'HH:MM-HH:MM'
+				[startTime, endTime] = timeRange.split('-');
+			} else {
+				throw new Error(`Time.getTimeRangeTimestamp: 无效的时间范围格式 "${timeRange}"，支持格式: "HH:MM-HH:MM" 或 "HHMMHHMM"`);
+			}
+		}
+
+		// 将时间转换为当天的时间戳
+		const startTimestamp = this._getTimestampFromTime(startTime);
+		const endTimestamp = this._getTimestampFromTime(endTime);
+
+		return [startTimestamp, endTimestamp];
+	}
+
+	/**
+	 * 根据给定时间（HH:MM）返回当天的时间戳
+	 * @param {string} time - 时间字符串，例如 "13:00"
+	 * @returns {number} 返回的时间戳
+	 */
+	static _getTimestampFromTime(time) {
+		const [hours, minutes] = time.split(':').map(Number);
+		const today = new Date();
+
+		// 设置当天的小时和分钟
+		today.setHours(hours, minutes, 0, 0);
+
+		// 返回时间戳（秒）
+		return Math.floor(today.getTime() / 1000);
+	}
+
+	static formatTimeRange(rangeStr) {
+		const regex = new RegExp(
+			"^(\\d{4})-(\\d{2})-(\\d{2})\\s(\\d{2}):(\\d{2}):(\\d{2})\\s-\\s(\\d{4})-(\\d{2})-(\\d{2})\\s(\\d{2}):(\\d{2}):(\\d{2})$"
+		);
+		const match = rangeStr.match(regex);
+		if (!match) {
+			throw new Error(`Time.formatTimeRange: 无效的时间范围格式 "${rangeStr}", 需要格式: "YYYY-MM-DD HH:MM:SS - YYYY-MM-DD HH:MM:SS"`);
+		}
+
+		const [
+			_,
+			year1, month1, day1, hour1, min1, sec1,
+			year2, month2, day2, hour2, min2, sec2
+		] = match;
+
+		if (year1 !== year2 || month1 !== month2 || day1 !== day2) {
+			throw new Error(`Time.formatTimeRange: 时间范围跨天 (${year1}-${month1}-${day1} ≠ ${year2}-${month2}-${day2})`);
+		}
+
+		return `${month1}-${day1} ${hour1}:${min1}-${hour2}:${min2}`;
+	}
+}
 
 class TimerScheduler {
 	static dailyTasks = new Map();      // 每日任务
@@ -1069,5 +1138,30 @@ class TimerScheduler {
 			mainTimerRunning: this.mainTimer !== null,
 			checkInterval: this.checkInterval
 		};
+	}
+}
+
+class FormatValidation {
+	// 校验时间格式，支持 "13:00-14:00" 或 "13001400"
+	static validateTime(timeText) {
+		// 正则匹配 "13:00-14:00" 格式
+		const timeRangeRegex = new RegExp("^\\d{2}:\\d{2}-\\d{2}:\\d{2}$");
+
+		// 正则匹配 "13001400" 格式
+		const timeCompactRegex = new RegExp("^\\d{4}\\d{4}$");
+
+		// 如果时间匹配其中一个格式，返回true，否则返回false
+		if (timeRangeRegex.test(timeText) || timeCompactRegex.test(timeText)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// 校验备注内容是否仅包含汉字、数字或英文
+	static validateMomoFormat(momoText) {
+		// 校验是否为汉字、数字或英文
+		const momoRegex = new RegExp("^[\\u4e00-\\u9fa5a-zA-Z0-9]+$");
+		return momoRegex.test(momoText);
 	}
 }

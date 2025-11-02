@@ -211,14 +211,18 @@ class W2 extends Page {
 		this.calendar_table = DomHelper.bySelector("#calendar_table"); // 日历主体
 		this.prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
 		this.next_month_btn = DomHelper.bySelector("#next_month_btn"); // 查看下个月排班按钮
-
+		// 抽调申请
 		this.apply_activity_transfer_btn = DomHelper.bySelector("#apply_activity_transfer_btn"); // 申请抽调按钮
 		this.apply_activity_transfer_type_div = DomHelper.bySelector("#apply_activity_transfer_type_div"); // 申请抽调类型
 		this.apply_activity_transfer_type_label = DomHelper.bySelector("#apply_activity_transfer_type_label"); // 申请抽调类型标签
 		this.apply_activity_transfer_type_ul = DomHelper.bySelector("#apply_activity_transfer_type_ul"); // 申请抽调类型列表
 		this.apply_activity_transfer_time_text = DomHelper.bySelector("#apply_activity_transfer_time_text"); // 申请抽调时间
 		this.apply_activity_transfer_momo_text = DomHelper.bySelector("#apply_activity_transfer_momo_text"); // 申请抽调备注
-
+		this.info_message_box = DomHelper.bySelector("#info_message_box"); // 信息提示框
+		this.error_message_box = DomHelper.bySelector("#error_message_box"); // 错误提示框
+		// 抽调列表
+		this.apply_activity_transfer_label = DomHelper.bySelector("#apply_activity_transfer_label"); // 申请抽调列表标签
+		this.apply_activity_transfer_table = DomHelper.bySelector("#apply_activity_transfer_table"); // 申请抽调列表
 		this.tooltip = new ToolTip();
 	}
 	// 登录W2
@@ -340,17 +344,50 @@ class W2 extends Page {
 			Global.value.month++;
 			await this.calendarTask();
 		});
+		// 申请抽调按钮
 		this.apply_activity_transfer_btn.addEventListener("click", async () => {
-			// 从这里继续, 写全局变量, 将sprit加入updataUIElements中
-			this.apply_activity_transfer_type_label.value;
-			this.apply_activity_transfer_time_text.value;
-			this.apply_activity_transfer_momo_text.value;
-			await W2Request.qualityInspection();
+			let typeLabel = this.apply_activity_transfer_type_label.innerText;
+			let timeText = this.apply_activity_transfer_time_text.value;
+			let momoText = this.apply_activity_transfer_momo_text.value;
+			// Global.config.w2.apply_activity_transfer_time = this.apply_activity_transfer_time_text.value;
+			// Global.config.w2.apply_activity_transfer_momo = this.apply_activity_transfer_momo_text.value;
+			if (!FormatValidation.validateTime(timeText)) {
+				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "时间格式错误, 请重新输入";
+				this.error_message_box.classList.remove("hidden");
+				this.info_message_box.classList.add("hidden");
+				this.apply_activity_transfer_time_text.classList.add("border-red-500");
+				this.apply_activity_transfer_momo_text.classList.remove("border-red-500");
+				return;
+			}
+			if (!FormatValidation.validateMomo(momoText)) {
+				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "备注格式错误, 请重新输入";
+				this.error_message_box.classList.remove("hidden");
+				this.info_message_box.classList.add("hidden");
+				this.apply_activity_transfer_time_text.classList.remove("border-red-500");
+				this.apply_activity_transfer_momo_text.classList.add("border-red-500");
+				return;
+			}
+			if (FormatValidation.validateMomo(momoText) && FormatValidation.validateTime(timeText)) {
+				DomHelper.bySelectorFromParent(this.info_message_box, "span").innerText = "已发送抽调请求";
+				this.error_message_box.classList.add("hidden");
+				this.info_message_box.classList.remove("hidden");
+				this.apply_activity_transfer_time_text.classList.remove("border-red-500");
+				this.apply_activity_transfer_momo_text.classList.remove("border-red-500");
+			}
+			if (typeLabel === "抽调质检") {
+				// await W2Request.qualityInspection();
+				this.log.debug("if触发");
+				let eventTimestamp = Time.getTimeRangeTimestamp(Global.config.w2.apply_activity_transfer_time);
+				this.log.debug("申请抽调时间戳: ", eventTimestamp);
+			} else if (typeLabel === "线下培训") {
+				// await W2Request.training();
+			}
 		});
 	}
-
 	async updateUIElement() {
 		this.addTooltipMessage();
+		this.applyActivityTransferDropdownList(); // 申请抽调下拉列表的动画
+		TimerScheduler.setIntervalTask(async () => { this.applyActivityTransferList() }, 3000, "W2_APPLY_ACTIVITY_TRANSFER_LIST_TASK");
 		TimerScheduler.setIntervalTask(async () => { this.personalStatusTask() }, 3000, "W2_PERSONAL_STATUS_TASK");
 		TimerScheduler.setIntervalTask(async () => { this.loginStatusTask() }, 3000, "W2_LOGIN_STATUS_TASK");
 		TimerScheduler.setIntervalTask(async () => { this.workingStatusTask() }, 3000, "W2_WORKING_STATUS_TASK");
@@ -399,6 +436,66 @@ class W2 extends Page {
 	async personalStatusTask() {
 		if (Global.config.w2.login_status === W2.status.login_success) {
 			Global.config.w2.personal_informat = await W2Request.getPersonalInformat();
+		}
+	}
+	// 更新抽调列表
+	async applyActivityTransferList() {
+		let result = await W2Request.getApplyApprovalList();
+		// 从这里继续
+		// Global.config.w2.apply_activity_transfer_table = result;
+
+		if (result === null) {
+			this.log.error("获取抽调列表失败");
+			return;
+		}
+		this.apply_activity_transfer_table.innerHTML = "";
+		if (result.code === 200) {
+			result.data.data_list.forEach(item => {
+				const type = item.detail.type;
+				const time = Time.formatTimeRange(item.detail.time);
+				const reason = item.detail.reason;
+				const recordDiv = document.createElement('div');
+				recordDiv.className = 'flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100';
+
+				const typeDiv = document.createElement('div');
+				typeDiv.className = 'flex flex-col';
+				const typeLabel = document.createElement('span');
+				typeLabel.className = 'text-gray-500 text-xs';
+				typeLabel.textContent = '类型';
+				const typeValue = document.createElement('span');
+				typeValue.className = 'text-base font-semibold text-gray-800';
+				typeValue.textContent = type;
+				typeDiv.appendChild(typeLabel);
+				typeDiv.appendChild(typeValue);
+
+				const timeDiv = document.createElement('div');
+				timeDiv.className = 'flex flex-col';
+				const timeLabel = document.createElement('span');
+				timeLabel.className = 'text-gray-500 text-xs';
+				timeLabel.textContent = '时间';
+				const timeValue = document.createElement('span');
+				timeValue.className = 'text-base font-semibold text-gray-800';
+				timeValue.textContent = time;
+				timeDiv.appendChild(timeLabel);
+				timeDiv.appendChild(timeValue);
+
+				const reasonDiv = document.createElement('div');
+				reasonDiv.className = 'flex flex-col';
+				const reasonLabel = document.createElement('span');
+				reasonLabel.className = 'text-gray-500 text-xs';
+				reasonLabel.textContent = '抽调原因';
+				const reasonValue = document.createElement('span');
+				reasonValue.className = 'text-base font-semibold text-gray-800';
+				reasonValue.textContent = reason;
+				reasonDiv.appendChild(reasonLabel);
+				reasonDiv.appendChild(reasonValue);
+
+				recordDiv.appendChild(typeDiv);
+				recordDiv.appendChild(timeDiv);
+				recordDiv.appendChild(reasonDiv);
+
+				this.apply_activity_transfer_table.appendChild(recordDiv);
+			});
 		}
 	}
 	// 登录选项卡的状态显示
@@ -462,8 +559,54 @@ class W2 extends Page {
 			}
 		}
 	}
-	async applyActivityTransfer() {
-		
+	async applyActivityTransferDropdownList() {
+		const selectBox = this.apply_activity_transfer_type_div;
+		const optionsBox = this.apply_activity_transfer_type_ul;
+		const label = this.apply_activity_transfer_type_label;
+		let open = false;
+
+		function animateDropdown(expand) {
+			const duration = 200;
+			const startHeight = expand ? 0 : optionsBox.scrollHeight;
+			const endHeight = expand ? optionsBox.scrollHeight : 0;
+			const startOpacity = expand ? 0 : 1;
+			const endOpacity = expand ? 1 : 0;
+			const startTime = performance.now();
+
+			function step(timestamp) {
+				const progress = Math.min((timestamp - startTime) / duration, 1);
+				optionsBox.style.maxHeight = (startHeight + (endHeight - startHeight) * progress) + 'px';
+				optionsBox.style.opacity = startOpacity + (endOpacity - startOpacity) * progress;
+				if (progress < 1) requestAnimationFrame(step);
+			}
+			requestAnimationFrame(step);
+		}
+
+		// 点击下拉框本身切换
+		selectBox.addEventListener('click', (e) => {
+			e.stopPropagation(); // 阻止冒泡
+			open = !open;
+			animateDropdown(open);
+		});
+
+		// 选择选项
+		optionsBox.querySelectorAll('li').forEach(item => {
+			item.addEventListener('click', (e) => {
+				e.stopPropagation(); // 阻止冒泡
+				label.textContent = item.textContent;
+				open = false;
+				animateDropdown(false);
+			});
+		});
+
+		// 点击页面其他地方收起
+		document.addEventListener('click', () => {
+			if (open) {
+				open = false;
+				animateDropdown(false);
+			}
+		});
+
 	}
 	// 判断今天是否是休息日
 	static async isTodayOff() {
@@ -657,7 +800,6 @@ class W2 extends Page {
 	}
 }
 class LS extends Page {
-
 	static status = {
 		login_success: "登录成功",
 		login_failed: "登录失败",

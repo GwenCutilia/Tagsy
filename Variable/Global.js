@@ -32,6 +32,10 @@ class Global {
 			current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
 			// 任务状态
 			token_check_task: false,
+			// 抽调请求
+			apply_activity_transfer_time: null,
+			apply_activity_transfer_momo: null,
+			apply_activity_transfer_table: null,
 			// 模块时间区间任务设置
 			time_range_login_start: "08:50",
 			time_range_login_end: "08:50",

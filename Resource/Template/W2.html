@@ -56,8 +56,7 @@
 			<div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
 				<!-- 第一列 -->
 				<div class="flex flex-col space-y-6">
-					<!-- 当前登录状态 -->
-					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
 							<div class="flex space-x-2">
@@ -75,8 +74,7 @@
 						<div id="login_status_label" class="text-2xl font-bold text-blue-600">--</div>
 					</div>
 
-					<!-- 申请抽调 -->
-					<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4">
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">申请抽调</div>
 							<div class="flex space-x-2">
@@ -85,97 +83,49 @@
 								</button>
 							</div>
 						</div>
-
 						<!-- 表单区域 -->
 						<div class="space-y-3">
-							<!-- 类型和备注在同一行 -->
 							<div class="grid grid-cols-2 gap-3">
-								<!-- 自定义淡入淡出下拉 -->
 								<div class="relative">
 									<label class="block text-sm text-gray-600 mb-1">类型</label>
 									<div id="apply_activity_transfer_type_div" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer bg-white flex justify-between items-center">
-										<span id="apply_activity_transfer_type_label">申请抽调</span>
+										<span id="apply_activity_transfer_type_label">抽调质检</span>
 										<i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
 									</div>
 									<ul id="apply_activity_transfer_type_ul" class="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden z-50 max-h-0 opacity-0 transition-all duration-200">
-										<li class="px-3 py-2 text-sm hover:bg-indigo-100 cursor-pointer" data-value="offline_training">申请抽调</li>
+										<li class="px-3 py-2 text-sm hover:bg-indigo-100 cursor-pointer" data-value="offline_training">抽调质检</li>
 										<li class="px-3 py-2 text-sm hover:bg-indigo-100 cursor-pointer" data-value="transfer_request">线下培训</li>
 									</ul>
 								</div>
-
-								<!-- 备注输入框 -->
 								<div class="grid grid-cols-1 gap-3">
 									<div>
 										<label for="apply_activity_transfer_time_text" class="block text-sm text-gray-600 mb-1">抽调时间</label>
-										<input type="text" id="apply_activity_transfer_time_text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+										<input type="text" id="apply_activity_transfer_time_text" placeholder="13:00-14:00 && 13001400" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
 									</div>
-									<!-- <div>
-										<label for="apply_activity_transfer_time_text" class="block text-sm text-gray-600 mb-1">结束时间</label>
-										<input type="text" id="apply_activity_transfer_time_text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-									</div> -->
 								</div>
 							</div>
 							<div class="grid grid-cols-1 gap-3">
 								<div>
 									<label for="apply_activity_transfer_momo_text" class="block text-sm text-gray-600 mb-1">备注</label>
-									<input type="text" id="apply_activity_transfer_momo_text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">									
+									<input type="text" id="apply_activity_transfer_momo_text" placeholder="" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">									
 								</div>
+							</div>
+						</div>
+						<div id="info_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+							<div class="flex items-center">
+								<i class="fas fa-info-circle text-blue-500 mr-2"></i>
+								<span class="text-blue-700 text-sm">--</span>
+							</div>
+						</div>
+						<div id="error_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+							<div class="flex items-center">
+								<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+								<span class="text-red-700 text-sm">--</span>
 							</div>
 						</div>
 					</div>
 
-					<script>
-						const selectBox = document.getElementById('apply_activity_transfer_type_div');
-						const optionsBox = document.getElementById('apply_activity_transfer_type_ul');
-						const label = document.getElementById('apply_activity_transfer_type_label');
-						let open = false;
-
-						function animateDropdown(expand) {
-							const duration = 200;
-							const startHeight = expand ? 0 : optionsBox.scrollHeight;
-							const endHeight = expand ? optionsBox.scrollHeight : 0;
-							const startOpacity = expand ? 0 : 1;
-							const endOpacity = expand ? 1 : 0;
-							const startTime = performance.now();
-
-							function step(timestamp) {
-								const progress = Math.min((timestamp - startTime) / duration, 1);
-								optionsBox.style.maxHeight = (startHeight + (endHeight - startHeight) * progress) + 'px';
-								optionsBox.style.opacity = startOpacity + (endOpacity - startOpacity) * progress;
-								if (progress < 1) requestAnimationFrame(step);
-							}
-							requestAnimationFrame(step);
-						}
-
-						// 点击下拉框本身切换
-						selectBox.addEventListener('click', (e) => {
-							e.stopPropagation(); // 阻止冒泡
-							open = !open;
-							animateDropdown(open);
-						});
-
-						// 选择选项
-						optionsBox.querySelectorAll('li').forEach(item => {
-							item.addEventListener('click', (e) => {
-								e.stopPropagation(); // 阻止冒泡
-								label.textContent = item.textContent;
-								open = false;
-								animateDropdown(false);
-							});
-						});
-
-						// 点击页面其他地方收起
-						document.addEventListener('click', () => {
-							if (open) {
-								open = false;
-								animateDropdown(false);
-							}
-						});
-
-					</script>
-
-					<!-- 当前任务时间线 -->
-					<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4 h-[160px]">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center">
 								<div class="text-gray-500 text-sm align-middle">当前任务时间线</div>
@@ -224,8 +174,7 @@
 
 				<!-- 第二列 -->
 				<div class="flex flex-col space-y-6">
-					<!-- 考勤打卡状态 -->
-					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">考勤打卡状态</div>
 							<div class="flex space-x-2">
@@ -240,18 +189,31 @@
 						<div id="check_in_out_label" class="text-2xl font-bold text-green-600">--</div>
 					</div>
 
-					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-5 h-50 flex flex-col justify-center">
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">我的申请</div>
-
 						</div>
+						<div class="flex justify-between items-center mb-1">
+							<div id="apply_activity_transfer_label" class="text-gray-800 font-bold text-xl">--</div>
+							<div class="flex space-x-2">
+								<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+									<i class="fas fa-chevron-left text-gray-600"></i>
+								</button>
+								<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+									<i class="fas fa-chevron-right text-gray-600"></i>
+								</button>
+								<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+									<i class="fa-solid fa-arrow-rotate-right"></i>
+								</button>
+							</div>
+						</div>
+						<div id="apply_activity_transfer_table" class="mt-3 space-y-3 overflow-y-auto max-h-[calc(5*64px+16px)]"></div>
 					</div>
 				</div>
 
 				<!-- 第三列 -->
 				<div class="flex flex-col space-y-6">
-					<!-- 当前工作状态 -->
-					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">当前工作状态</div>
 							<div class="flex space-x-2">
@@ -263,8 +225,7 @@
 						<div id="meal_working_status_label" class="text-2xl font-bold text-blue-600">--</div>
 					</div>
 
-					<!-- 我的排班 -->
-					<div class="grid-cell bg-white shadow rounded-xl p-6 w-full" draggable="true">
+					<div class="grid-cell bg-white shadow rounded-xl p-6 w-full">
 						<div class="text-gray-500 text-sm mb-2">我的排班</div>
 						<div class="flex justify-between items-center mb-4">
 							<div id="calendar_label" class="text-gray-800 font-bold text-xl">--</div>
@@ -287,7 +248,6 @@
 							<div class="py-2">六</div>
 						</div>
 						<div id="calendar_table" class="grid grid-cols-7 text-center text-sm gap-1">
-							<!-- 动态生成的日期 -->
 						</div>
 					</div>
 				</div>
@@ -295,79 +255,5 @@
 			</div>
 		</main>
 	</div>
-
-	<!-- <script>
-		document.addEventListener('DOMContentLoaded', function() {
-			// 拖拽功能实现
-			let draggedElement = null;
-			
-			// 获取所有可拖拽元素
-			const draggableElements = document.querySelectorAll('.grid-cell');
-			
-			// 添加拖拽事件监听器
-			draggableElements.forEach(element => {
-				element.addEventListener('dragstart', handleDragStart);
-				element.addEventListener('dragend', handleDragEnd);
-				element.addEventListener('dragover', handleDragOver);
-				element.addEventListener('dragenter', handleDragEnter);
-				element.addEventListener('dragleave', handleDragLeave);
-				element.addEventListener('drop', handleDrop);
-			});
-			
-			// 拖拽事件处理函数
-			function handleDragStart(e) {
-				draggedElement = this;
-				this.style.opacity = '0.5';
-				this.style.transform = 'rotate(5deg)';
-				e.dataTransfer.effectAllowed = 'move';
-				e.dataTransfer.setData('text/html', this.innerHTML);
-			}
-			
-			function handleDragEnd(e) {
-				this.style.opacity = '1';
-				this.style.transform = 'rotate(0deg)';
-				draggableElements.forEach(element => {
-					element.style.border = '';
-					element.style.backgroundColor = '';
-				});
-			}
-			
-			function handleDragOver(e) {
-				e.preventDefault();
-				return false;
-			}
-			
-			function handleDragEnter(e) {
-				this.style.border = '2px dashed #3b82f6';
-				this.style.backgroundColor = '#f0f9ff';
-			}
-			
-			function handleDragLeave(e) {
-				this.style.border = '';
-				this.style.backgroundColor = '';
-			}
-			
-			function handleDrop(e) {
-				e.stopPropagation();
-				
-				if (draggedElement !== this) {
-					// 交换元素位置
-					const grid = document.getElementById('dashboard-grid');
-					const draggedIndex = Array.from(grid.children).indexOf(draggedElement);
-					const dropIndex = Array.from(grid.children).indexOf(this);
-					
-					if (draggedIndex < dropIndex) {
-						grid.insertBefore(draggedElement, this.nextSibling);
-					} else {
-						grid.insertBefore(draggedElement, this);
-					}
-				}
-				
-				this.style.border = '';
-				this.style.backgroundColor = '';
-				return false;
-			}
-		});
-	</script> -->
 </body>
 </html>
