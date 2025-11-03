@@ -897,7 +897,7 @@ class Time {
 		);
 		const match = rangeStr.match(regex);
 		if (!match) {
-			throw new Error(`Time.formatTimeRange: 无效的时间范围格式 "${rangeStr}", 需要格式: "YYYY-MM-DD HH:MM:SS - YYYY-MM-DD HH:MM:SS"`);
+			throw new Error('Time.formatTimeRange: 无效的时间范围格式 "' + rangeStr + '", 需要格式: "YYYY-MM-DD HH:MM:SS - YYYY-MM-DD HH:MM:SS"');
 		}
 
 		const [
@@ -907,10 +907,41 @@ class Time {
 		] = match;
 
 		if (year1 !== year2 || month1 !== month2 || day1 !== day2) {
-			throw new Error(`Time.formatTimeRange: 时间范围跨天 (${year1}-${month1}-${day1} ≠ ${year2}-${month2}-${day2})`);
+			throw new Error('Time.formatTimeRange: 时间范围跨天 (' + year1 + '-' + month1 + '-' + day1 + ' ≠ ' + year2 + '-' + month2 + '-' + day2 + ')');
 		}
 
-		return `${month1}-${day1} ${hour1}:${min1}-${hour2}:${min2}`;
+		// 返回 HTML 格式字符串（中间换行）
+		return [month1 + '-' + day1, + hour1 + ':' + min1 + '-' + hour2 + ':' + min2];
+	}
+	/**
+	 * 根据今天的日期生成一个偏移后的时间范围
+	 * @param {number} offsetStart - 相对今天的起始偏移天数（负数为过去，正数为未来）
+	 * @param {number} offsetEnd - 相对今天的结束偏移天数（负数为过去，正数为未来）
+	 * @returns {[string, string]} 返回 ["2025-09-15", "2025-10-15"] 这样的数组
+	 */
+	static getDateRangeByToday(offsetStart, offsetEnd) {
+		if (!Number.isInteger(offsetStart) || !Number.isInteger(offsetEnd)) {
+			throw new Error(`Time.getDateRangeByToday: 参数必须为整数, 当前为 ${offsetStart}, ${offsetEnd}`);
+		}
+
+		const today = new Date();
+
+		// 计算偏移后的开始与结束日期
+		const beginDate = new Date(today);
+		beginDate.setDate(today.getDate() + offsetStart);
+
+		const endDate = new Date(today);
+		endDate.setDate(today.getDate() + offsetEnd);
+
+		// 格式化函数
+		const format = (d) => {
+			const y = d.getFullYear();
+			const m = (d.getMonth() + 1).toString().padStart(2, '0');
+			const day = d.getDate().toString().padStart(2, '0');
+			return `${y}-${m}-${day}`;
+		};
+
+		return [format(beginDate), format(endDate)];
 	}
 }
 
@@ -1159,7 +1190,7 @@ class FormatValidation {
 	}
 
 	// 校验备注内容是否仅包含汉字、数字或英文
-	static validateMomoFormat(momoText) {
+	static validateMomo(momoText) {
 		// 校验是否为汉字、数字或英文
 		const momoRegex = new RegExp("^[\\u4e00-\\u9fa5a-zA-Z0-9]+$");
 		return momoRegex.test(momoText);

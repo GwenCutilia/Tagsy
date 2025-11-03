@@ -30,8 +30,6 @@ class Global {
 			check_in_out_status: null, // 考勤打卡状态
 			meal_working_status: null, // 工作时长状态
 			current_time_line_task_status: null, // 定时打卡任务, 当前任务选项卡
-			// 任务状态
-			token_check_task: false,
 			// 抽调请求
 			apply_activity_transfer_time: null,
 			apply_activity_transfer_momo: null,
@@ -83,6 +81,7 @@ class Global {
 	static value = {
 		// 累加器 && 标志位
 		month: Time.getCurrentMonth(), // 当前月份
+		apply_approval_transfer_list_page: 1,
 	}
 	static w2_TaskConfig = {
 		W2_LOGIN_TASK: "W2_LOGIN_TASK",

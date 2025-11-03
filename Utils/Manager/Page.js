@@ -58,6 +58,7 @@ class Template {
 	}
 	static async W2Task() {
 		await W2.login();
+		await W2.intervalTask();
 		await W2.currentTask();
 		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
@@ -182,19 +183,26 @@ class W2 extends Page {
 	}
 
 	async init() {
-		// 初始化
+		// 待优化, 将其他h5中的页面的拖动效果取消
+		// 初始化Dom
+		// 登录状态
 		this.login_status_label = DomHelper.bySelector("#login_status_label"); // 登录状态
-		this.check_in_out_label = DomHelper.bySelector("#check_in_out_label"); // 考勤打卡状态
-		this.meal_working_status_label = DomHelper.bySelector("#meal_working_status_label"); // 工作状态
 		this.login_btn = DomHelper.bySelector("#login_btn"); // 登录按钮
 		this.relogin_btn = DomHelper.bySelector("#relogin_btn"); // 重新登录按钮
 		this.login_out_btn = DomHelper.bySelector("#login_out_btn"); // 退出登录按钮
+		// 考勤状态
+		this.check_in_out_label = DomHelper.bySelector("#check_in_out_label"); // 考勤打卡状态
 		this.check_in_btn = DomHelper.bySelector("#check_in_btn"); // 打卡按钮
 		this.check_out_btn = DomHelper.bySelector("#check_out_btn"); // 下班按钮
+		// 工作状态
+		this.meal_working_status_label = DomHelper.bySelector("#meal_working_status_label"); // 工作状态
 		this.meal_working_status_btn = DomHelper.bySelector("#meal_working_status_btn"); // 切换状态按钮
+		// 任务线
 		this.current_time_line_task_start_btn = DomHelper.bySelector("#current_time_line_task_start_btn"); // 开始W2任务按钮
 		this.current_time_line_task_stop_btn = DomHelper.bySelector("#current_time_line_task_stop_btn"); // 停止W2任务按钮
+		// 任务开关
 		this.current_time_line_task_turn_on_off_i = DomHelper.bySelector("#current_time_line_task_turn_on_off_i"); // 任务开关图标
+		// 待优化, 图标全部改成font-awesome图标
 		this.current_time_line_task_icon_0 = DomHelper.bySelector("#current_time_line_task_icon_0"); // 任务1图标
 		this.current_time_line_task_icon_1 = DomHelper.bySelector("#current_time_line_task_icon_1"); // 任务2图标
 		this.current_time_line_task_icon_2 = DomHelper.bySelector("#current_time_line_task_icon_2"); // 任务3图标
@@ -207,6 +215,7 @@ class W2 extends Page {
 		this.current_time_line_task_label_1 = DomHelper.bySelector("#current_time_line_task_label_1"); // 任务2标签
 		this.current_time_line_task_label_2 = DomHelper.bySelector("#current_time_line_task_label_2"); // 任务3标签
 		this.current_time_line_task_label_3 = DomHelper.bySelector("#current_time_line_task_label_3"); // 任务4标签
+		// 排班列表
 		this.calendar_label = DomHelper.bySelector("#calendar_label"); // 日历月份
 		this.calendar_table = DomHelper.bySelector("#calendar_table"); // 日历主体
 		this.prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
@@ -222,8 +231,11 @@ class W2 extends Page {
 		this.error_message_box = DomHelper.bySelector("#error_message_box"); // 错误提示框
 		// 抽调列表
 		this.apply_activity_transfer_label = DomHelper.bySelector("#apply_activity_transfer_label"); // 申请抽调列表标签
-		this.apply_activity_transfer_table = DomHelper.bySelector("#apply_activity_transfer_table"); // 申请抽调列表
+		this.apply_activity_transfer_table = DomHelper.bySelector("#apply_activity_transfer_table"); // 申请抽调列表表格
 		this.tooltip = new ToolTip();
+		this.apply_activity_transfer_prev_page_button = DomHelper.bySelector("#apply_activity_transfer_prev_page_button"); // 抽调列表上一页按钮
+		this.apply_activity_transfer_next_page_button = DomHelper.bySelector("#apply_activity_transfer_next_page_button"); // 抽调列表下一页按钮
+		this.apply_activity_transfer_reflash_button = DomHelper.bySelector("#apply_activity_transfer_reflash_button"); // 抽调列表刷新按钮
 	}
 	// 登录W2
 	static async login() {
@@ -273,19 +285,14 @@ class W2 extends Page {
 	}
 	// 心跳
 	static async loginCheck() {
-		Global.config.w2.token_check_task = true; // 开启任务
-		while (Global.config.w2.token_check_task === true) {
-			let result = await W2Request.loginCheck();
-			this.log.log("result: ", result);
-			if (result.code === 200) {
-				Global.config.w2.token = result.data.token;
-				Global.config.w2.login_status = W2.status.login_success;
-			} else {
-				this.log.error("Token失效, 请重新登录");
-				Global.config.w2.token_check_task = false; // 关闭任务
-				Global.config.w2.login_status = W2.status.login_failed;
-			}
-			await System.sleepSeconds(60);
+		let result = await W2Request.loginCheck();
+		this.log.log("result: ", result);
+		if (result.code === 200) {
+			Global.config.w2.token = result.data.token;
+			Global.config.w2.login_status = W2.status.login_success;
+		} else {
+			this.log.error("Token失效, 请重新登录");
+			Global.config.w2.login_status = W2.status.login_failed;
 		}
 	}
 	bindEvents() {
@@ -374,26 +381,37 @@ class W2 extends Page {
 				this.apply_activity_transfer_time_text.classList.remove("border-red-500");
 				this.apply_activity_transfer_momo_text.classList.remove("border-red-500");
 			}
+			Global.config.w2.apply_activity_transfer_time = this.apply_activity_transfer_time_text.value;
+			Global.config.w2.apply_activity_transfer_momo = this.apply_activity_transfer_momo_text.value;
 			if (typeLabel === "抽调质检") {
-				// await W2Request.qualityInspection();
-				this.log.debug("if触发");
-				let eventTimestamp = Time.getTimeRangeTimestamp(Global.config.w2.apply_activity_transfer_time);
-				this.log.debug("申请抽调时间戳: ", eventTimestamp);
+				await W2Request.qualityInspection();
 			} else if (typeLabel === "线下培训") {
-				// await W2Request.training();
+				await W2Request.training();
 			}
+		});
+		// 抽调列表
+		this.apply_activity_transfer_prev_page_button.addEventListener("click", async () => {
+			Global.value.apply_approval_transfer_list_page--;
+			await this.applyActivityTransferList();
+		});
+		this.apply_activity_transfer_next_page_button.addEventListener("click", async () => {
+			Global.value.apply_approval_transfer_list_page++;
+			await this.applyActivityTransferList();
+		});
+		this.apply_activity_transfer_reflash_button.addEventListener("click", async () => {
+			await this.applyActivityTransferList();
 		});
 	}
 	async updateUIElement() {
 		this.addTooltipMessage();
 		this.applyActivityTransferDropdownList(); // 申请抽调下拉列表的动画
-		TimerScheduler.setIntervalTask(async () => { this.applyActivityTransferList() }, 3000, "W2_APPLY_ACTIVITY_TRANSFER_LIST_TASK");
-		TimerScheduler.setIntervalTask(async () => { this.personalStatusTask() }, 3000, "W2_PERSONAL_STATUS_TASK");
-		TimerScheduler.setIntervalTask(async () => { this.loginStatusTask() }, 3000, "W2_LOGIN_STATUS_TASK");
-		TimerScheduler.setIntervalTask(async () => { this.workingStatusTask() }, 3000, "W2_WORKING_STATUS_TASK");
-		TimerScheduler.setIntervalTask(async () => { this.workHourStatusTask() }, 3000, "W2_WORK_HOUR_STATUS_TASK");
-		TimerScheduler.setIntervalTask(async () => { this.currentTimeLineTask() }, 3000, "W2_CURRENT_TIME_LINE_TASK");
-		TimerScheduler.setIntervalTask(async () => { this.calendarTask() }, 10 * 1000, "W2_CALENDAR_TASK");
+		TimerScheduler.setIntervalTask(async () => { this.applyActivityTransferList() }, 10 * 1000, "W2_APPLY_ACTIVITY_TRANSFER_LIST_TASK"); // 抽调列表
+		TimerScheduler.setIntervalTask(async () => { this.personalStatusTask() }, 3000, "W2_PERSONAL_STATUS_TASK"); // 个人信息
+		TimerScheduler.setIntervalTask(async () => { this.loginStatusTask() }, 3000, "W2_LOGIN_STATUS_TASK"); // 登录状态
+		TimerScheduler.setIntervalTask(async () => { this.workingStatusTask() }, 3000, "W2_WORKING_STATUS_TASK"); // 工作状态
+		TimerScheduler.setIntervalTask(async () => { this.workHourStatusTask() }, 3000, "W2_WORK_HOUR_STATUS_TASK"); // 考勤状态
+		TimerScheduler.setIntervalTask(async () => { this.currentTimeLineTask() }, 3000, "W2_CURRENT_TIME_LINE_TASK"); // 当前任务时间线
+		TimerScheduler.setIntervalTask(async () => { this.calendarTask() }, 10 * 1000, "W2_CALENDAR_TASK"); // 排班列表
 	}
 	// 获取工作信息
 	static async getPersonalInformat() {
@@ -429,8 +447,11 @@ class W2 extends Page {
 		this.tooltip.addTooltip(this.current_time_line_task_turn_on_off_i, "亮起代表任务正常运行");
 		this.tooltip.addTooltip(this.current_time_line_task_start_btn, "启动任务");
 		this.tooltip.addTooltip(this.current_time_line_task_stop_btn, "停止任务");
+		// 排班列表
 		this.tooltip.addTooltip(this.prev_month_btn, "查看上个月排班");
 		this.tooltip.addTooltip(this.next_month_btn, "查看下个月排班");
+		// 申请抽调
+		this.tooltip.addTooltip(this.apply_activity_transfer_momo_text, "格式为中英文, 不允许有符号");
 	}
 	// 每三秒更新一次考勤状态和工作状态
 	async personalStatusTask() {
@@ -441,21 +462,42 @@ class W2 extends Page {
 	// 更新抽调列表
 	async applyActivityTransferList() {
 		let result = await W2Request.getApplyApprovalList();
-		// 从这里继续
 		// Global.config.w2.apply_activity_transfer_table = result;
-
+		
 		if (result === null) {
 			this.log.error("获取抽调列表失败");
 			return;
 		}
+		if (Global.value.apply_approval_transfer_list_page < 1) {
+			Global.value.apply_approval_transfer_list_page = 1;
+			this.apply_activity_transfer_prev_page_button.disabled = true;
+			this.apply_activity_transfer_prev_page_button.classList.add('opacity-50');
+			this.apply_activity_transfer_prev_page_button.classList.add('text-gray-400');
+		} else {
+			this.apply_activity_transfer_prev_page_button.disabled = false;
+			this.apply_activity_transfer_prev_page_button.classList.remove('opacity-50');
+			this.apply_activity_transfer_prev_page_button.classList.remove('text-gray-400');
+		}
+		if (Global.value.apply_approval_transfer_list_page > 3) {
+			Global.value.apply_approval_transfer_list_page = 3;
+			this.apply_activity_transfer_next_page_button.disabled = true;
+			this.apply_activity_transfer_next_page_button.classList.add('opacity-50');
+			this.apply_activity_transfer_next_page_button.classList.add('text-gray-400');
+		} else {
+			this.apply_activity_transfer_next_page_button.disabled = false;
+			this.apply_activity_transfer_next_page_button.classList.remove('opacity-50');
+			this.apply_activity_transfer_next_page_button.classList.remove('text-gray-400');
+		}
+
 		this.apply_activity_transfer_table.innerHTML = "";
 		if (result.code === 200) {
 			result.data.data_list.forEach(item => {
+				const timeTemp = Time.formatTimeRange(item.detail.time);
 				const type = item.detail.type;
-				const time = Time.formatTimeRange(item.detail.time);
+				const time = timeTemp[1];
 				const reason = item.detail.reason;
 				const recordDiv = document.createElement('div');
-				recordDiv.className = 'flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100';
+				recordDiv.className = 'grid grid-cols-3 flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100';
 
 				const typeDiv = document.createElement('div');
 				typeDiv.className = 'flex flex-col';
@@ -472,7 +514,7 @@ class W2 extends Page {
 				timeDiv.className = 'flex flex-col';
 				const timeLabel = document.createElement('span');
 				timeLabel.className = 'text-gray-500 text-xs';
-				timeLabel.textContent = '时间';
+				timeLabel.textContent = '时间 (' + timeTemp[0] + ")";
 				const timeValue = document.createElement('span');
 				timeValue.className = 'text-base font-semibold text-gray-800';
 				timeValue.textContent = time;
@@ -610,47 +652,55 @@ class W2 extends Page {
 	}
 	// 判断今天是否是休息日
 	static async isTodayOff() {
-		// 记录之前通过其他函数更改的月份
-		let saveMonth = Global.value.month;
+		// 保存当前月份，避免副作用
+		const prevMonth = Global.value.month;
 		Global.value.month = Time.getCurrentMonth();
+
 		// 获取当前月份的排班数据
 		const scheduleResult = await W2Request.queryPersonalSchedule();
-		// 恢复之前记录的月份
-		Global.value.month = saveMonth;
-		// 检查返回数据是否有效
+
+		// 恢复原月份
+		Global.value.month = prevMonth;
+
+		// 基础数据校验
 		if (!scheduleResult || !scheduleResult.data || 
-			!scheduleResult.data.detail_data_list || 
+			!Array.isArray(scheduleResult.data.detail_data_list) || 
 			scheduleResult.data.detail_data_list.length === 0) {
 			this.log.warn("无法获取排班数据");
-			return false;
+			return true; // 若无法获取数据，视为休息
 		}
 
 		const detailData = scheduleResult.data.detail_data_list[0];
-		const scheduleInfos = detailData.schedule_infos;
-		
-		// 获取今天的日期字符串（格式：YYYY-MM-DD）
-		const today = Time.getCurrentDate('default');
-		
-		// 检查今天是否有排班信息
+		const scheduleInfos = detailData.schedule_infos || {};
+
+		// 获取今天日期字符串（格式：YYYY-MM-DD）
+		const today = Time.getCurrentDate("default");
+
+		// 若没有今日排班信息，视为休息日
 		if (!scheduleInfos[today]) {
-			this.log.warn(`今天 ${today} 没有排班信息`);
-			return false;
+			this.log.info(`今天 ${today} 未排班，视为休息日`);
+			return true;
 		}
 
 		const todaySchedule = scheduleInfos[today];
-		
-		// 判断是否是休息日
-		const isOff = todaySchedule.schedule_conf_name === "休息";
-		
+		const scheduleName = todaySchedule.schedule_conf_name || "";
+
+		// 判断是否为休息日
+		const isOff = scheduleName.includes("休息");
+
+		this.log.log(`今日排班: ${scheduleName}, 是否休息: ${isOff}`);
+
 		return isOff;
 	}
+
 	// 我的排班日历
 	async calendarTask() {
 		let result = await W2Request.queryPersonalSchedule();
 		if (Global.config.w2.login_status === W2.status.login_success && result.code === 200) {
-			// 日历标题实现
+			// 日历标题
 			calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
-			// 按钮逻辑 - 待优化
+
+			// 按钮逻辑
 			if (Global.value.month >= Time.getCurrentMonth()) {
 				this.next_month_btn.disabled = true;
 				this.next_month_btn.classList.add('opacity-50');
@@ -660,27 +710,32 @@ class W2 extends Page {
 				this.next_month_btn.classList.remove('opacity-50');
 				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.remove('text-gray-400');
 			}
+
 			if (Global.value.month <= 1) {
 				this.prev_month_btn.disabled = true;
-				this.next_month_btn.classList.add('opacity-50');
-				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
+				this.prev_month_btn.classList.add('opacity-50');
+				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.add('text-gray-400');
 			} else {
 				this.prev_month_btn.disabled = false;
 				this.prev_month_btn.classList.remove('opacity-50');
-				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
+				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.remove('text-gray-400');
 			}
+
 			// 日历日期实现
-			// 更新日历页需要的<div>框架
 			let firstWeekDay = Time.getFirstDayOfMonthWeek(result.data.column[0].date);
 			let lastDate = parseInt(result.data.column[result.data.column.length - 1].date.split("-")[2]);
 			let offsetToSaturday = (firstWeekDay) % 7;
 			this.calendar_table.innerHTML = '';
+
 			for (let i = 0; i < offsetToSaturday; i++) {
 				const emptyDiv = document.createElement("div");
 				emptyDiv.className = "py-2 rounded";
 				this.calendar_table.appendChild(emptyDiv);
 			}
-			// 生成日历页
+
+			// 获取排班数据
+			const scheduleInfos = result.data.detail_data_list?.[0]?.schedule_infos || {};
+
 			for (let d = 1; d <= lastDate; d++) {
 				const dateDiv = document.createElement('div');
 				const current = new Date(Time.getCurrentYear(), Global.value.month - 1, d);
@@ -688,34 +743,50 @@ class W2 extends Page {
 				dateDiv.className = 'py-2 rounded cursor-pointer transition-colors duration-200';
 				dateDiv.textContent = d;
 
-				// 格式化日期为 YYYY-MM-DD 格式
-				// let result = await W2Request.queryCurrentMonthSchedule();
-				// let lastDate = result.data.detail_data_list[0].schedule_infos["2025-10-01"]
-				// console.log(lastDate);
 				const formattedDate = Time.formatDate(Time.getCurrentYear(), Global.value.month, d);
-				
-				// 检查是否为休息日
-				const daySchedule = result.data.detail_data_list[0].schedule_infos[formattedDate];
-				if (daySchedule && daySchedule.schedule_conf_name === "休息") {
-					// 休息日样式 - 使用API返回的颜色
-					dateDiv.style.backgroundColor = '#DCEDC8';  // 明亮的浅绿色
-					dateDiv.style.color = '#689F38';            // 中等绿色文字
+				const daySchedule = scheduleInfos[formattedDate];
+
+				// ✅ 判断休息逻辑：接口未返回该日期 或 schedule_conf_name === "休息"
+				if (!daySchedule || daySchedule.schedule_conf_name === "休息") {
+					dateDiv.style.backgroundColor = '#DCEDC8';  // 浅绿背景
+					dateDiv.style.color = '#689F38';            // 深绿文字
 					dateDiv.classList.add('font-semibold', 'shadow-sm');
 					this.tooltip.addTooltip(dateDiv, "休息日");
 				} else if (Time.isToday(current)) {
-					// 今天但不是休息日
+					// 今天
 					dateDiv.classList.add('bg-blue-600', 'text-white', 'font-semibold', 'shadow-sm');
 					this.tooltip.addTooltip(dateDiv, "这是今天");
 				} else {
 					// 普通工作日
 					dateDiv.classList.add('bg-gray-50', 'hover:bg-blue-100');
 				}
+
 				this.calendar_table.appendChild(dateDiv);
 			}
 		} else {
 			calendar_label.innerText = W2.status.unknown;
 			calendar_table.innerHTML = "";
 		}
+	}
+	// 间隔任务
+	static async intervalTask() {
+		const taskConfigs = [
+			{
+				action: async () => { 
+					await W2.loginCheck() 
+				},
+				intervalMs: 60 * 1000,
+				name: Global.w2_TaskConfig.W2_LOGIN_TASK
+			}
+		]
+		for (const config of taskConfigs) {
+			TimerScheduler.setIntervalTask(
+				config.action,
+				config.intervalMs,
+				config.name
+			);
+		}
+		this.log.log("W2间隔任务已启动");
 	}
 	// 定时任务
 	static async currentTask() {

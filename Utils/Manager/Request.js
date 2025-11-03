@@ -152,8 +152,8 @@ class W2Request extends HttpRequest {
 		return await this._applyActivityTransfer("training");
 	}
 	static async _applyActivityTransfer(activityType) {
-		url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
-		headers = this.CONFIG.DEFAULT_HEADERS;
+		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
+		const headers = this.CONFIG.DEFAULT_HEADERS;
 		let eventTimestamp = Time.getTimeRangeTimestamp(Global.config.w2.apply_activity_transfer_time);
 
 		const data = {
@@ -162,11 +162,11 @@ class W2Request extends HttpRequest {
 			"end_time": eventTimestamp[1],
 			"memo": Global.config.w2.apply_activity_transfer_momo,
 			"header": {
-				"staff": "lingboweibu(beijing)kejiyouxiangongsi_1101488685013168128",
+				"staff": Global.config.w2.user_name,
 				"staff_id": 0,
-				"oa_ticket": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjA2OTI3MDUsInN0YWZmIjoibGluZ2Jvd2VpYnUoYmVpamluZylrZWppeW91eGlhbmdvbmdzaV8xMTAxNDg4Njg1MDEzMTY4MTI4Iiwic3RhZmZfaWQiOjAsImV4cCI6MTc2MDY5MzAwNS4xMDc0MzI0fQ.eEG8M2fWPrtbDIbG5XabsITzy5xc9IuLnaWkpP1srqQ",
+				"oa_ticket": Global.config.w2.token,
 				"tracer": "|b077b6d5cc0a68|1760692722212",
-				"tenant_token": "lingboweibu(beijing)kejiyouxiangongsi_8ff28136-0add-11"
+				"tenant_token": Global.config.w2.tenant_token
 			}
 		}
 		const result = await this._request("POST", url, headers, data);
@@ -177,10 +177,10 @@ class W2Request extends HttpRequest {
 		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/get_my_apply_approval";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
-			"page": 1,
+			"page": Global.value.apply_approval_transfer_list_page,
 			"page_size": 3,
-			"begin_date": "2025-10-02", // 开始查询的时间
-			"end_date": "2025-11-02", // 结束查询的时间
+			"begin_date": Time.getDateRangeByToday(-31, 0)[0], // 开始查询的时间
+			"end_date": Time.getDateRangeByToday(-31, 0)[1], // 结束查询的时间
 			"apply_type_list": [ // 类型
 				"transfer",
 				"holiday",
@@ -202,6 +202,7 @@ class W2Request extends HttpRequest {
 		}
 
 		const result = await this._request("POST", url, headers, data);
+		this.log.log("getApplyApprovalList result: ", result);
 		return result;
 	}
 	// 前往用餐
