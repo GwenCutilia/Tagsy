@@ -1,5 +1,5 @@
 // Tagsy_Core.js
-async function Core() {
+async function core() {
 	// 初始化设置
 	Global.init();
 	log = new Logger("Core");

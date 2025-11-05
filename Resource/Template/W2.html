@@ -4,6 +4,14 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Tagsy 仪表盘</title>
+	<script>
+		// 屏蔽 tailwind cdn 的警告
+		const _warn = console.warn;
+		console.warn = function(msg) {
+			if (String(msg).includes("cdn.tailwindcss.com")) return;
+			_warn.apply(console, arguments);
+		};
+	</script>
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
@@ -73,7 +81,7 @@
 						</div>
 						<div id="login_status_label" class="text-2xl font-bold text-blue-600">--</div>
 					</div>
-
+					<!-- 申请抽调 -->
 					<div class="grid-cell bg-white shadow rounded-xl p-5 flex flex-col space-y-4">
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">申请抽调</div>
@@ -142,30 +150,32 @@
 								</button>
 							</div>
 						</div>
+						<!-- 任务时间线 -->
 						<div class="flex-1 flex items-center justify-between relative">
+							<!-- 背景连线 -->
 							<div class="absolute top-10 left-4 right-4 h-0.5 bg-gray-300 z-0"></div>
 
 							<div class="flex flex-col items-center relative z-10">
-								<div id="current_time_line_task_icon_0" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="current_time_line_task_arrow_0" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<!-- 上班打卡：时钟图标 -->
+								<i id="current_time_line_task_icon_0" class="fa-solid fa-briefcase text-blue-600 text-lg"></i>
 								<div id="current_time_line_task_label_0" class="mt-2 text-gray-700 text-sm">上班打卡</div>
 							</div>
 
 							<div class="flex flex-col items-center relative z-10">
-								<div id="current_time_line_task_icon_1" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="current_time_line_task_arrow_1" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<!-- 前往用餐：餐具图标 -->
+								<i id="current_time_line_task_icon_1" class="fa-solid fa-utensils text-blue-600 text-lg"></i>
 								<div id="current_time_line_task_label_1" class="mt-2 text-gray-700 text-sm">前往用餐</div>
 							</div>
 
 							<div class="flex flex-col items-center relative z-10">
-								<div id="current_time_line_task_icon_2" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="current_time_line_task_arrow_2" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<!-- 切换标注：交换图标 -->
+								<i id="current_time_line_task_icon_2" class="fa-solid fa-pen-to-square text-blue-600 text-lg"></i>
 								<div id="current_time_line_task_label_2" class="mt-2 text-gray-700 text-sm">切换标注</div>
 							</div>
 
 							<div class="flex flex-col items-center relative z-10">
-								<div id="current_time_line_task_icon_3" class="w-4 h-4 bg-blue-600 rounded-full"></div>
-								<div id="current_time_line_task_arrow_3" class="mt-1 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-blue-600"></div>
+								<!-- 下班打卡：门口或打卡完成图标 -->
+								<i id="current_time_line_task_icon_3" class="fa-solid fa-door-open text-blue-600 text-lg"></i>
 								<div id="current_time_line_task_label_3" class="mt-2 text-gray-700 text-sm">下班打卡</div>
 							</div>
 						</div>
@@ -196,14 +206,14 @@
 						<div class="flex justify-between items-center mb-1">
 							<div id="apply_activity_transfer_label" class="text-gray-800 font-bold text-xl">--</div>
 							<div class="flex space-x-2">
-								<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-									<i id="apply_activity_transfer_prev_page_button" class="fas fa-chevron-left text-gray-600"></i>
+								<button id="apply_activity_transfer_prev_page_btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+									<i class="fas fa-chevron-left text-gray-600"></i>
 								</button>
-								<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-									<i id="apply_activity_transfer_next_page_button" class="fas fa-chevron-right text-gray-600"></i>
+								<button id="apply_activity_transfer_next_page_btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+									<i class="fas fa-chevron-right text-gray-600"></i>
 								</button>
-								<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-									<i id="apply_activity_transfer_reflash_button" class="fa-solid fa-arrow-rotate-right"></i>
+								<button id="apply_activity_transfer_refresh_page_btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+									<i class="fa-solid fa-arrow-rotate-right"></i>
 								</button>
 							</div>
 						</div>
@@ -251,7 +261,6 @@
 						</div>
 					</div>
 				</div>
-
 			</div>
 		</main>
 	</div>

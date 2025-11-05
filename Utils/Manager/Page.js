@@ -1,4 +1,3 @@
-// 
 class Page {
 	// 静态属性: 日志和路由配置
 	static log = new Logger("Page");
@@ -12,7 +11,6 @@ class Page {
 
 	// 实例属性: 每个页面实例的日志
 	constructor() {
-		this.runtimeLog = new RuntimeLogger(this.constructor.name); // 以类名作为日志标识
 		this.log = new Logger(this.constructor.name);
 	}
 
@@ -60,93 +58,63 @@ class Template {
 		await W2.login();
 		await W2.intervalTask();
 		await W2.currentTask();
-		TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 	}
 	static async LSTask() {
 		await LS.login();
 		await LS.currentTask();
-		// TimerScheduler.setIntervalTask(LS.currentTask.bind(this), 60 * 1000 * 60, "LS_CURRENT_TASK");
 	}
 }
-class Index extends Template {
-	clearID = "#clear_log_btn"; // 清空日志按钮
-	loadingStatusValueID = "#loading_status_value"; // 加载状态显示
-	SYSTEM_OPERATING_STATUSValueID = "#operating_status_value"; // 运行状态显示
-	btnLoadID = "#btn_load"; // 加载按钮
-	btnUnloadID = "#btn_unload"; // 卸载按钮
-	SYSTEM_RUNNING_TIMEValueID = "#running_time_value"; // 运行时间显示
+class Index extends Page {
 	constructor() {
 		super();
-		this.bindEvents();
 		this.init();
+		this.bindEvents();
 		this.updateUIElement();
 	}
-	bindEvents() {
-		if (DomHelper.exists(this.clearID)) {
-			DomHelper.bySelector(this.clearID).addEventListener("click", () => {
-				this.runtimeLog.clear();
-			});
-		}
-		if (DomHelper.exists(this.btnLoadID)) {
-			DomHelper.bySelector(this.btnLoadID).addEventListener("click", async () => {
-				Global.config.system.status = false;
-				await LoadGlobalAllScripts();
-				Resource.AllLoaded();
-				DomHelper.bySelector(this.loadingStatusValueID).innerText = "已加载";
-			});
-		}
-		if (DomHelper.exists(this.btnUnloadID)) {
-			DomHelper.bySelector(this.btnUnloadID).addEventListener("click", () => {
-				Global.config.system.status = false;
-				Resource.scriptsNum = 0;
-				Resource.scriptsAdd = 0;
-				// 清空日志等全局单例
-				if (window.runtimeLogger) {
-					window.runtimeLogger.clear();
-				}
-				// 删除所有动态加载的 <script>
-				DomHelper.allBySelector('script[data-dynamic="true"]').forEach(s => s.remove());
-
-				this.log.log("所有动态加载脚本已卸载");
-				Resource.AllLoaded();
-				DomHelper.bySelector(this.loadingStatusValueID).innerText = "未加载";
-			});
-		}
-	}
-	updateUIElement() {
+	async init() {
 		// 加载状态
-		this.loadingStatusValue = DomHelper.bySelector(this.loadingStatusValueID);
+		this.loading_status_label = DomHelper.bySelector("#loading_status_label");
+		this.load_btn = DomHelper.bySelector("#load_btn");
+		this.unload_btn = DomHelper.bySelector("#unload_btn");
+		// 运行状态
+		this.running_status_label = DomHelper.bySelector("#running_status_label");
+		this.running_start_btn = DomHelper.bySelector("#running_start_btn");
+		this.running_stop_btn = DomHelper.bySelector("#running_stop_btn");
+		// 运行时间
+		this.running_time_status_label = DomHelper.bySelector("#running_time_status_label");
+		// 日志
+		this.running_log_content = DomHelper.bySelector("#running_log_content");
+		this.clear_log_btn = DomHelper.bySelector("#clear_log_btn");
+	}
+	bindEvents() {
+		
+	}
+	async updateUIElement() {
+		let task = [
+			{
+				action: async () => { 
+					await this.loadingStatusTask();
+				},
+				intervalMs: 3000,
+				name: "INDEX_LOADING_STATUS_TASK",
+			},
+		]
+		task.forEach(config => {
+			TimerScheduler.setIntervalTask(
+				config.action, 
+				config.intervalMs, 
+				config.name
+			);
+		});
+	}
+	async loadingStatusTask() {
+		// 加载状态
+		this.loadingStatusValue = this.loading_status_label;
 		this.log.debug("loadingStatusValue: ", this.loadingStatusValue);
-		if (Resource.AllLoaded() && DomHelper.exists(this.loadingStatusValueID)) {
+		if (Resource.AllLoaded()) {
 			this.loadingStatusValue.innerText = "已加载";
-			this.runtimeLog.add("已加载资源");
 		} else {
 			this.loadingStatusValue.innerText = "加载异常";
-			this.runtimeLog.add("资源加载异常");
-		}
-		// 运行状态
-		// this.SYSTEM_OPERATING_STATUSValue = DomHelper.bySelector(this.SYSTEM_OPERATING_STATUSValueID)
-		// if (this.loadingStatusValue.innerText === "已加载" && DomHelper.exists(this.SYSTEM_OPERATING_STATUSValueID)) {
-		// 	this.SYSTEM_OPERATING_STATUSValue.innerText = "正在运行";
-		// } else {
-		// 	this.SYSTEM_OPERATING_STATUSValue.innerText = "运行异常";
-		// }
-	}
-	async init() {
-		this.loggerShow();
-		// 检查W2运行环境
-		if (Global.config.w2.user_name === null) {
-			this.runtimeLog.add("W2账号未填写, 请于设置填写账号信息");
-			this.runtimeLog.add("W2模块已停止运行");
-			// 停止W2模块
-			TimerScheduler.stopAllTasks();
-		}
-	}
-	async loggerShow() {
-		// 启动日志
-		while (true) {
-			await System.sleepSeconds(1);
-			this.runtimeLog.show();
 		}
 	}
 }
@@ -180,6 +148,7 @@ class W2 extends Page {
 		this.init();
 		this.bindEvents();
 		this.updateUIElement();
+		this.addAanimationEffect(); // 添加动画效果
 	}
 
 	async init() {
@@ -207,10 +176,6 @@ class W2 extends Page {
 		this.current_time_line_task_icon_1 = DomHelper.bySelector("#current_time_line_task_icon_1"); // 任务2图标
 		this.current_time_line_task_icon_2 = DomHelper.bySelector("#current_time_line_task_icon_2"); // 任务3图标
 		this.current_time_line_task_icon_3 = DomHelper.bySelector("#current_time_line_task_icon_3"); // 任务4图标
-		this.current_time_line_task_arrow_0 = DomHelper.bySelector("#current_time_line_task_arrow_0"); // 任务1箭头
-		this.current_time_line_task_arrow_1 = DomHelper.bySelector("#current_time_line_task_arrow_1"); // 任务2箭头
-		this.current_time_line_task_arrow_2 = DomHelper.bySelector("#current_time_line_task_arrow_2"); // 任务3箭头
-		this.current_time_line_task_arrow_3 = DomHelper.bySelector("#current_time_line_task_arrow_3"); // 任务4箭头
 		this.current_time_line_task_label_0 = DomHelper.bySelector("#current_time_line_task_label_0"); // 任务1标签
 		this.current_time_line_task_label_1 = DomHelper.bySelector("#current_time_line_task_label_1"); // 任务2标签
 		this.current_time_line_task_label_2 = DomHelper.bySelector("#current_time_line_task_label_2"); // 任务3标签
@@ -233,9 +198,9 @@ class W2 extends Page {
 		this.apply_activity_transfer_label = DomHelper.bySelector("#apply_activity_transfer_label"); // 申请抽调列表标签
 		this.apply_activity_transfer_table = DomHelper.bySelector("#apply_activity_transfer_table"); // 申请抽调列表表格
 		this.tooltip = new ToolTip();
-		this.apply_activity_transfer_prev_page_button = DomHelper.bySelector("#apply_activity_transfer_prev_page_button"); // 抽调列表上一页按钮
-		this.apply_activity_transfer_next_page_button = DomHelper.bySelector("#apply_activity_transfer_next_page_button"); // 抽调列表下一页按钮
-		this.apply_activity_transfer_reflash_button = DomHelper.bySelector("#apply_activity_transfer_reflash_button"); // 抽调列表刷新按钮
+		this.apply_activity_transfer_prev_page_btn = DomHelper.bySelector("#apply_activity_transfer_prev_page_btn"); // 抽调列表上一页按钮
+		this.apply_activity_transfer_next_page_btn = DomHelper.bySelector("#apply_activity_transfer_next_page_btn"); // 抽调列表下一页按钮
+		this.apply_activity_transfer_refresh_page_btn = DomHelper.bySelector("#apply_activity_transfer_refresh_page_btn"); // 抽调列表刷新按钮
 	}
 	// 登录W2
 	static async login() {
@@ -299,10 +264,9 @@ class W2 extends Page {
 		this.login_btn.addEventListener("click", async () => {
 			await W2.login();
 			await W2.currentTask();
-			TimerScheduler.setIntervalTask(W2.currentTask.bind(this), 60 * 1000 * 60, "W2_CURRENT_TASK");
 		});
 		this.relogin_btn.addEventListener("click", async () => {
-			await W2.login(); // 再写一个relogin函数
+			 // 再写一个relogin函数
 		});
 		this.login_out_btn.addEventListener("click", async () => {
 			await W2Request.loginOut();
@@ -314,8 +278,6 @@ class W2 extends Page {
 
 			Global.config.w2.login_status = W2.status.not_login;
 			Global.config.w2.token_check_task = false;
-
-			W2.stopAllTask();
 		});
 		this.check_in_btn.addEventListener("click", async () => {
 			await W2Request.checkIn();
@@ -374,44 +336,103 @@ class W2 extends Page {
 				this.apply_activity_transfer_momo_text.classList.add("border-red-500");
 				return;
 			}
-			if (FormatValidation.validateMomo(momoText) && FormatValidation.validateTime(timeText)) {
+			Global.config.w2.apply_activity_transfer_time = this.apply_activity_transfer_time_text.value;
+			Global.config.w2.apply_activity_transfer_momo = this.apply_activity_transfer_momo_text.value;
+			let result;
+			if (typeLabel === "抽调质检") {
+				result = await W2Request.qualityInspection();
+			} else if (typeLabel === "线下培训") {
+				result = await W2Request.training();
+			}
+			
+			if (FormatValidation.validateMomo(momoText) && FormatValidation.validateTime(timeText) && result.code === 200) {
 				DomHelper.bySelectorFromParent(this.info_message_box, "span").innerText = "已发送抽调请求";
 				this.error_message_box.classList.add("hidden");
 				this.info_message_box.classList.remove("hidden");
 				this.apply_activity_transfer_time_text.classList.remove("border-red-500");
 				this.apply_activity_transfer_momo_text.classList.remove("border-red-500");
-			}
-			Global.config.w2.apply_activity_transfer_time = this.apply_activity_transfer_time_text.value;
-			Global.config.w2.apply_activity_transfer_momo = this.apply_activity_transfer_momo_text.value;
-			if (typeLabel === "抽调质检") {
-				await W2Request.qualityInspection();
-			} else if (typeLabel === "线下培训") {
-				await W2Request.training();
+			} else {
+				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "错误代码: " + result.code + " " + result.msg;
+				this.error_message_box.classList.remove("hidden");
+				this.info_message_box.classList.add("hidden");
+				this.apply_activity_transfer_time_text.classList.add("border-red-500");
+				this.apply_activity_transfer_momo_text.classList.add("border-red-500");
 			}
 		});
 		// 抽调列表
-		this.apply_activity_transfer_prev_page_button.addEventListener("click", async () => {
+		this.apply_activity_transfer_prev_page_btn.addEventListener("click", async () => {
 			Global.value.apply_approval_transfer_list_page--;
 			await this.applyActivityTransferList();
 		});
-		this.apply_activity_transfer_next_page_button.addEventListener("click", async () => {
+		this.apply_activity_transfer_next_page_btn.addEventListener("click", async () => {
 			Global.value.apply_approval_transfer_list_page++;
 			await this.applyActivityTransferList();
 		});
-		this.apply_activity_transfer_reflash_button.addEventListener("click", async () => {
+		this.apply_activity_transfer_refresh_page_btn.addEventListener("click", async () => {
 			await this.applyActivityTransferList();
 		});
 	}
 	async updateUIElement() {
 		this.addTooltipMessage();
-		this.applyActivityTransferDropdownList(); // 申请抽调下拉列表的动画
-		TimerScheduler.setIntervalTask(async () => { this.applyActivityTransferList() }, 10 * 1000, "W2_APPLY_ACTIVITY_TRANSFER_LIST_TASK"); // 抽调列表
-		TimerScheduler.setIntervalTask(async () => { this.personalStatusTask() }, 3000, "W2_PERSONAL_STATUS_TASK"); // 个人信息
-		TimerScheduler.setIntervalTask(async () => { this.loginStatusTask() }, 3000, "W2_LOGIN_STATUS_TASK"); // 登录状态
-		TimerScheduler.setIntervalTask(async () => { this.workingStatusTask() }, 3000, "W2_WORKING_STATUS_TASK"); // 工作状态
-		TimerScheduler.setIntervalTask(async () => { this.workHourStatusTask() }, 3000, "W2_WORK_HOUR_STATUS_TASK"); // 考勤状态
-		TimerScheduler.setIntervalTask(async () => { this.currentTimeLineTask() }, 3000, "W2_CURRENT_TIME_LINE_TASK"); // 当前任务时间线
-		TimerScheduler.setIntervalTask(async () => { this.calendarTask() }, 10 * 1000, "W2_CALENDAR_TASK"); // 排班列表
+		let task = [
+			{
+				action: async () => {
+					this.loginStatusTask();
+					
+				},
+				intervalMs: 3000,
+				name: "W2_LOGIN_STATUS_TASK",
+			},
+			{
+				action: async () => {
+					this.workingStatusTask();
+				},
+				intervalMs: 3000,
+				name: "W2_WORKING_STATUS_TASK",
+			},
+			{
+				action: async () => {
+					this.workHourStatusTask();
+				},
+				intervalMs: 3000,
+				name: "W2_WORK_HOUR_STATUS_TASK",
+			},
+			{
+				action: async () => {
+					this.currentTimeLineTask();
+				},
+				intervalMs: 3000,
+				name: "W2_CURRENT_TIME_LINE_TASK",
+			},
+			{
+				action: async () => {
+					this.personalStatusTask();
+				},
+				intervalMs: 3000,
+				name: "W2_PERSONAL_STATUS_TASK",
+			},
+			{
+				action: async () => {
+					this.calendarTask();
+				},
+				intervalMs: 1000 * 10,
+				name: "W2_CALENDAR_TASK",
+			},
+			{
+				action: async () => {
+					this.applyActivityTransferList();
+				},
+				intervalMs: 1000 * 10,
+				name: "W2_APPLY_ACTIVITY_TRANSFER_LIST_TASK",
+			},
+		]
+		task.forEach(cofig => {
+			TimerScheduler.setIntervalTask(
+				cofig.action,
+				cofig.intervalMs,
+				cofig.name
+			);
+		});
 	}
 	// 获取工作信息
 	static async getPersonalInformat() {
@@ -462,35 +483,26 @@ class W2 extends Page {
 	// 更新抽调列表
 	async applyActivityTransferList() {
 		let result = await W2Request.getApplyApprovalList();
-		// Global.config.w2.apply_activity_transfer_table = result;
-		
-		if (result === null) {
-			this.log.error("获取抽调列表失败");
-			return;
-		}
-		if (Global.value.apply_approval_transfer_list_page < 1) {
-			Global.value.apply_approval_transfer_list_page = 1;
-			this.apply_activity_transfer_prev_page_button.disabled = true;
-			this.apply_activity_transfer_prev_page_button.classList.add('opacity-50');
-			this.apply_activity_transfer_prev_page_button.classList.add('text-gray-400');
-		} else {
-			this.apply_activity_transfer_prev_page_button.disabled = false;
-			this.apply_activity_transfer_prev_page_button.classList.remove('opacity-50');
-			this.apply_activity_transfer_prev_page_button.classList.remove('text-gray-400');
-		}
-		if (Global.value.apply_approval_transfer_list_page > 3) {
-			Global.value.apply_approval_transfer_list_page = 3;
-			this.apply_activity_transfer_next_page_button.disabled = true;
-			this.apply_activity_transfer_next_page_button.classList.add('opacity-50');
-			this.apply_activity_transfer_next_page_button.classList.add('text-gray-400');
-		} else {
-			this.apply_activity_transfer_next_page_button.disabled = false;
-			this.apply_activity_transfer_next_page_button.classList.remove('opacity-50');
-			this.apply_activity_transfer_next_page_button.classList.remove('text-gray-400');
-		}
-
-		this.apply_activity_transfer_table.innerHTML = "";
-		if (result.code === 200) {
+		if (Global.config.w2.login_status === W2.status.login_success && result.code === 200) {
+			if (Global.value.apply_approval_transfer_list_page <= 1) {
+				this.apply_activity_transfer_prev_page_btn.disabled = true;
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.add('opacity-50');
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.add('text-gray-400');
+			} else {
+				this.apply_activity_transfer_prev_page_btn.disabled = false;
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.remove('opacity-50');
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.remove('text-gray-400');
+			}
+			if (Global.value.apply_approval_transfer_list_page >= 3) {
+				this.apply_activity_transfer_next_page_btn.disabled = true;
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_next_page_btn, "i").classList.add('opacity-50');
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_next_page_btn, "i").classList.add('text-gray-400');
+			} else {
+				this.apply_activity_transfer_next_page_btn.disabled = false;
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_next_page_btn, "i").classList.remove('opacity-50');
+				DomHelper.bySelectorFromParent(this.apply_activity_transfer_next_page_btn, "i").classList.remove('text-gray-400');
+			}
+			this.apply_activity_transfer_table.innerHTML = "";
 			result.data.data_list.forEach(item => {
 				const timeTemp = Time.formatTimeRange(item.detail.time);
 				const type = item.detail.type;
@@ -537,7 +549,10 @@ class W2 extends Page {
 				recordDiv.appendChild(reasonDiv);
 
 				this.apply_activity_transfer_table.appendChild(recordDiv);
+				
 			});
+		} else {
+			this.apply_activity_transfer_table.innerHTML = "";
 		}
 	}
 	// 登录选项卡的状态显示
@@ -580,28 +595,25 @@ class W2 extends Page {
 			}
 			for (let i = 0; i < 4; i++) {
 				const icon = this["current_time_line_task_icon_" + i];
-				const arrow = this["current_time_line_task_arrow_" + i];
 				const label = this["current_time_line_task_label_" + i];
 				// currentTask的值是currentTaskStatus枚举体中的键值, 由间隔任务currentTask()变更
 				if (label.innerText === Global.config.w2.current_time_line_task_status) {
-					icon.classList.replace("bg-blue-600", "bg-green-600");
-					arrow.classList.replace("border-b-blue-600", "border-b-green-600");
+					icon.classList.replace("text-blue-600", "text-green-600");
 				} else {
-					icon.classList.replace("bg-green-600", "bg-blue-600");
-					arrow.classList.replace("border-b-green-600", "border-b-blue-600");
+					icon.classList.replace("text-green-600", "text-blue-600");
 				}
 			}
 		} else {
+			// 如果未登录, 则将图标全部置为蓝色
 			this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
 			for (let i = 0; i < 4; i++) {
 				const icon = this["current_time_line_task_icon_" + i];
-				const arrow = this["current_time_line_task_arrow_" + i];
-				icon.classList.replace("bg-green-600", "bg-blue-600");
-				arrow.classList.replace("border-b-green-600", "border-b-blue-600");
+				icon.classList.replace("text-green-600", "text-blue-600");
 			}
 		}
 	}
-	async applyActivityTransferDropdownList() {
+	async addAanimationEffect() {
+		// 申请抽调下拉列表的动画
 		const selectBox = this.apply_activity_transfer_type_div;
 		const optionsBox = this.apply_activity_transfer_type_ul;
 		const label = this.apply_activity_transfer_type_label;
@@ -649,6 +661,17 @@ class W2 extends Page {
 			}
 		});
 
+		// 按钮点击效果
+		DomHelper.allBySelector('button').forEach(btn => {
+			btn.addEventListener('click', () => {
+				// 添加点击效果样式
+				btn.classList.add('ring-2', 'ring-offset-1', 'ring-indigo-300'); // 可以调整颜色
+				// 0.2秒后移除效果
+				setTimeout(() => {
+					btn.classList.remove('ring-2', 'ring-offset-1', 'ring-indigo-300');
+				}, 200);
+			});
+		});
 	}
 	// 判断今天是否是休息日
 	static async isTodayOff() {
@@ -770,27 +793,27 @@ class W2 extends Page {
 	}
 	// 间隔任务
 	static async intervalTask() {
-		const taskConfigs = [
+		const task = [
 			{
 				action: async () => { 
 					await W2.loginCheck() 
 				},
 				intervalMs: 60 * 1000,
-				name: Global.w2_TaskConfig.W2_LOGIN_TASK
+				name: "W2_LOGIN_CHECK_TASK"
 			}
 		]
-		for (const config of taskConfigs) {
+		task.forEach(config => {
 			TimerScheduler.setIntervalTask(
 				config.action,
 				config.intervalMs,
 				config.name
 			);
-		}
+		});
 		this.log.log("W2间隔任务已启动");
 	}
 	// 定时任务
 	static async currentTask() {
-		const taskConfigs = [
+		const task = [
 			{
 				start: Global.config.w2.time_range_login_start,
 				end: Global.config.w2.time_range_login_end,
@@ -846,8 +869,8 @@ class W2 extends Page {
 		];
 
 		// if (await W2.isLoginStatus()) {
-			if (!await W2.isTodayOff()) {
-					for (const config of taskConfigs) {
+			// if (!await W2.isTodayOff()) {
+					for (const config of task) {
 						TimerScheduler.setDailyTask(
 							Time.getRandomTimeInRange(config.start, config.end),
 							config.action,
@@ -855,10 +878,9 @@ class W2 extends Page {
 						);
 					}
 				this.log.log("今天是工作日, 定时任务已启动");
-			} else {
-				W2.stopAllTask();
-				this.log.log("今天是休息日");
-			}
+			// } else {
+			// 	this.log.log("今天是休息日");
+			// }
 		// } else {
 		// 	this.log.log("未登录");
 		// }

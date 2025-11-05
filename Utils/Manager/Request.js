@@ -179,8 +179,8 @@ class W2Request extends HttpRequest {
 		const data = {
 			"page": Global.value.apply_approval_transfer_list_page,
 			"page_size": 3,
-			"begin_date": Time.getDateRangeByToday(-31, 0)[0], // 开始查询的时间
-			"end_date": Time.getDateRangeByToday(-31, 0)[1], // 结束查询的时间
+			"begin_date": Time.getDateRangeByToday(-9, 0)[0], // 开始查询的时间
+			"end_date": Time.getDateRangeByToday(-9, 0)[1], // 结束查询的时间
 			"apply_type_list": [ // 类型
 				"transfer",
 				"holiday",
@@ -202,7 +202,7 @@ class W2Request extends HttpRequest {
 		}
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("getApplyApprovalList result: ", result);
+		// this.log.log("getApplyApprovalList result: ", result);
 		return result;
 	}
 	// 前往用餐

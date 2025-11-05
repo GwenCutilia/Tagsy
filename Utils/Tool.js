@@ -464,7 +464,7 @@ class System {
 	}
 }
 
- class ToolTip {
+class ToolTip {
 	constructor() {
 		this.tooltip = null;
 		this.tooltipTimeout = null;

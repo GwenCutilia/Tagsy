@@ -4,19 +4,21 @@ class Resource {
 	static scriptsAdd = 0;
 	static log = new Logger("Resource");
 	static AllLoaded() {
-		if (this.scriptsNum && this.scriptsAdd && this.scriptsAdd === this.scriptsNum) {
+		// this.log.debug("All scripts loaded: " + ScriptLoader.scriptsTotal);
+		// this.log.debug("Scripts added: " + ScriptLoader.scriptsAdded);
+		if (Resource.scriptsNum && Resource.scriptsAdd && Resource.scriptsAdd === Resource.scriptsNum) {
 			Global.config.system.status = true;
 			this.log.log("资源加载成功");
 			return true;
 		} else {
+			this.log.error("this.scriptsNum:" + Resource.scriptsNum + ", this.scriptsAdd:" + Resource.scriptsAdd);
 			this.log.error("资源加载失败");
 			return false;
 		}
 	}
 	static async LoadScript() {
-		await LoadGlobalAllScripts();
+		await ScriptLoader.LoadGlobalAllScripts();
 	}
-
 }
 // 运行系统
 class Running {

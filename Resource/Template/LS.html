@@ -55,7 +55,7 @@
 		<main class="flex-1 ml-64 p-6 space-y-6">
 			<div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				<!-- 状态卡片区域 -->
-				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
+				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 					<div class="flex items-center justify-between">
 						<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
 						<div class="flex space-x-2">
@@ -69,165 +69,35 @@
 					</div>
 					<div id="login_status_label" class="text-2xl font-bold text-blue-600">--</div>
 				</div>
-				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center" draggable="true">
+				<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
 					<div class="text-gray-500 text-sm mb-1">日报打卡状态</div>
 					<div id="fill_daily_report_label" class="text-2xl font-bold text-green-600">--</div>
 				</div>
-				<div class="grid-cell bg-white shadow rounded-xl p-5 h-200 flex flex-col justify-center" draggable="true">
+				<div class="grid-cell bg-white shadow rounded-xl p-5 h-200 flex flex-col justify-center">
 					<div class="flex items-center justify-between">
 						<div class="text-gray-500 text-sm mb-1">日报打卡列表</div>
 					</div>
 					<div class="flex justify-between items-center mb-1">
 						<div id="daily_report_list_label" class="text-gray-800 font-bold text-xl">--</div>
 						<div class="flex space-x-2">
-							<button id="" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+							<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
 								<i class="fas fa-chevron-left text-gray-600"></i>
 							</button>
-							<button id="" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+							<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
 								<i class="fas fa-chevron-right text-gray-600"></i>
 							</button>
-							<button id="" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+							<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
 								<i class="fa-solid fa-arrow-rotate-right"></i>
 							</button>
 						</div>
 					</div>
 					<!-- 日报打卡列表 -->
 					<div id="daily_report_list_table" class="mt-3 space-y-3 overflow-y-auto max-h-[calc(5*64px+16px)]">
-						<!-- 单条记录 -->
-						<!-- <div class="flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100">
-							<div class="flex flex-col">
-								<span class="text-gray-500 text-xs">时间</span>
-								<span class="text-base font-semibold text-gray-800">2025-10-27</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">标注数据量</span>
-								<span class="text-green-600 font-semibold text-base">325</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">质检数据量</span>
-								<span class="text-blue-600 font-semibold text-base">54</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">工作时长</span>
-								<span class="text-gray-800 font-semibold text-base">6h 30m</span>
-							</div>
-						</div>
-
-						<div class="flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100">
-							<div class="flex flex-col">
-								<span class="text-gray-500 text-xs">时间</span>
-								<span class="text-base font-semibold text-gray-800">2025-10-26</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">标注数据量</span>
-								<span class="text-green-600 font-semibold text-base">412</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">质检数据量</span>
-								<span class="text-blue-600 font-semibold text-base">60</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">工作时长</span>
-								<span class="text-gray-800 font-semibold text-base">7h 10m</span>
-							</div>
-						</div>
-
-						<div class="flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition shadow-sm rounded-xl px-4 py-3 border border-gray-100">
-							<div class="flex flex-col">
-								<span class="text-gray-500 text-xs">时间</span>
-								<span class="text-base font-semibold text-gray-800">2025-10-25</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">标注数据量</span>
-								<span class="text-green-600 font-semibold text-base">298</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">质检数据量</span>
-								<span class="text-blue-600 font-semibold text-base">40</span>
-							</div>
-							<div class="flex flex-col text-center">
-								<span class="text-gray-500 text-xs">工作时长</span>
-								<span class="text-gray-800 font-semibold text-base">5h 45m</span>
-							</div>
-						</div> -->
+						<!-- 可动态生成日报列表 -->
 					</div>
 				</div>
 			</div>
 		</main>
 	</div>
-
-	<!-- <script>
-		document.addEventListener('DOMContentLoaded', function() {
-			// 拖拽功能实现
-			let draggedElement = null;
-			
-			// 获取所有可拖拽元素
-			const draggableElements = document.querySelectorAll('.grid-cell');
-			
-			// 添加拖拽事件监听器
-			draggableElements.forEach(element => {
-				element.addEventListener('dragstart', handleDragStart);
-				element.addEventListener('dragend', handleDragEnd);
-				element.addEventListener('dragover', handleDragOver);
-				element.addEventListener('dragenter', handleDragEnter);
-				element.addEventListener('dragleave', handleDragLeave);
-				element.addEventListener('drop', handleDrop);
-			});
-			
-			// 拖拽事件处理函数
-			function handleDragStart(e) {
-				draggedElement = this;
-				this.style.opacity = '0.5';
-				this.style.transform = 'rotate(5deg)';
-				e.dataTransfer.effectAllowed = 'move';
-				e.dataTransfer.setData('text/html', this.innerHTML);
-			}
-			
-			function handleDragEnd(e) {
-				this.style.opacity = '1';
-				this.style.transform = 'rotate(0deg)';
-				draggableElements.forEach(element => {
-					element.style.border = '';
-					element.style.backgroundColor = '';
-				});
-			}
-			
-			function handleDragOver(e) {
-				e.preventDefault();
-				return false;
-			}
-			
-			function handleDragEnter(e) {
-				this.style.border = '2px dashed #3b82f6';
-				this.style.backgroundColor = '#f0f9ff';
-			}
-			
-			function handleDragLeave(e) {
-				this.style.border = '';
-				this.style.backgroundColor = '';
-			}
-			
-			function handleDrop(e) {
-				e.stopPropagation();
-				
-				if (draggedElement !== this) {
-					// 交换元素位置
-					const grid = document.getElementById('dashboard-grid');
-					const draggedIndex = Array.from(grid.children).indexOf(draggedElement);
-					const dropIndex = Array.from(grid.children).indexOf(this);
-					
-					if (draggedIndex < dropIndex) {
-						grid.insertBefore(draggedElement, this.nextSibling);
-					} else {
-						grid.insertBefore(draggedElement, this);
-					}
-				}
-				
-				this.style.border = '';
-				this.style.backgroundColor = '';
-				return false;
-			}
-		});
-	</script> -->
 </body>
 </html>

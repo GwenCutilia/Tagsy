@@ -6,7 +6,9 @@ class Global {
 	// w2_email_api_address_account_setting_input: '1778751963@qq.com', 
 	// w2_email_api_pop3_auth_code_account_setting_input: 'rjkiywoldplaceca',
 	static config = {
-		cache: {},
+		cache: {
+
+		},
 		system: {
 			status: false,
 			operating_status: false,
