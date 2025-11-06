@@ -4,6 +4,7 @@ class Page {
 	static routes = {
 		"Index.html": () => new Index(),
 		"W2.html": () => new W2(),
+		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
 		// 可添加其他页面路由
@@ -70,6 +71,7 @@ class Index extends Page {
 		this.init();
 		this.bindEvents();
 		this.updateUIElement();
+		this.addAanimationEffect();
 	}
 	async init() {
 		// 加载状态
@@ -80,24 +82,36 @@ class Index extends Page {
 		this.running_status_label = DomHelper.bySelector("#running_status_label");
 		this.running_start_btn = DomHelper.bySelector("#running_start_btn");
 		this.running_stop_btn = DomHelper.bySelector("#running_stop_btn");
-		// 运行时间
-		this.running_time_status_label = DomHelper.bySelector("#running_time_status_label");
+		// 工作时间
+		this.worked_hours_label = DomHelper.bySelector("#worked_hours_label");
+		this.remain_hours_label = DomHelper.bySelector("#remain_hours_label");
 		// 日志
 		this.running_log_content = DomHelper.bySelector("#running_log_content");
 		this.clear_log_btn = DomHelper.bySelector("#clear_log_btn");
 	}
 	bindEvents() {
-		
+		this.load_btn.addEventListener("click", async () => {
+			await ResourceLoader.loadAllResources();
+		});
 	}
 	async updateUIElement() {
 		let task = [
 			{
+				// 加载状态
 				action: async () => { 
 					await this.loadingStatusTask();
 				},
 				intervalMs: 3000,
 				name: "INDEX_LOADING_STATUS_TASK",
 			},
+			{
+				// 工作时间
+				action: async () => {
+					await this.workHourTask();
+				},
+				intervalMs: 3000,
+				name: "INDEX_WORK_HOUR_TASK",
+			}
 		]
 		task.forEach(config => {
 			TimerScheduler.setIntervalTask(
@@ -116,6 +130,29 @@ class Index extends Page {
 		} else {
 			this.loadingStatusValue.innerText = "加载异常";
 		}
+	}
+	async runningStatusTask() {
+
+	}
+	async workHourTask() {
+		let workedHours = parseFloat(Time.getWorkedHoursToday().toFixed(2));
+		let remainHours = (8 - workedHours).toFixed(2);
+		this.remain_hours_label.classList.remove("hidden");
+		this.worked_hours_label.innerText = workedHours + " 小时";
+		this.remain_hours_label.innerText = ", 距离下班还有 " + remainHours + " 小时";
+	}
+	addAanimationEffect() {
+		// 按钮点击效果
+		DomHelper.allBySelector('button').forEach(btn => {
+			btn.addEventListener('click', () => {
+				// 添加点击效果样式
+				btn.classList.add('ring-2', 'ring-offset-1', 'ring-indigo-300');
+				// 0.2秒后移除效果
+				setTimeout(() => {
+					btn.classList.remove('ring-2', 'ring-offset-1', 'ring-indigo-300');
+				}, 200);
+			});
+		});
 	}
 }
 class W2 extends Page {
@@ -892,6 +929,42 @@ class W2 extends Page {
 		});
 	}
 }
+class QLabel extends Page {
+	constructor() {
+		super();
+		this.init();
+		// this.bindEvents();
+		// this.updateUIElement();
+	}
+	init() {
+
+	}
+	static async testurl() {
+		// let url = "https://cn.apihz.cn/api/user/jhdl.php";
+		// let header = {
+		// 	"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+		// }
+		// let data = {
+		// 	id: "10008362",
+		// 	key: "1d0c8fec499fb7057027e09fc4662fb0",
+		// 	type: "2",
+		// }
+		
+		let result = await HttpRequest.fetch({
+			url: "https://cn.apihz.cn/api/user/jhdl.php",
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+			},
+			data: {
+				id: "10008362",
+				key: "1d0c8fec499fb7057027e09fc4662fb0",
+				type: "2"
+			}
+		});
+		this.log.log(result);
+	}
+}
 class LS extends Page {
 	static status = {
 		login_success: "登录成功",
@@ -969,7 +1042,7 @@ class LS extends Page {
 		// 登录状态UI
 		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 3000, Global.ls_TaskConfig.LS_LOGIN_STATUS_TASK);
 		// 刷新日报列表的任务
-		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 10000, Global.ls_TaskConfig.LS_GET_DAILY_REPORT_LIST_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 3000, Global.ls_TaskConfig.LS_GET_DAILY_REPORT_LIST_TASK);
 		// 打卡任务UI
 		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 3000, Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_STATUS_TASK);
 		// 日报列表UI

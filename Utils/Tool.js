@@ -943,6 +943,36 @@ class Time {
 
 		return [format(beginDate), format(endDate)];
 	}
+	/**
+	 * 计算今天截至当前时间已经工作的小时数
+	 * @returns {number} 已工作的小时数，小数形式
+	 */
+	static getWorkedHoursToday() {
+		const now = new Date();
+		const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+		// 定义工作时间段（分钟）
+		const workPeriods = [
+			[9 * 60, 12 * 60],   // 上午 09:00-12:00
+			[13 * 60 + 30, 18 * 60 + 30]   // 下午 13:30-18:30
+		];
+
+		let workedMinutes = 0;
+
+		for (const [start, end] of workPeriods) {
+			if (currentMinutes >= end) {
+				// 整个时段已经过去
+				workedMinutes += (end - start);
+			} else if (currentMinutes > start && currentMinutes < end) {
+				// 当前在该时段中
+				workedMinutes += (currentMinutes - start);
+			}
+			// 当前时间在该时段之前，则不计
+		}
+
+		// 转换为小时数
+		return workedMinutes / 60;
+	}
 }
 
 class TimerScheduler {

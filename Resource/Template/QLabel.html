@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tagsy 仪表盘</title>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans" style="display:none">
+
+<div id="app" class="flex min-h-screen">
+	<!-- 侧边栏 -->
+	<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
+		<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 py-5 border-b">Tagsy_V2.0.0</div>
+		<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
+			<li id="menu_overview">
+				<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
+				</a>
+			</li>
+			<li id="menu_w2">
+				<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
+				</a>
+			</li>
+			<li id="menu_qlabel">
+				<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+					<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
+				</a>
+			</li>
+			<li id="menu_ls">
+				<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
+				</a>
+			</li>
+			<li id="menu_wecom">
+				<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
+				</a>
+			</li>
+			<li id="menu_setting">
+				<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
+				</a>
+			</li>
+		</ul>
+		<div id="sidebar_footer" class="mt-auto px-4 py-4 border-t">
+			<a id="link_logout" href="#" class="flex items-center px-4 py-2 text-sm rounded-md text-red-600 hover:bg-red-50">
+				<i class="fas fa-sign-out-alt mr-2 w-5 text-center"></i>退出登录
+			</a>
+		</div>
+	</aside>
+
+	<!-- 主内容区域 -->
+	<main id="main_content" class="flex-1 ml-64 p-6 space-y-6">
+		<div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<!-- 第一列 -->
+			<div class="flex flex-col space-y-6">
+                
+			</div>
+			<!-- 第二列 -->
+			<div class="flex flex-col space-y-6">
+				
+			</div>
+			<!-- 第三列 -->
+			<div class="flex flex-col space-y-6">
+				
+			</div>
+		</div>
+	</main>
+</div>
+</body>
+</html>
