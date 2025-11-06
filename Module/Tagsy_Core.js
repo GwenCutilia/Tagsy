@@ -11,6 +11,6 @@
 // ==/UserScript==
 
 (async function () {
-	await ScriptLoader.loadGlobalAllScripts();
+	await ResourceLoader.loadAllResources();
 	await core();
 })();

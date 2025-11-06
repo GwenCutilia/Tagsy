@@ -4,18 +4,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Tagsy 仪表盘</title>
-	<script>
-		// 屏蔽 tailwind cdn 的警告
-		const _warn = console.warn;
-		console.warn = function(msg) {
-			if (String(msg).includes("cdn.tailwindcss.com")) return;
-			_warn.apply(console, arguments);
-		};
-	</script>
-	<script src="https://cdn.tailwindcss.com"></script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gray-100 text-gray-800 font-sans" style="display:none">
 	<div id="app" class="flex min-h-screen">
 		<!-- 侧边栏 -->
 		<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
@@ -69,7 +59,7 @@
 							<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
 							<div class="flex space-x-2">
 								<button id="login_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
-									<i class="fa-solid fa-right-to-bracket"></i>
+									 <i class="fa-solid fa-right-to-bracket"></i>
 								</button>
 								<button id="relogin_btn" class="ml-auto bg-yellow-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-yellow-700 transition">
 									<i class="fa-solid fa-arrows-rotate"></i>

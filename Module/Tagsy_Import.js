@@ -1,59 +1,85 @@
 // /*
 // *********************
-// 	***引导函数***
+// 	***动态资源加载器***
+// 	支持 JS 和 CSS 文件
 // *********************
 // */
-// 加载单个脚本
-class ScriptLoader {
-	static scriptsAdded = 0; // 成功加载数量
-	static scriptsTotal = 0; // 总脚本数量
-	constructor() {
+class ResourceLoader {
+	static resourcesAdded = 0; // 已成功加载数量
+	static resourcesTotal = 0; // 总资源数量
 
-	}
+	constructor() { }
 
-	// 异步加载单个脚本
-	static loadScriptAsync(scriptUrl) {
+	// 异步加载单个 JS 脚本
+	static loadJsAsync(jsUrl) {
 		return new Promise((resolve, reject) => {
 			const script = document.createElement("script");
-			script.src = scriptUrl + `?v=${Date.now()}`;
+			script.src = jsUrl + `?v=${Date.now()}`; // 防缓存
 			script.dataset.dynamic = "true";
 			script.onload = () => resolve(1); // 成功返回 1
-			script.onerror = () => reject(new Error(`Failed to load: ${scriptUrl}`));
+			script.onerror = () => reject(new Error(`Failed to load JS: ${jsUrl}`));
 			document.head.appendChild(script);
 		});
 	}
 
-	// 并行加载一组脚本
-	static async loadScriptsParallel(scripts) {
-		const results = await Promise.all(
-			scripts.map(url =>
-				ScriptLoader.loadScriptAsync(url).catch(err => {
-					console.error(err);
-					return 0; // 失败返回 0
-				})
-			)
-		);
-		return results.reduce((sum, val) => sum + val, 0); // 成功数量
+	// 异步加载单个 CSS
+	static loadCssAsync(cssUrl) {
+		return new Promise((resolve, reject) => {
+			const link = document.createElement("link");
+			link.rel = "stylesheet";
+			link.href = cssUrl + `?v=${Date.now()}`; // 防缓存
+			link.onload = () => resolve(1); // 成功返回 1
+			link.onerror = () => reject(new Error(`Failed to load CSS: ${cssUrl}`));
+			document.head.appendChild(link);
+		});
+	}
+
+	// 根据后缀动态选择 JS 或 CSS 加载
+	static async loadResourceAsync(url) {
+		if (url.endsWith(".css")) {
+			try {
+				return await ResourceLoader.loadCssAsync(url);
+			} catch (err) {
+				console.error(err);
+				return 0;
+			}
+		} else if (url.endsWith(".js")) {
+			try {
+				return await ResourceLoader.loadJsAsync(url);
+			} catch (err) {
+				console.error(err);
+				return 0;
+			}
+		} else {
+			console.warn("Unknown resource type:", url);
+			return Promise.resolve(0);
+		}
+	}
+
+	// 并行加载一组资源
+	static async loadResourcesParallel(resources) {
+		const results = await Promise.all(resources.map(url => ResourceLoader.loadResourceAsync(url)));
+		return results.reduce((sum, val) => sum + val, 0); // 返回成功数量
 	}
 
 	// 分组顺序加载，每组内部并行
-	static async loadScriptsByGroups(groups) {
+	static async loadResourcesByGroups(groups) {
 		let totalSuccess = 0;
 		for (const group of groups) {
-			totalSuccess += await ScriptLoader.loadScriptsParallel(group);
+			totalSuccess += await ResourceLoader.loadResourcesParallel(group);
 		}
 		return totalSuccess;
 	}
 
 	// 全局加载入口
-	static async loadGlobalAllScripts() {
-		const ExternalUrl = "https://cdn.tailwindcss.com/";
-		const Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/";
+	static async loadAllResources() {
+		const Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/"; // 本地路径，可修改
 
-		// 脚本分组
-		const resource = [
+		// 资源分组，内部并行，分组顺序加载
+		const resourceGroups = [
 			[
-				ExternalUrl + "3.4.17",
+				Url + "Resource/Lib/Font_Awesome/All.css",
+				Url + "Resource/Lib/Tail_Wind/Tail_Wind.js",
 				Url + "Utils/Tool.js",
 			],
 			[
@@ -70,11 +96,16 @@ class ScriptLoader {
 				Url + "Module/Common/Tagsy_Core.js",
 			]
 		];
-		// 保存总脚本数
-		ScriptLoader.scriptsTotal = resource.flat().length;
+
+		// 保存总资源数
+		ResourceLoader.resourcesTotal = resourceGroups.flat().length;
+
 		// 执行加载
-		ScriptLoader.scriptsAdded = await ScriptLoader.loadScriptsByGroups(resource);
-		Resource.scriptsNum = ScriptLoader.scriptsTotal;
-		Resource.scriptsAdd = ScriptLoader.scriptsAdded;
+		ResourceLoader.resourcesAdded = await ResourceLoader.loadResourcesByGroups(resourceGroups);
+
+		Resource.scriptsNum = ResourceLoader.resourcesTotal;
+		Resource.scriptsAdd = ResourceLoader.resourcesAdded;
+
+		// console.log(`Resources loaded: ${ResourceLoader.resourcesAdded}/${ResourceLoader.resourcesTotal}`);
 	}
 }

@@ -28,10 +28,6 @@ class Page {
 	bindEvents() {
 
 	}
-
-	init() {
-
-	}
 }
 class Template {
 	static log = new Logger("Template");
@@ -46,6 +42,7 @@ class Template {
 		await W2Request.getLoginPage();
 		this.W2Task();
 		this.LSTask();
+		this.initPage();
 		// 为每日任务写单独的函数出来
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
 		// 添加一个重新登录的按钮监听事件
@@ -53,6 +50,9 @@ class Template {
 	}
 	static isTemplatePage() {
 		return location.pathname.includes('/Template/');
+	}
+	static async initPage() {
+		document.body.style.display = "";
 	}
 	static async W2Task() {
 		await W2.login();

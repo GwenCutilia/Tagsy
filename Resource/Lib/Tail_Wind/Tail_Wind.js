@@ -12,8 +12,7 @@
 		if (typeof require != "undefined")
 			return require(r);
 		throw new Error('Dynamic require of "' + r + '" is not supported')
-	}
-		;
+	};
 	var P = (r, e) => () => (r && (e = r(r = 0)),
 		e);
 	var x = (r, e) => () => (e || r((e = {
@@ -22929,7 +22928,6 @@ Check your Browserslist config to be sure that your targets are set up correctly
 			default: r
 		}
 	}
-	console.warn("cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation");
 	var Ns = "tailwind", uf = "text/tailwindcss", _v = "/template.html", Yt, Ev = !0, Ov = 0, ff = new Set, cf, Tv = "", Rv = (r = !1) => ({
 		get(e, t) {
 			return (!r || t === "config") && typeof e[t] == "object" && e[t] !== null ? new Proxy(e[t], Rv()) : e[t]
