@@ -14,12 +14,14 @@ class Global {
 			operating_status: false,
 			running_time: 0,
 		},
+		apibox: {
+			user_id: null,
+			api_key: null,
+		},
 		w2: {
 			// 登录信息
 			user_name: null,
 			user_password: null,
-			email_api_id: null,
-			email_api_secret: null,
 			email_api_address: null,
 			email_api_pop3_auth_code: null,
 			// 登录验证码

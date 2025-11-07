@@ -2,7 +2,6 @@ class W2Request extends HttpRequest {
 	static log = new Logger("W2Request");
 	static CONFIG = {
 		BASE_URL: "https://api-wanwei.myapp.com",
-		EMAIL_API_URL: "https://cn.apihz.cn/",
 		DEFAULT_HEADERS: {
 			"x-requested-with": "XMLHttpRequest",
 			"Accept": "*/*",
@@ -14,7 +13,7 @@ class W2Request extends HttpRequest {
 		super();
 	}
 
-	// 获取W2登录验证码
+	// 发送W2登录验证码
 	static async getVerifyCode() {
 		const url = this.CONFIG.BASE_URL + "/user_center/get_verify";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
@@ -35,31 +34,6 @@ class W2Request extends HttpRequest {
 			headers: {},
 			responseType: "text"
 		});
-	}
-	// 获取第一封邮件
-	static async getEmailApi() {
-		const url = this.CONFIG.EMAIL_API_URL + "api/mail/getmaillist.php";
-
-		const headers = {
-			"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-		};
-
-		const data = {
-			id: Global.config.w2.email_api_id,
-			key: Global.config.w2.email_api_secret,
-			mail: Global.config.w2.email_api_address,
-			pwd: Global.config.w2.email_api_pop3_auth_code,
-			popimap: "pop3",
-			ip: "pop.qq.com",
-			port: "995",
-			ssl: "ssl",
-			page: "1",
-			num: "1",
-		};
-
-		const result = await this._request("POST", url, headers, data);
-		this.log.debug("获取邮箱API结果: ", result);
-		return result;
 	}
 	// 获取心跳令牌
 	static async login() {
@@ -428,6 +402,58 @@ class LSRequest extends HttpRequest {
 		// this.log.log("getDailyReportList result: ", result);
 		return result;
 	}
+	static async _request(method, url, headers, data) {
+		return await this.fetch({
+			method,
+			url,
+			headers,
+			data,
+			responseType: "json",
+		});
+	}
+}
+class ApiboxRequest extends HttpRequest {
+	static log = new Logger("ApiboxRequest");
+	static CONFIG = {
+		URL: "https://cn.apihz.cn/",
+		HEADERS: {
+			"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+		}
+	};
+	static async getInfo() {
+		const url = this.CONFIG.URL + "api/xitong/info.php";
+		const headers = this.CONFIG.HEADERS;
+		const data = {
+			id: Global.config.apibox.user_id,
+			key: Global.config.apibox.api_key
+		}
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("getInfo result: ", result);
+		return result;
+	}
+	static async getEmailApi() {
+		const url = this.CONFIG.URL + "api/mail/getmaillist.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: Global.config.apibox.user_id,
+			key: Global.config.apibox.api_key,
+			mail: Global.config.w2.email_api_address,
+			pwd: Global.config.w2.email_api_pop3_auth_code,
+			popimap: "pop3",
+			ip: "pop.qq.com",
+			port: "995",
+			ssl: "ssl",
+			page: "1",
+			num: "1",
+		};
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.debug("获取邮箱API结果: ", result);
+		return result;
+	}
+
 	static async _request(method, url, headers, data) {
 		return await this.fetch({
 			method,

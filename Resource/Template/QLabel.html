@@ -10,7 +10,9 @@
 <div id="app" class="flex min-h-screen">
 	<!-- 侧边栏 -->
 	<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
-		<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 py-5 border-b">Tagsy_V2.0.0</div>
+		<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 h-16 flex items-center justify-center border-b border-gray-200">
+				Tagsy_V2.0.0
+			</div>
 		<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
 			<li id="menu_overview">
 				<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
@@ -43,30 +45,44 @@
 				</a>
 			</li>
 		</ul>
-		<div id="sidebar_footer" class="mt-auto px-4 py-4 border-t">
-			<a id="link_logout" href="#" class="flex items-center px-4 py-2 text-sm rounded-md text-red-600 hover:bg-red-50">
-				<i class="fas fa-sign-out-alt mr-2 w-5 text-center"></i>退出登录
-			</a>
+		<div id="sidebar_footer" class="h-16 mt-auto px-4 py-4 flex items-center justify-center text-xs text-gray-400">
+			由 @Gwencutilia 打造
 		</div>
 	</aside>
-
 	<!-- 主内容区域 -->
-	<main id="main_content" class="flex-1 ml-64 p-6 space-y-6">
-		<div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-			<!-- 第一列 -->
-			<div class="flex flex-col space-y-6">
-                
+	<div class="flex-1 ml-64 flex flex-col">
+		<!-- 顶部导航栏 -->
+		<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
+			<div class="flex-1 text-lg font-semibold text-gray-600"></div>
+			<div class="flex items-center space-x-4">
+				<button class="w-7 h-7 rounded text-gray-700 hover:bg-gray-100"><i class="fas fa-bell"></i></button>
+				<button class="w-7 h-7 rounded text-gray-700 hover:bg-gray-100"><i class="fas fa-user-circle"></i></button>
 			</div>
-			<!-- 第二列 -->
-			<div class="flex flex-col space-y-6">
-				
+		</header>
+		<!-- 主内容区域 -->
+		<main id="main_content" class="flex-1 p-6 mt-16 pb-16 overflow-y-auto">
+			<div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+				<!-- 第一列 -->
+				<div class="flex flex-col space-y-6">
+					
+				</div>
+				<!-- 第二列 -->
+				<div class="flex flex-col space-y-6">
+					
+				</div>
+				<!-- 第三列 -->
+				<div class="flex flex-col space-y-6">
+					
+				</div>
 			</div>
-			<!-- 第三列 -->
-			<div class="flex flex-col space-y-6">
-				
+		</main>
+		<!-- 底部导航栏 -->
+		<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-center fixed bottom-0 left-64 right-0 z-30">
+			<div class="flex space-x-6">
+
 			</div>
-		</div>
-	</main>
+		</footer>
+	</div>
 </div>
 </body>
 </html>

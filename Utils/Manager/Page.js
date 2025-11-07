@@ -219,6 +219,7 @@ class W2 extends Page {
 		this.current_time_line_task_label_3 = DomHelper.bySelector("#current_time_line_task_label_3"); // 任务4标签
 		// 排班列表
 		this.calendar_label = DomHelper.bySelector("#calendar_label"); // 日历月份
+		this.calendar_title = DomHelper.bySelector("#calendar_title"); // 日历标题
 		this.calendar_table = DomHelper.bySelector("#calendar_table"); // 日历主体
 		this.prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
 		this.next_month_btn = DomHelper.bySelector("#next_month_btn"); // 查看下个月排班按钮
@@ -259,7 +260,7 @@ class W2 extends Page {
 		}
 		this.log.log("验证码已发送, 等待接收");
 		// await System.sleepSeconds(5);
-		result = await W2Request.getEmailApi();
+		result = await ApiboxRequest.getEmailApi();
 		if (result.code !== 200) {
 			Global.config.w2.login_status = W2.status.login_failed;
 			this.log.error("获取邮件失败, 请检查邮箱API信息");
@@ -781,44 +782,71 @@ class W2 extends Page {
 				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.remove('text-gray-400');
 			}
 
-			// 日历日期实现
+			// 日历容器清空
+			this.calendar_title.innerHTML = "";
+			this.calendar_table.innerHTML = "";
+
+			const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
+			for (let i = 0; i < weekNames.length; i++) {
+				const w = document.createElement("div");
+				w.classList.add("py-2");
+				w.textContent = weekNames[i];
+				calendar_title.appendChild(w);
+			}
+
+			this.calendar_table.parentNode.insertBefore(calendar_title, this.calendar_table);
+
+			// 日历日期计算
 			let firstWeekDay = Time.getFirstDayOfMonthWeek(result.data.column[0].date);
 			let lastDate = parseInt(result.data.column[result.data.column.length - 1].date.split("-")[2]);
-			let offsetToSaturday = (firstWeekDay) % 7;
-			this.calendar_table.innerHTML = '';
+			let offsetToSaturday = firstWeekDay % 7;
 
+			// 填充空占位
 			for (let i = 0; i < offsetToSaturday; i++) {
 				const emptyDiv = document.createElement("div");
-				emptyDiv.className = "py-2 rounded";
+				emptyDiv.classList.add("py-2");
+				emptyDiv.classList.add("rounded");
 				this.calendar_table.appendChild(emptyDiv);
 			}
 
 			// 获取排班数据
 			const scheduleInfos = result.data.detail_data_list?.[0]?.schedule_infos || {};
 
+			// 生成每一天日期
 			for (let d = 1; d <= lastDate; d++) {
 				const dateDiv = document.createElement('div');
 				const current = new Date(Time.getCurrentYear(), Global.value.month - 1, d);
 				dateDiv.id = `calendar_date_${d}`;
-				dateDiv.className = 'py-2 rounded cursor-pointer transition-colors duration-200';
+
+				// 基础样式
+				dateDiv.classList.add('py-2');
+				dateDiv.classList.add('rounded');
+				dateDiv.classList.add('cursor-pointer');
+				dateDiv.classList.add('transition-colors');
+				dateDiv.classList.add('duration-200');
 				dateDiv.textContent = d;
 
 				const formattedDate = Time.formatDate(Time.getCurrentYear(), Global.value.month, d);
 				const daySchedule = scheduleInfos[formattedDate];
 
-				// ✅ 判断休息逻辑：接口未返回该日期 或 schedule_conf_name === "休息"
 				if (!daySchedule || daySchedule.schedule_conf_name === "休息") {
-					dateDiv.style.backgroundColor = '#DCEDC8';  // 浅绿背景
-					dateDiv.style.color = '#689F38';            // 深绿文字
-					dateDiv.classList.add('font-semibold', 'shadow-sm');
+					// 休息日样式
+					dateDiv.style.backgroundColor = '#DCEDC8';
+					dateDiv.style.color = '#689F38';
+					dateDiv.classList.add('font-semibold');
+					dateDiv.classList.add('shadow-sm');
 					this.tooltip.addTooltip(dateDiv, "休息日");
 				} else if (Time.isToday(current)) {
-					// 今天
-					dateDiv.classList.add('bg-blue-600', 'text-white', 'font-semibold', 'shadow-sm');
+					// 今天样式
+					dateDiv.classList.add('bg-blue-600');
+					dateDiv.classList.add('text-white');
+					dateDiv.classList.add('font-semibold');
+					dateDiv.classList.add('shadow-sm');
 					this.tooltip.addTooltip(dateDiv, "这是今天");
 				} else {
-					// 普通工作日
-					dateDiv.classList.add('bg-gray-50', 'hover:bg-blue-100');
+					// 普通工作日样式
+					dateDiv.classList.add('bg-gray-50');
+					dateDiv.classList.add('hover:bg-blue-100');
 				}
 
 				this.calendar_table.appendChild(dateDiv);
@@ -1206,14 +1234,17 @@ class Setting extends Page {
 		this.updateUIElement();
 	}
 	init() {
-		this.btn_save_settings = DomHelper.bySelector("#btn_save_settings"); // 保存设置按钮
+		// API盒子账号设置
+		this.api_box_user_test_account_setting_button = DomHelper.bySelector("#api_box_user_test_account_setting_button"); // API盒子账号测试按钮
+		this.api_box_user_id_account_setting_input = DomHelper.bySelector("#api_box_user_id_account_setting_input"); // API盒子通讯ID输入框
+		this.api_box_api_key_account_setting_input = DomHelper.bySelector("#api_box_api_key_account_setting_input"); // API盒子通讯密钥输入框
+		this.api_box_info_account_setting_message_box = DomHelper.bySelector("#api_box_info_account_setting_message_box"); // API盒子信息框
+		this.api_box_error_account_setting_message_box = DomHelper.bySelector("#api_box_error_account_setting_message_box"); // API盒子错误信息框
 		// W2账号设置
 		this.w2_user_test_account_setting_button = DomHelper.bySelector("#w2_user_test_account_setting_button"); // W2账号测试按钮
 		this.w2_user_name_account_setting_input = DomHelper.bySelector("#w2_user_name_account_setting_input"); // W2账号输入框 账号
 		this.w2_user_password_account_setting_input = DomHelper.bySelector("#w2_user_password_account_setting_input"); // W2密码输入框
 		this.w2_email_api_test_account_setting_button = DomHelper.bySelector("#w2_email_api_test_account_setting_button"); // W2API测试按钮
-		this.w2_email_api_id_account_setting_input = DomHelper.bySelector("#w2_email_api_id_account_setting_input"); // W2邮箱API输入框
-		this.w2_email_api_secret_account_setting_input = DomHelper.bySelector("#w2_email_api_secret_account_setting_input"); // W2邮箱API密钥输入框
 		this.w2_email_api_address_account_setting_input = DomHelper.bySelector("#w2_email_api_address_account_setting_input"); // W2邮箱输入框
 		this.w2_email_api_pop3_auth_code_account_setting_input = DomHelper.bySelector("#w2_email_api_pop3_auth_code_account_setting_input"); // W2POP3授权码输入框
 		this.w2_error_account_setting_message_box = DomHelper.bySelector("#w2_error_account_setting_message_box") // W2错误提示
@@ -1251,30 +1282,32 @@ class Setting extends Page {
 		this.ls_error_setting_message_box = DomHelper.bySelector("#ls_error_setting_message_box");
 	}
 	bindEvents() {
-		if (DomHelper.exists(this.btn_save_settings)) {
-			this.btn_save_settings.addEventListener("click", async () => {
-				Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
-				Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
-				let result = await W2Request.getVerifyCode();
-				if (result === 200) {
-					this.w2_user_name_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.w2_user_password_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.w2_info_account_setting_message_box.classList.remove('hidden');
-					this.w2_user_name_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_password_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.w2_error_account_setting_message_box.classList.add('hidden');
-				} else {
-					this.w2_error_account_setting_message_box.classList.remove('hidden');
-					this.w2_user_name_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_password_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_info_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.user_name = null;
-					Global.config.w2.user_password = null;
-				}
-			});
-		}
+		this.api_box_user_test_account_setting_button.addEventListener("click", async () => {
+			Global.config.apibox.user_id = this.api_box_user_id_account_setting_input.value;
+			Global.config.apibox.api_key = this.api_box_api_key_account_setting_input.value;
+			let result = await ApiboxRequest.getInfo(); // 直接返回状态信息
+			this.log.debug("getInfo: ", result);
+			if (result.code === 200) {
+				this.api_box_info_account_setting_message_box.querySelector("span").innerText = "API账号信息正确";
+				this.api_box_error_account_setting_message_box.classList.add('hidden');
+				this.api_box_info_account_setting_message_box.classList.remove('hidden');
+				this.api_box_user_id_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
+				this.api_box_api_key_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
+				this.api_box_user_id_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
+				this.api_box_api_key_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
+			} else {
+				this.api_box_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
+				this.api_box_error_account_setting_message_box.classList.remove('hidden');
+				this.api_box_info_account_setting_message_box.classList.add('hidden');
+				this.api_box_user_id_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+				this.api_box_api_key_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+				this.api_box_user_id_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+				this.api_box_api_key_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+
+				Global.config.apibox.user_id = null;
+				Global.config.apibox.api_key = null;
+			}
+		});
 		if (DomHelper.exists(this.w2_user_test_account_setting_button)) {
 			this.w2_user_test_account_setting_button.addEventListener("click", async () => {
 				Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
@@ -1316,48 +1349,59 @@ class Setting extends Page {
 		}
 		if (DomHelper.exists(this.w2_email_api_test_account_setting_button)) {
 			this.w2_email_api_test_account_setting_button.addEventListener("click", async () => {
-				Global.config.w2.email_api_id = this.w2_email_api_id_account_setting_input.value;
-				Global.config.w2.email_api_secret = this.w2_email_api_secret_account_setting_input.value;
+				let result;
+
+				Global.config.apibox.user_id = this.api_box_user_id_account_setting_input.value;
+				Global.config.apibox.api_key = this.api_box_api_key_account_setting_input.value;
+
+				result = await ApiboxRequest.getInfo(); // 直接返回状态信息
+				this.log.debug("getInfo: ", result);
+				if (result.code !== 200) {
+					this.w2_error_account_setting_message_box.querySelector("span").innerText = "Apibox通讯ID与密钥错误";
+					this.w2_error_account_setting_message_box.classList.remove('hidden');
+					this.w2_email_api_address_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					this.w2_email_api_pop3_auth_code_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					this.api_box_user_id_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					this.api_box_api_key_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					return;
+				}
+
 				Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
 				Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
-				let result = await W2Request.getEmailApi(); // 返回结果
+				result = await ApiboxRequest.getEmailApi(); // 返回结果
 				if (result.code === 200) {
 					this.w2_info_account_setting_message_box.querySelector("span").innerText = "W2邮箱API连通性测试无误, 已获取邮箱列表";
-					this.w2_email_api_id_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.w2_email_api_secret_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
 					this.w2_email_api_address_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
 					this.w2_email_api_pop3_auth_code_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
+					this.api_box_user_id_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
+					this.api_box_api_key_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
 					
-					this.w2_email_api_id_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.w2_email_api_secret_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
 					this.w2_email_api_address_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
 					this.w2_email_api_pop3_auth_code_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-
+					this.api_box_user_id_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
+					this.api_box_api_key_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
+					
 					this.w2_info_account_setting_message_box.classList.remove('hidden');
 					this.w2_error_account_setting_message_box.classList.add('hidden');
 
-					Global.config.w2.email_api_id = this.w2_email_api_id_account_setting_input.value;
-					Global.config.w2.email_api_secret = this.w2_email_api_secret_account_setting_input.value;
 					Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
 					Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 				} else {
 					this.w2_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
 
-					this.w2_email_api_id_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_email_api_secret_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
 					this.w2_email_api_address_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
 					this.w2_email_api_pop3_auth_code_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+					this.api_box_user_id_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+					this.api_box_api_key_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
 
-					this.w2_email_api_id_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_email_api_secret_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					this.w2_email_api_address_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
 					this.w2_email_api_pop3_auth_code_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					this.api_box_user_id_account_setting_input.classList.add('border-red-300', 'focus:ring-red-500');
+					this.api_box_api_key_account_setting_input.classList.add('border-red-300', 'focus:ring-red-500');
 
 					this.w2_error_account_setting_message_box.classList.remove('hidden');
 					this.w2_info_account_setting_message_box.classList.add('hidden');
 
-					Global.config.w2.email_api_id = null;
-					Global.config.w2.email_api_secret = null;
 					Global.config.w2.email_api_address = null;
 					Global.config.w2.email_api_pop3_auth_code = null;
 				}
@@ -1561,16 +1605,15 @@ class Setting extends Page {
 		})
 	}
 	updateUIElement() {
+		if (Global.config.apibox.user_id !== null && Global.config.apibox.api_key !== null) {
+			this.api_box_user_id_account_setting_input.value = Global.config.apibox.user_id;
+			this.api_box_api_key_account_setting_input.value = Global.config.apibox.api_key;
+		}
 		if (Global.config.w2.user_name !== null && Global.config.w2.user_password !== null) {
 			this.w2_user_name_account_setting_input.value = Global.config.w2.user_name;
 			this.w2_user_password_account_setting_input.value = Global.config.w2.user_password;
 		}
-		if (Global.config.w2.email_api_id !== null && 
-			Global.config.w2.email_api_secret !== null &&
-		 	Global.config.w2.email_api_address !== null && 
-		 	Global.config.w2.email_api_pop3_auth_code !== null) {
-			this.w2_email_api_id_account_setting_input.value = Global.config.w2.email_api_id;
-			this.w2_email_api_secret_account_setting_input.value = Global.config.w2.email_api_secret;
+		if (Global.config.w2.email_api_address !== null && Global.config.w2.email_api_pop3_auth_code !== null) {
 			this.w2_email_api_address_account_setting_input.value = Global.config.w2.email_api_address;
 			this.w2_email_api_pop3_auth_code_account_setting_input.value = Global.config.w2.email_api_pop3_auth_code;
 		}
