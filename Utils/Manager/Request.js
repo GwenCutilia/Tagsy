@@ -311,7 +311,6 @@ class LSRequest extends HttpRequest {
 			Global.config.ls.user_id = result.user.userId;
 		}
 		this.log.log("getInfo result: ", result);
-		this.log.log("userid: ", result.user.userId);
 		return result;
 	}
 	// 获取项目工作区信息
@@ -451,6 +450,20 @@ class ApiboxRequest extends HttpRequest {
 
 		const result = await this._request("POST", url, headers, data);
 		this.log.debug("获取邮箱API结果: ", result);
+		return result;
+	}
+	// 天气
+	static async getWeatherInfo() {
+		const url = "https://cn.apihz.cn/api/tianqi/tqybip.php"
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: Global.config.apibox.user_id,
+			key: Global.config.apibox.api_key,
+		}
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("getWeatherInfo result: ", result);
 		return result;
 	}
 

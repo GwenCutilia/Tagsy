@@ -36,14 +36,21 @@ class Template {
 		if (!this.isTemplatePage()) {
 			return;
 		}
-		await Template.loadTask();
+		this.loadTask();
+		this.loadFramework();
 		this.log.log('Template初始化完成');
 	}
-	static async loadTask() {
+	// 初始化框架
+	static async loadFramework() {
+		this.initPage();
 		await W2Request.getLoginPage();
+		new Framework();
+	}
+
+	static async loadTask() {
+		// Interaction.addInteraction();
 		this.W2Task();
 		this.LSTask();
-		this.initPage();
 		// 为每日任务写单独的函数出来
 		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
 		// 添加一个重新登录的按钮监听事件
@@ -71,7 +78,6 @@ class Index extends Page {
 		this.init();
 		this.bindEvents();
 		this.updateUIElement();
-		this.addAanimationEffect();
 	}
 	async init() {
 		// 加载状态
@@ -124,7 +130,6 @@ class Index extends Page {
 	async loadingStatusTask() {
 		// 加载状态
 		this.loadingStatusValue = this.loading_status_label;
-		this.log.debug("loadingStatusValue: ", this.loadingStatusValue);
 		if (Resource.AllLoaded()) {
 			this.loadingStatusValue.innerText = "已加载";
 		} else {
@@ -140,19 +145,6 @@ class Index extends Page {
 		this.remain_hours_label.classList.remove("hidden");
 		this.worked_hours_label.innerText = workedHours + " 小时";
 		this.remain_hours_label.innerText = ", 距离下班还有 " + remainHours + " 小时";
-	}
-	addAanimationEffect() {
-		// 按钮点击效果
-		DomHelper.allBySelector('button').forEach(btn => {
-			btn.addEventListener('click', () => {
-				// 添加点击效果样式
-				btn.classList.add('ring-2', 'ring-offset-1', 'ring-indigo-300');
-				// 0.2秒后移除效果
-				setTimeout(() => {
-					btn.classList.remove('ring-2', 'ring-offset-1', 'ring-indigo-300');
-				}, 200);
-			});
-		});
 	}
 }
 class W2 extends Page {
@@ -316,9 +308,6 @@ class W2 extends Page {
 
 			Global.config.w2.login_status = W2.status.not_login;
 			Global.config.w2.token_check_task = false;
-		});
-		this.check_in_btn.addEventListener("click", async () => {
-			await W2Request.checkIn();
 		});
 		this.meal_working_status_btn.addEventListener("click", async () => {
 			if (meal_working_status_label.innerText === "正在标注") {
@@ -727,7 +716,6 @@ class W2 extends Page {
 		if (!scheduleResult || !scheduleResult.data || 
 			!Array.isArray(scheduleResult.data.detail_data_list) || 
 			scheduleResult.data.detail_data_list.length === 0) {
-			this.log.warn("无法获取排班数据");
 			return true; // 若无法获取数据，视为休息
 		}
 
@@ -739,7 +727,6 @@ class W2 extends Page {
 
 		// 若没有今日排班信息，视为休息日
 		if (!scheduleInfos[today]) {
-			this.log.info(`今天 ${today} 未排班，视为休息日`);
 			return true;
 		}
 
@@ -761,35 +748,38 @@ class W2 extends Page {
 			// 日历标题
 			calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
 
-			// 按钮逻辑
+			// 下个月按钮
 			if (Global.value.month >= Time.getCurrentMonth()) {
-				this.next_month_btn.disabled = true;
-				this.next_month_btn.classList.add('opacity-50');
+				this.next_month_btn.classList.add('opacity-50', 'pointer-events-none', 'text-gray-400');
 				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
 			} else {
-				this.next_month_btn.disabled = false;
-				this.next_month_btn.classList.remove('opacity-50');
-				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.remove('text-gray-400');
+				this.next_month_btn.classList.remove('opacity-50', 'pointer-events-none', 'bg-gray-200', 'text-gray-400');
+				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.remove('text-gray-400', 'pointer-events-none');
 			}
 
+			// 上个月按钮
 			if (Global.value.month <= 1) {
-				this.prev_month_btn.disabled = true;
-				this.prev_month_btn.classList.add('opacity-50');
+				this.prev_month_btn.classList.add('opacity-50', 'pointer-events-none', 'text-gray-400');
 				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.add('text-gray-400');
 			} else {
-				this.prev_month_btn.disabled = false;
-				this.prev_month_btn.classList.remove('opacity-50');
-				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.remove('text-gray-400');
+				this.prev_month_btn.classList.remove('opacity-50', 'pointer-events-none', 'bg-gray-200', 'text-gray-400');
+				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.remove('text-gray-400', 'pointer-events-none');
 			}
 
 			// 日历容器清空
 			this.calendar_title.innerHTML = "";
 			this.calendar_table.innerHTML = "";
 
+			// 星期标题
 			const weekNames = ["日", "一", "二", "三", "四", "五", "六"];
 			for (let i = 0; i < weekNames.length; i++) {
-				const w = document.createElement("div");
-				w.classList.add("py-2");
+				const w = DomHelper.createDom("div");
+				w.classList.add(
+					"py-2",
+					"text-center",
+					"font-medium",
+					"text-gray-600"
+				);
 				w.textContent = weekNames[i];
 				calendar_title.appendChild(w);
 			}
@@ -803,9 +793,8 @@ class W2 extends Page {
 
 			// 填充空占位
 			for (let i = 0; i < offsetToSaturday; i++) {
-				const emptyDiv = document.createElement("div");
-				emptyDiv.classList.add("py-2");
-				emptyDiv.classList.add("rounded");
+				const emptyDiv = DomHelper.createDom("div");
+				emptyDiv.classList.add("py-2", "rounded");
 				this.calendar_table.appendChild(emptyDiv);
 			}
 
@@ -814,39 +803,40 @@ class W2 extends Page {
 
 			// 生成每一天日期
 			for (let d = 1; d <= lastDate; d++) {
-				const dateDiv = document.createElement('div');
+				const dateDiv = DomHelper.createDom('div');
 				const current = new Date(Time.getCurrentYear(), Global.value.month - 1, d);
 				dateDiv.id = `calendar_date_${d}`;
+				dateDiv.textContent = d;
 
 				// 基础样式
-				dateDiv.classList.add('py-2');
-				dateDiv.classList.add('rounded');
-				dateDiv.classList.add('cursor-pointer');
-				dateDiv.classList.add('transition-colors');
-				dateDiv.classList.add('duration-200');
-				dateDiv.textContent = d;
+				dateDiv.classList.add(
+					"py-2",
+					"rounded",
+					"cursor-pointer",
+					"transition-colors",
+					"duration-200",
+					"text-center"
+				);
 
 				const formattedDate = Time.formatDate(Time.getCurrentYear(), Global.value.month, d);
 				const daySchedule = scheduleInfos[formattedDate];
 
-				if (!daySchedule || daySchedule.schedule_conf_name === "休息") {
-					// 休息日样式
-					dateDiv.style.backgroundColor = '#DCEDC8';
-					dateDiv.style.color = '#689F38';
-					dateDiv.classList.add('font-semibold');
-					dateDiv.classList.add('shadow-sm');
+				// 状态判断并添加样式
+				if (Time.isToday(current) && (!daySchedule || daySchedule.schedule_conf_name === "休息")) {
+					// 今天休息日 → 深绿色
+					dateDiv.classList.add("bg-green-500", "text-white", "font-semibold", "shadow-sm");
+					this.tooltip.addTooltip(dateDiv, "今天休息");
+				} else if (!daySchedule || daySchedule.schedule_conf_name === "休息") {
+					// 其他休息日 → 浅绿色
+					dateDiv.classList.add("bg-green-200", "text-green-700", "font-semibold", "shadow-sm");
 					this.tooltip.addTooltip(dateDiv, "休息日");
 				} else if (Time.isToday(current)) {
-					// 今天样式
-					dateDiv.classList.add('bg-blue-600');
-					dateDiv.classList.add('text-white');
-					dateDiv.classList.add('font-semibold');
-					dateDiv.classList.add('shadow-sm');
-					this.tooltip.addTooltip(dateDiv, "这是今天");
+					// 今天工作日 → 蓝色
+					dateDiv.classList.add("bg-blue-300", "text-white", "font-semibold", "shadow-sm");
+					this.tooltip.addTooltip(dateDiv, "今天");
 				} else {
-					// 普通工作日样式
-					dateDiv.classList.add('bg-gray-50');
-					dateDiv.classList.add('hover:bg-blue-100');
+					// 普通工作日 → 灰色
+					dateDiv.classList.add("bg-gray-50", "hover:bg-blue-100");
 				}
 
 				this.calendar_table.appendChild(dateDiv);
@@ -856,6 +846,7 @@ class W2 extends Page {
 			calendar_table.innerHTML = "";
 		}
 	}
+
 	// 间隔任务
 	static async intervalTask() {
 		const task = [
@@ -1656,6 +1647,118 @@ class Setting extends Page {
 		if (Global.config.ls.time_range_fill_daily_report_start !== null && Global.config.ls.time_range_fill_daily_report_end !== null) {
 			this.ls_time_range_fill_daily_report_start_module_setting_input.value = Global.config.ls.time_range_fill_daily_report_start;
 			this.ls_time_range_fill_daily_report_end_module_setting_input.value = Global.config.ls.time_range_fill_daily_report_end;
+		}
+	}
+}
+// 界面逻辑
+class Framework extends Page {
+	// 框架初始化
+	// 通用动画效果
+	constructor() {
+		super();
+		Framework.init();
+		Framework.addInteraction();
+	}
+	static init() {
+		this.weather_message_box = DomHelper.bySelector("#weather_message_box");
+		this.weather_div = DomHelper.bySelector("#weather_div");
+		this.weather_icon = DomHelper.bySelector("#weather_icon");
+		this.weather_temp_label = DomHelper.bySelector("#weather_temp_label");
+		this.weather_city_label = DomHelper.bySelector("#weather_city_label");
+		this.weather_wind_label = DomHelper.bySelector("#weather_wind_label");
+	}
+	static addInteraction() {
+		this.addFrameworkAuxiliaryLogic();
+		this.weatherComponent();
+	}
+	// 添加框架辅助逻辑
+	static async addFrameworkAuxiliaryLogic() {
+		// 按钮点击效果
+		DomHelper.allBySelector('button').forEach(btn => {
+			btn.addEventListener('click', () => {
+				// 添加点击效果样式
+				btn.classList.add('ring-2', 'ring-offset-1', 'ring-indigo-300');
+				// 0.2秒后移除效果
+				setTimeout(() => {
+					btn.classList.remove('ring-2', 'ring-offset-1', 'ring-indigo-300');
+				}, 200);
+			});
+		});
+		DomHelper.allBySelector("*").forEach(el => {
+			// 排除按钮、输入框、链接、textarea、select
+			if (!["BUTTON", "INPUT", "TEXTAREA", "SELECT", "A"].includes(el.tagName)) {
+				el.classList.add("select-none");
+			}
+		});
+	}
+	static async weatherComponent() {
+		// {
+		// 	"code": 200,
+		// 	"guo": "中国",
+		// 	"sheng": "山西",
+		// 	"shi": "大同",
+		// 	"name": "大同",
+		// 	"weather1": "晴",
+		// 	"weather2": "晴",
+		// 	"wd1": "7",
+		// 	"wd2": "-4",
+		// 	"winddirection1": "西风",
+		// 	"winddirection2": "西南风",
+		// 	"windleve1": "微风",
+		// 	"windleve2": "微风",
+		// 	"weather1img": "https://rescdn.apihz.cn/resimg/tianqi/qing.png",
+		// 	"weather2img": "https://rescdn.apihz.cn/resimg/tianqi/qing.png",
+		// 	"lon": "113.410",
+		// 	"lat": "40.080",
+		// 	"uptime": "2025-11-09 12:00:00",
+		// 	"nowinfo": {
+		// 		"precipitation": 0,
+		// 		"temperature": 6.9,
+		// 		"pressure": 902,
+		// 		"humidity": 28,
+		// 		"windDirection": "西北风",
+		// 		"windDirectionDegree": 300,
+		// 		"windSpeed": 3.4,
+		// 		"windScale": "3级",
+		// 		"feelst": 3,
+		// 		"uptime": "2025/11/09 16:30"
+		// 	},
+		// 	"alarm": {
+		// 		"id": "14020041600000_20251108171700",
+		// 		"title": "大同市气象台发布大风蓝色预警[Ⅳ级/一般]",
+		// 		"signaltype": "大风",
+		// 		"signallevel": "蓝色",
+		// 		"effective": "2025/11/08 17:18",
+		// 		"eventType": "11B06",
+		// 		"severity": "BLUE",
+		// 		"type": "p0007004"
+		// 	}
+		// }
+		const weatherIconMap = {
+			"晴": "fa-sun",
+			"多云": "fa-cloud-sun",
+			"阴": "fa-cloud",
+			"雨": "fa-cloud-rain",
+			"雪": "fa-snowflake",
+			"雾": "fa-smog",
+			"风": "fa-wind"
+		};
+		
+		let result = await ApiboxRequest.getWeatherInfo();
+		let data = result;
+		console.log(result);
+		if (result.code === 200) {
+			let weatherName = data.weather1 || "晴";
+			let iconClass = weatherIconMap[weatherName] || "fa-sun";
+			
+			this.weather_message_box.classList.add("hidden");
+			this.weather_div.classList.remove("hidden");
+			this.weather_icon.classList.replace("fa-sun", iconClass);
+			this.weather_temp_label.textContent = data.nowinfo.temperature + "℃";
+			this.weather_city_label.textContent = data.shi;
+			this.weather_wind_label.textContent = data.nowinfo.windDirection + " " + data.nowinfo.windScale;
+		} else {
+			this.weather_message_box.innerText = "Apibox接口异常, 检查Apibox设置";
 		}
 	}
 }

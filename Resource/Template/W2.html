@@ -255,10 +255,25 @@
 				</div>
 			</main>
 			<!-- 底部导航栏 -->
-			<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-center fixed bottom-0 left-64 right-0 z-30">
-				<div class="flex space-x-6">
+			<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-between fixed bottom-0 left-64 right-0 z-30 px-6">
 
+			<div class="flex space-x-6">
+				<!-- 左侧可以放导航按钮 -->
+			</div>
+
+			<!-- 天气信息区域 -->
+			<div id="weather" class="flex items-center text-sm text-gray-600">
+				<div id="weather_message_box">
+					<div>天气信息获取中...</div>
 				</div>
+				<div id="weather_div" class="hidden">
+					<i id="weather_icon" class="fa-solid fa-sun text-yellow-500 mr-2"></i>
+					<span id="weather_temp_label" class="mr-2"></span>
+					<span id="weather_city_label" class="mr-2"></span>
+					<i class="fa-solid fa-wind mr-1"></i>
+					<span id="weather_wind_label"></span>
+				</div>
+			</div>
 			</footer>
 		</div>
 	</div>
