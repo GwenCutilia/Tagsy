@@ -81,7 +81,6 @@ class ResourceLoader {
 			Url = "https://weavefate.asia/";
 		}
 
-		// 后面不变
 		const resourceGroups = [
 			[
 				Url + "Resource/Lib/Font_Awesome/All.css",

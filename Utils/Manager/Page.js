@@ -48,7 +48,6 @@ class Template {
 	}
 
 	static async loadTask() {
-		// Interaction.addInteraction();
 		this.W2Task();
 		this.LSTask();
 		// 为每日任务写单独的函数出来
@@ -1428,8 +1427,8 @@ class Setting extends Page {
 					endInput: this.ls_time_range_login_out_end_module_setting_input
 				},
 				{
-					start: ls_time_range_fill_daily_report_start_module_setting_input.value,
-					end: ls_time_range_fill_daily_report_end_module_setting_input.value,
+					start: this.ls_time_range_fill_daily_report_start_module_setting_input.value,
+					end: this.ls_time_range_fill_daily_report_end_module_setting_input.value,
 					configStart: 'time_range_fill_daily_report_start',
 					configEnd: 'time_range_fill_daily_report_end',
 					fieldName: '填报日报',
@@ -1446,7 +1445,7 @@ class Setting extends Page {
 			// 循环检查所有时间字段
 			for (const field of timeFields) {
 				if (timeToSeconds(field.start) > timeToSeconds(field.end)) {
-					DomHelper.bySelectorFromParent(ls_error_setting_message_box, "span").innerText = field.fieldName + " 开始时间不能晚于结束时间";
+					DomHelper.bySelectorFromParent(this.ls_error_setting_message_box, "span").innerText = field.fieldName + " 开始时间不能晚于结束时间";
 					this.ls_error_setting_message_box.classList.remove("hidden");
 					this.ls_info_setting_message_box.classList.add("hidden");
 					field.startInput.classList.add("border-red-500");
@@ -1462,7 +1461,7 @@ class Setting extends Page {
 				Global.config.ls[field.configStart] = field.start;
 				Global.config.ls[field.configEnd] = field.end;
 			}
-			DomHelper.bySelectorFromParent(ls_info_setting_message_box, "span").innerText = "时间段配置已保存";
+			DomHelper.bySelectorFromParent(this.ls_info_setting_message_box, "span").innerText = "时间段配置已保存";
 			this.ls_info_setting_message_box.classList.remove("hidden");
 			this.ls_error_setting_message_box.classList.add("hidden");
 		});
@@ -1595,7 +1594,7 @@ class Setting extends Page {
 			}
 		})
 	}
-	updateUIElement() {
+	async updateUIElement() {
 		if (Global.config.apibox.user_id !== null && Global.config.apibox.api_key !== null) {
 			this.api_box_user_id_account_setting_input.value = Global.config.apibox.user_id;
 			this.api_box_api_key_account_setting_input.value = Global.config.apibox.api_key;

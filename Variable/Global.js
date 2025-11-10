@@ -108,8 +108,8 @@ class Global {
 
 	static log = new Logger("Global");
 
-	static init() {
-		this.traverseConfig(this.config);
+	static async init() {
+		await this.traverseConfig(this.config);
 		this.setupConfigProxy(); // 初始化代理
 	}
 
@@ -132,7 +132,7 @@ class Global {
 	}
 
 	static setupConfigProxy() {
-		// 递归为对象及所有嵌套对象创建代理（核心修复点）
+		// 递归为对象及所有嵌套对象创建代理
 		const createProxy = (obj, parentKey = '') => {
 			// 1. 先为现有嵌套对象递归创建代理
 			for (const key in obj) {
