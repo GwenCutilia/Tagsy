@@ -296,6 +296,18 @@ class LSRequest extends HttpRequest {
 		}
 		return result;
 	}
+	static async loginOut() {
+		const url = "http://biaoju.labelvibe.com:8088/prod-api/logout";
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"Authorization": "Bearer " + Global.config.ls.token,
+			"Cookie": "Admin-Token=" + Global.config.ls.token
+		};
+
+		const result = await this._request("POST", url, headers);
+		this.log.log("loginOut result: ", result);
+		return result;
+	}
 	// 获取个人信息
 	static async getInfo() {
 		const url = "http://biaoju.labelvibe.com:8088/prod-api/getInfo";

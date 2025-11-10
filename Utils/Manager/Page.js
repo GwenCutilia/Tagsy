@@ -42,8 +42,8 @@ class Template {
 	}
 	// 初始化框架
 	static async loadFramework() {
-		this.initPage();
 		await W2Request.getLoginPage();
+		this.initPage();
 		new Framework();
 	}
 
@@ -987,6 +987,7 @@ class LS extends Page {
 	static status = {
 		login_success: "登录成功",
 		login_failed: "登录失败",
+		login_out: "已登出",
 		not_loginfill_daily_report: "未打卡",
 		already_fill_daily_report: "已打卡",
 		failed_fill_daily_report: "打卡失败", // 打卡失败
@@ -996,12 +997,18 @@ class LS extends Page {
 	constructor() {
 		super();
 		this.init();
-		// this.bindEvents();
+		this.bindEvents();
 		this.updateUIElement();
 	}
 	async init() {
+		// 登录状态
+		this.login_btn = DomHelper.bySelector("#login_btn"); // 登录按钮
+		this.login_out_btn = DomHelper.bySelector("#login_out_btn"); // 登录状态标签
 		this.login_status_label = DomHelper.bySelector("#login_status_label"); // 签到签出标签
+		// 打卡状态
+		this.fill_daily_report_btn = DomHelper.bySelector("#fill_daily_report_btn"); // 打卡按钮
 		this.fill_daily_report_label = DomHelper.bySelector("#fill_daily_report_label"); // 打卡状态标签
+		// 日报列表
 		this.daily_report_list_label = DomHelper.bySelector("#daily_report_list_label"); // 日报列表标题
 		this.daily_report_list_table = DomHelper.bySelector("#daily_report_list_table"); // 日报列表表格
 	}
@@ -1040,7 +1047,8 @@ class LS extends Page {
 	}
 	// 退出登录
 	static async loginOut() {
-		
+		await LSRequest.loginOut();
+		Global.config.ls.login_status = LS.status.login_out;
 	}
 	// 心跳 如果LS的掉线了再做
 	static async loginCheck() {
@@ -1054,6 +1062,19 @@ class LS extends Page {
 		} else {
 			
 		}
+	}
+	// 事件绑定
+	bindEvents() {
+		this.login_btn.addEventListener("click", async () => {
+			await LS.login();
+		});
+		this.login_out_btn.addEventListener("click", async () => {
+			await LS.loginOut();
+			Global.config.ls.login_status = LS.status.login_out;
+		});
+		this.fill_daily_report_btn.addEventListener("click", async () => {
+			await LS.fillDailyReport();
+		});
 	}
 	// 刷新UI
 	async updateUIElement() {
@@ -1683,6 +1704,7 @@ class Framework extends Page {
 				}, 200);
 			});
 		});
+
 		DomHelper.allBySelector("*").forEach(el => {
 			// 排除按钮、输入框、链接、textarea、select
 			if (!["BUTTON", "INPUT", "TEXTAREA", "SELECT", "A"].includes(el.tagName)) {

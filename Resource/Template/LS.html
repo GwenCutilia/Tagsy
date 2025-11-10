@@ -48,7 +48,6 @@
 				由 @Gwencutilia 打造
 			</div>
 		</aside>
-
 		<!-- 主内容区域 -->
 		<div class="flex-1 ml-64 flex flex-col">
 			<!-- 顶部导航栏 -->
@@ -66,10 +65,10 @@
 						<div class="flex items-center justify-between">
 							<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
 							<div class="flex space-x-2">
-								<button id="login_btn" class="ml-auto bg-green-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-700 transition">
+								<button id="login_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
 									<i class="fa-solid fa-right-to-bracket"></i>
 								</button>
-								<button id="login_out_btn" class="ml-auto bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-700 transition">
+								<button id="login_out_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
 									<i class="fa-solid fa-right-from-bracket"></i>
 								</button>
 							</div>
@@ -77,7 +76,14 @@
 						<div id="login_status_label" class="text-2xl font-bold text-blue-600">--</div>
 					</div>
 					<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-						<div class="text-gray-500 text-sm mb-1">日报打卡状态</div>
+						<div class="flex items-center justify-between">
+							<div class="text-gray-500 text-sm mb-1">日报打卡状态</div>
+							<div class="flex space-x-2">
+								<button id="fill_daily_report_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
+									<i class="fa-solid fa-id-card-clip"></i>
+								</button>
+							</div>
+						</div>
 						<div id="fill_daily_report_label" class="text-2xl font-bold text-green-600">--</div>
 					</div>
 					<div class="grid-cell bg-white shadow rounded-xl p-5 h-200 flex flex-col justify-center">
