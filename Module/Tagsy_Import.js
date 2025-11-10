@@ -73,9 +73,15 @@ class ResourceLoader {
 
 	// 全局加载入口
 	static async loadAllResources() {
-		const Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/"; // 本地路径，可修改
+		// 自动判断环境
+		let Url;
+		if (location.href.startsWith("file:///")) {
+			Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/";
+		} else {
+			Url = "https://weavefate.asia/";
+		}
 
-		// 资源分组，内部并行，分组顺序加载
+		// 后面不变
 		const resourceGroups = [
 			[
 				Url + "Resource/Lib/Font_Awesome/All.css",
@@ -97,15 +103,10 @@ class ResourceLoader {
 			]
 		];
 
-		// 保存总资源数
 		ResourceLoader.resourcesTotal = resourceGroups.flat().length;
-
-		// 执行加载
 		ResourceLoader.resourcesAdded = await ResourceLoader.loadResourcesByGroups(resourceGroups);
 
 		Resource.scriptsNum = ResourceLoader.resourcesTotal;
 		Resource.scriptsAdd = ResourceLoader.resourcesAdded;
-
-		// console.log(`Resources loaded: ${ResourceLoader.resourcesAdded}/${ResourceLoader.resourcesTotal}`);
 	}
 }
