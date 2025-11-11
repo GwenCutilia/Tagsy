@@ -12,12 +12,9 @@
 				"type": "shell",
 				"command": ".\\NSIS\\makensis.exe .\\Setup\\RelyFile\\Tagsy_Setup.nsi",
 				"presentation": {
-					// "reveal": "silent",
-					// "echo": false,
-					// "focus": false
-					"reveal": "always",
-					"echo": true,
-					"focus": true,
+					"reveal": "silent",
+					"echo": false,
+					"focus": false,
 					"panel": "dedicated"
 				},
 				"options": {
@@ -33,7 +30,7 @@
 		"version": "0.2.0",
 		"configurations": [
 			{
-				"name": "Build Tagsy Installer",
+				"name": "Build_Tagsy",
 				"type": "node",
 				"request": "launch",
 				"preLaunchTask": "BuildInstaller",
