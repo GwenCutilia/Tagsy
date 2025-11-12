@@ -4,253 +4,143 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>登录页面</title>
-<style>
-	* {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-	}
-
-	body {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		min-height: 100vh;
-		background-color: #d8e9e7;
-		position: relative;
-		overflow: hidden;
-	}
-
-	/* 新增: 背景动画canvas, 层级最低, 铺满 */
-	#bg-canvas {
-		position: fixed;
-		top: 0; left: 0; right: 0; bottom: 0;
-		width: 100vw;
-		height: 100vh;
-		z-index: 0;
-		pointer-events: none; /* 不阻挡鼠标事件 */
-	}
-
-	.login-container {
-		position: relative;
-		z-index: 2;
-		background-color: #fff;
-		padding: 40px;
-		border-radius: 20px;
-		box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-		width: 100%;
-		max-width: 380px;
-		text-align: center;
-	}
-
-	.title {
-		font-size: 2em;
-		color: #333;
-		margin-bottom: 30px;
-		font-weight: 600;
-	}
-
-	.input-group {
-		position: relative;
-		margin-bottom: 20px;
-	}
-
-	.input-field {
-		width: 100%;
-		padding: 15px 15px 15px 50px;
-		border: 1px solid #e0e0e0;
-		background-color: #f7f9fc;
-		border-radius: 12px;
-		font-size: 1em;
-		color: #555;
-		outline: none;
-		transition: border-color 0.3s, box-shadow 0.3s;
-	}
-
-	.input-field::placeholder {
-		color: #aaa;
-	}
-
-	.input-field:focus {
-		border-color: #008c75;
-		box-shadow: 0 0 0 3px rgba(0, 140, 117, 0.1);
-	}
-
-	.input-group .icon {
-		position: absolute;
-		left: 18px;
-		top: 50%;
-		transform: translateY(-50%);
-		color: #888;
-	}
-
-	.input-group .toggle-password {
-		position: absolute;
-		right: 18px;
-		top: 50%;
-		transform: translateY(-50%);
-		color: #888;
-		cursor: pointer;
-	}
-
-	.login-button {
-		width: 100%;
-		padding: 15px;
-		border: none;
-		background-color: #008c75;
-		color: #fff;
-		border-radius: 12px;
-		font-size: 1.1em;
-		font-weight: 600;
-		cursor: pointer;
-		transition: background-color 0.3s, transform 0.1s;
-	}
-
-	.login-button:hover {
-		background-color: #007360;
-	}
-
-	.login-button:active {
-		transform: scale(0.98);
-	}
-</style>
 </head>
-<body>
+<body style="display:none" class="flex items-center justify-center min-h-screen bg-[#d8e9e7] relative">
 
-	<!-- 背景动画canvas -->
-	<canvas id="bg-canvas"></canvas>
+<!-- 背景动画canvas -->
+<canvas id="bg_canvas" class="fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
 
-	<!-- 登录框 -->
-	<div class="login-container">
-    <h1 class="title" id="greeting">欢迎</h1>
+<!-- 登录框 -->
+<div class="relative z-10 bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md text-center">
+	<h1 class="text-3xl font-semibold text-gray-800 mb-8">欢迎</h1>
 
-    <style>
-        /* 渐隐渐现动画关键帧 */
-        .fade-out {
-            opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-        .fade-in {
-            opacity: 1;
-            transition: opacity 0.8s ease;
-        }
-    </style>
+	<div id="login_container" class="space-y-6">
 
-    <script>
-        const greetings = ['欢迎', '你好'];
-        let index = 0;
-        const greetingEl = document.getElementById('greeting');
-
-        function switchGreeting() {
-            // 先渐隐
-            greetingEl.classList.remove('fade-in');
-            greetingEl.classList.add('fade-out');
-
-            // 0.8秒后文字切换并渐显
-            setTimeout(() => {
-                index = (index + 1) % greetings.length;
-                greetingEl.textContent = greetings[index];
-                greetingEl.classList.remove('fade-out');
-                greetingEl.classList.add('fade-in');
-            }, 800);
-        }
-
-        // 初始设为渐显
-        greetingEl.classList.add('fade-in');
-
-        // 每2秒切换一次
-        setInterval(switchGreeting, 4000);
-    </script>
-		<form onsubmit="event.preventDefault();">
-			<div class="input-group">
-				<span class="icon">👤</span>
-				<input type="text" class="input-field" placeholder="用户名" />
+	<!-- 主内容区域（用户名密码 / 二维码 二选一） -->
+	<div class="relative w-full h-[160px] flex items-center justify-center">
+		<!-- 用户名密码区 -->
+		<div id="form_section" class="absolute inset-0 flex flex-col justify-center w-full space-y-5 transition-opacity duration-300 opacity-100">
+			<div class="relative">
+				<i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+				<input type="text" id="username_input" placeholder="用户名" class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#008c75] focus:border-transparent transition-all duration-200" />
 			</div>
-			<div class="input-group">
-				<span class="icon">🔒</span>
-				<input type="password" id="password" class="input-field" placeholder="密码" />
-				<span class="toggle-password" id="toggle-password">👁️</span>
+
+			<div class="relative">
+				<i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+				<input type="password"
+					id="password_input"
+					placeholder="密码"
+					class="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#008c75] focus:border-transparent transition-all duration-200" />
+				<i id="toggle_password" class="fa-solid fa-eye absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer transition-all duration-200"></i>
 			</div>
-			<button type="submit" class="login-button">登录</button>
-		</form>
+		</div>
+
+		<!-- 二维码区 -->
+		<div id="qr_section" class="absolute inset-0 flex flex-col items-center justify-center space-y-3 transition-opacity duration-300 opacity-0 pointer-events-none">
+			<!-- 正方形容器 -->
+			<div class="w-[165px] aspect-square bg-gray-100 flex items-center justify-center rounded-xl shadow-md">
+				<img src="" alt="二维码" class="w-[150px] aspect-square object-cover rounded-lg" id="qr_image">
+			</div>
+			<p class="text-sm text-gray-500">请使用微信扫码</p>
+		</div>
 	</div>
 
-	<script>
-		// 密码显示切换逻辑, 保持不变
-		const togglePassword = document.getElementById("toggle-password");
-		const passwordInput = document.getElementById("password");
+	<!-- 按钮区 -->
+	<div class="flex items-center justify-between space-x-3">
+		<button id="login_button" class="flex-[2] py-3 rounded-xl bg-[#008c75] text-white font-semibold text-lg hover:bg-[#007360] active:scale-95 transition-all duration-150">
+			登录
+		</button>
 
-		togglePassword.addEventListener("click", () => {
-			const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-			passwordInput.setAttribute("type", type);
-			togglePassword.textContent = type === "password" ? "👁️" : "🙈";
-		});
+		<button id="register_button" class="flex-1 py-3 rounded-xl border border-[#008c75] text-[#008c75] font-semibold text-lg hover:bg-[#008c75] hover:text-white transition-all duration-150">
+			注册
+		</button>
 
-		// 背景粒子动画
-		const canvas = document.getElementById('bg-canvas');
-		const ctx = canvas.getContext('2d');
-		let width, height;
+		<button id="qr_toggle" class="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all duration-150">
+			<i class="fa-solid fa-qrcode text-xl"></i>
+		</button>
+	</div>
+</div>
 
-		function resize() {
-			width = window.innerWidth;
-			height = window.innerHeight;
-			canvas.width = width;
-			canvas.height = height;
+<script>
+	// 密码显示切换
+	const toggle_password = document.getElementById('toggle_password');
+	const password_input = document.getElementById('password_input');
+	toggle_password.addEventListener('click', () => {
+		const type = password_input.getAttribute('type') === 'password' ? 'text' : 'password';
+		password_input.setAttribute('type', type);
+		toggle_password.classList.toggle('fa-eye');
+		toggle_password.classList.toggle('fa-eye-slash');
+	});
+
+	// 二维码切换逻辑
+	const qr_toggle = document.getElementById('qr_toggle');
+	const form_section = document.getElementById('form_section');
+	const qr_section = document.getElementById('qr_section');
+	qr_toggle.addEventListener('click', () => {
+		const form_visible = form_section.classList.contains('opacity-100');
+
+		if (form_visible) {
+			form_section.classList.replace('opacity-100', 'opacity-0');
+			form_section.classList.add('pointer-events-none');
+
+			qr_section.classList.replace('opacity-0', 'opacity-100');
+			qr_section.classList.remove('pointer-events-none');
+		} else {
+			form_section.classList.replace('opacity-0', 'opacity-100');
+			form_section.classList.remove('pointer-events-none');
+
+			qr_section.classList.replace('opacity-100', 'opacity-0');
+			qr_section.classList.add('pointer-events-none');
 		}
-		window.addEventListener('resize', resize);
-		resize();
+	});
 
-		// 粒子类
-		class Particle {
-			constructor() {
-				this.reset();
-			}
-			reset() {
-				this.x = Math.random() * width;
-				this.y = Math.random() * height;
-				this.size = 1 + Math.random() * 5;
-				this.speedX = (Math.random() - 0.5) * 0.5;
-				this.speedY = (Math.random() - 0.5) * 0.5;
-				this.opacity = 0.1 + Math.random() * 0.4;
-			}
-			update() {
-				this.x += this.speedX;
-				this.y += this.speedY;
+	// 背景粒子动画
+	const canvas = document.getElementById('bg_canvas');
+	const ctx = canvas.getContext('2d');
+	let width, height;
 
-				if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
-					this.reset();
-				}
-			}
-			draw(ctx) {
-				ctx.beginPath();
-				ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-				ctx.fillStyle = `rgba(0, 140, 117, ${this.opacity})`;
-				ctx.fill();
-			}
+	function resize() {
+		width = window.innerWidth;
+		height = window.innerHeight;
+		canvas.width = width;
+		canvas.height = height;
+	}
+	window.addEventListener('resize', resize);
+	resize();
+
+	class Particle {
+		constructor() { this.reset(); }
+		reset() {
+			this.x = Math.random() * width;
+			this.y = Math.random() * height;
+			this.size = 1 + Math.random() * 5;
+			this.speedX = (Math.random() - 0.5) * 0.5;
+			this.speedY = (Math.random() - 0.5) * 0.5;
+			this.opacity = 0.1 + Math.random() * 0.4;
 		}
-
-		// 初始化粒子
-		const particles = [];
-		const PARTICLE_COUNT = 80;
-		for (let i = 0; i < PARTICLE_COUNT; i++) {
-			particles.push(new Particle());
+		update() {
+			this.x += this.speedX;
+			this.y += this.speedY;
+			if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.reset();
 		}
-
-		// 动画循环
-		function animate() {
-			ctx.clearRect(0, 0, width, height);
-
-			// 绘制所有粒子
-			for (const p of particles) {
-				p.update();
-				p.draw(ctx);
-			}
-
-			requestAnimationFrame(animate);
+		draw(ctx) {
+			ctx.beginPath();
+			ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+			ctx.fillStyle = `rgba(0, 140, 117, ${this.opacity})`;
+			ctx.fill();
 		}
-		animate();
-	</script>
+	}
 
+	const particles = [];
+	const PARTICLE_COUNT = 80;
+	for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+
+	function animate() {
+		ctx.clearRect(0,0,width,height);
+		for (const p of particles) { p.update(); p.draw(ctx); }
+		requestAnimationFrame(animate);
+	}
+	animate();
+</script>
 </body>
 </html>

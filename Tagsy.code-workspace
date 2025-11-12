@@ -10,7 +10,11 @@
 			{
 				"label": "BuildInstaller",
 				"type": "shell",
-				"command": ".\\NSIS\\makensis.exe .\\Setup\\RelyFile\\Tagsy_Setup.nsi",
+				"command": "cmd.exe",
+				"args": [
+					"/C",
+					"del /f /q \"Setup\\Build\\Tagsy_Setup.exe\" 2>nul & \"NSIS\\makensis.exe\" \"Setup\\RelyFile\\Tagsy_Setup.nsi\""
+				],
 				"presentation": {
 					"reveal": "silent",
 					"echo": false,
@@ -18,11 +22,9 @@
 					"panel": "dedicated"
 				},
 				"options": {
-					"cwd": "."
+					"cwd": "${workspaceFolder}"
 				},
-				"problemMatcher": [
-					"$msCompile"
-				]
+				"problemMatcher": []
 			}
 		]
 	},
@@ -40,7 +42,6 @@
 			}
 		]
 	},
-
 	"settings": {
 		"[javascript]": {
 			"editor.insertSpaces": false,
@@ -53,6 +54,6 @@
 			"editor.tabSize": 4
 		},
 		"commentTranslate.targetLanguage": "zh-CN",
-		"commentTranslate.source": "Google",
+		"commentTranslate.source": "Bing"
 	}
 }

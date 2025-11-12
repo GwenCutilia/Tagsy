@@ -26,6 +26,25 @@ class Page {
 		}
 	}
 
+	// // 静态方法: 初始化页面路由
+	// static async init() {
+	// 	const page = location.pathname.split("/").pop();
+
+	// 	if (!this.routes[page]) {
+	// 		this.log.error("没有为该页面配置逻辑:", page);
+	// 		return;
+	// 	}
+
+	// 	// 如果不是 Login.html，执行初始化逻辑
+	// 	if (page !== "Login.html") {
+	// 		await Template.init();
+	// 		new Framework();
+	// 	}
+
+	// 	// 执行页面对应的逻辑
+	// 	this.routes[page]();
+	// }
+
 	bindEvents() {
 
 	}
@@ -70,6 +89,9 @@ class Template {
 		await LS.login();
 		await LS.currentTask();
 	}
+}
+class Login extends Page {
+	
 }
 class Index extends Page {
 	constructor() {

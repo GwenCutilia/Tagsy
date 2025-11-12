@@ -1,5 +1,5 @@
 ﻿;--------------------------------
-; Tagsy 安装脚本（排除 Build 文件夹）
+; Tagsy 安装脚本
 ;--------------------------------
 
 Outfile "..\Build\Tagsy_Setup.exe"
@@ -18,9 +18,6 @@ Section "Install Files"
   ; 文件
   File /r "..\..\*.*"
 
-  ; 删除不需要的文件（如果被 File /r 打包了 Build 内的文件，可以用 Delete 或 Ignore）
-  ; 或者使用 Exclude 逻辑（NSIS 没有原生排除选项，需要手动处理 Build 文件夹）
-
 SectionEnd
 
 ;--------------------------------
@@ -32,5 +29,6 @@ Section "PostInstall"
 
   ExecShell "open" "https://weavefate.asia/Module/Tagsy_ApiBridge.user.js"
   ExecShell "open" "https://weavefate.asia/Module/Tagsy_Core.user.js"
+  ExecShell "open" "https://weavefate.asia/Resource/Template/Index.html"
 
 SectionEnd
