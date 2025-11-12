@@ -442,6 +442,35 @@ class ApiboxRequest extends HttpRequest {
 		this.log.log("getInfo result: ", result);
 		return result;
 	}
+	static async getQrCode() {
+		const url = this.CONFIG.URL + "api/user/jhdl.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: "10008362",
+			key: "1d0c8fec499fb7057027e09fc4662fb0",
+		}
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("getQrCode result: ", result);
+		return result;
+	}
+	static async queryLogin() {
+		// 查询登录
+		const url = this.CONFIG.URL + "api/user/jhdlq.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: "10008362",
+			key: "1d0c8fec499fb7057027e09fc4662fb0",
+			cxid: "",
+		}
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("getEmailList result: ", result);
+		return result;
+	}
 	static async getEmailApi() {
 		const url = this.CONFIG.URL + "api/mail/getmaillist.php";
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>登录页面</title>
 </head>
-<body style="display:none" class="flex items-center justify-center min-h-screen bg-[#d8e9e7] relative">
+<body style="display:none" class="flex items-center justify-center min-h-screen bg-teal-100 relative">
 
 <!-- 背景动画canvas -->
 <canvas id="bg_canvas" class="fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
@@ -22,7 +22,7 @@
 		<div id="form_section" class="absolute inset-0 flex flex-col justify-center w-full space-y-5 transition-opacity duration-300 opacity-100">
 			<div class="relative">
 				<i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-				<input type="text" id="username_input" placeholder="用户名" class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#008c75] focus:border-transparent transition-all duration-200" />
+				<input type="text" id="username_input" placeholder="用户名" class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200" />
 			</div>
 
 			<div class="relative">
@@ -30,7 +30,7 @@
 				<input type="password"
 					id="password_input"
 					placeholder="密码"
-					class="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#008c75] focus:border-transparent transition-all duration-200" />
+					class="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200" />
 				<i id="toggle_password" class="fa-solid fa-eye absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer transition-all duration-200"></i>
 			</div>
 		</div>
@@ -47,11 +47,11 @@
 
 	<!-- 按钮区 -->
 	<div class="flex items-center justify-between space-x-3">
-		<button id="login_button" class="flex-[2] py-3 rounded-xl bg-[#008c75] text-white font-semibold text-lg hover:bg-[#007360] active:scale-95 transition-all duration-150">
+		<button id="login_button" class="flex-[2] py-3 rounded-xl bg-teal-600 text-white font-semibold text-lg hover:bg-teal-700 active:scale-95 transition-all duration-150">
 			登录
 		</button>
 
-		<button id="register_button" class="flex-1 py-3 rounded-xl border border-[#008c75] text-[#008c75] font-semibold text-lg hover:bg-[#008c75] hover:text-white transition-all duration-150">
+		<button id="register_button" class="flex-1 py-3 rounded-xl border border-teal-600 text-teal-600 font-semibold text-lg hover:bg-teal-600 hover:text-white transition-all duration-150">
 			注册
 		</button>
 
@@ -126,7 +126,7 @@
 		draw(ctx) {
 			ctx.beginPath();
 			ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-			ctx.fillStyle = `rgba(0, 140, 117, ${this.opacity})`;
+			ctx.fillStyle = `rgba(13, 148, 136, ${this.opacity})`; // Tailwind teal-600 对应色
 			ctx.fill();
 		}
 	}
