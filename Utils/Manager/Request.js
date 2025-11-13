@@ -450,6 +450,7 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
+			type: "2",
 		}
 
 		const result = await this._request("POST", url, headers, data);
@@ -465,10 +466,10 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
-			cxid: "",
+			cxid: Global.config.login.cxid,
 		}
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("getEmailList result: ", result);
+		this.log.log("queryLogin result: ", result);
 		return result;
 	}
 	static async getEmailApi() {

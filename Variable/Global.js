@@ -9,6 +9,9 @@ class Global {
 		cache: {
 
 		},
+		login: {
+			cxid: null, // 查询id
+		},
 		system: {
 			status: false,
 			operating_status: false,

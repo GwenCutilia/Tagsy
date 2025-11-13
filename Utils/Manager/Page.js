@@ -2,6 +2,7 @@ class Page {
 	// 静态属性: 日志和路由配置
 	static log = new Logger("Page");
 	static routes = {
+		"Login.html": () => new Login(),
 		"Index.html": () => new Index(),
 		"W2.html": () => new W2(),
 		"QLabel.html": () => new QLabel(),
@@ -91,7 +92,150 @@ class Template {
 	}
 }
 class Login extends Page {
-	
+	constructor() {
+		super();
+		this.init();
+		this.bindEvents();
+		this.updateUIElement();
+		this.addAanimationEffect();
+	}
+	init() {
+		this.initValue();
+	}
+	initValue() {
+		// 背景
+		this.animation_canvas = DomHelper.bySelector("#animation_canvas");
+		// 用户名&&密码
+		this.infomation_div = DomHelper.bySelector("#infomation_div");
+		this.password_toggle_btn = DomHelper.bySelector("#password_toggle_btn");
+		this.password_input = DomHelper.bySelector("#password_input");
+		// 登录&&注册
+		this.login_button = DomHelper.bySelector("#login_button");
+		this.register_button = DomHelper.bySelector("#register_button");
+		// 二维码
+		this.qr_div = DomHelper.bySelector("#qr_div");
+		this.qr_toggle = DomHelper.bySelector("#qr_toggle");
+		this.qr_url_img = DomHelper.bySelector("#qr_url_img");
+	}
+	updateUIElement() {
+		
+	}
+	bindEvents() {
+		// 密码显示切换
+		const password_toggle_btn = this.password_toggle_btn;
+		const password_input = this.password_input;
+		const qr_url_img = this.qr_url_img;
+		password_toggle_btn.addEventListener('click', () => {
+			const type = password_input.getAttribute('type') === 'password' ? 'text' : 'password';
+			password_input.setAttribute('type', type);
+			password_toggle_btn.classList.toggle('fa-eye');
+			password_toggle_btn.classList.toggle('fa-eye-slash');
+		});
+
+		// 二维码切换逻辑
+		const qr_toggle = this.qr_toggle;
+		const infomation_div = this.infomation_div;
+		const qr_div = this.qr_div;
+		qr_toggle.addEventListener('click', async () => {
+			const form_visible = infomation_div.classList.contains('opacity-100');
+
+			if (form_visible) {
+				let result;
+				result = await ApiboxRequest.getQrCode();
+				if (result.code == 200) {
+					qr_url_img.src = result.logqrcode;
+					Global.config.login.cxid = result.cxid;
+				}
+				infomation_div.classList.replace('opacity-100', 'opacity-0');
+				infomation_div.classList.add('pointer-events-none');
+				
+				qr_div.classList.replace('opacity-0', 'opacity-100');
+				qr_div.classList.remove('pointer-events-none');
+				await System.sleepSeconds(5);
+				let i = 0;
+				let loginStatusFlag = true;
+				while(loginStatusFlag && i <= 5) {
+					result = await ApiboxRequest.queryLogin();
+					if (result.code == 200) {
+						this.log.log("登录成功");
+						
+						loginStatusFlag = false;
+					}
+					await System.sleepSeconds(10);
+					i++;
+				}
+			} else {
+				infomation_div.classList.replace('opacity-0', 'opacity-100');
+				infomation_div.classList.remove('pointer-events-none');
+
+				qr_div.classList.replace('opacity-100', 'opacity-0');
+				qr_div.classList.add('pointer-events-none');
+			}
+		});
+	}
+	addAanimationEffect() {
+		this.addParticleEffects();
+	}
+
+	// 给背景添加粒子动画
+	addParticleEffects() {
+		const canvas = this.animation_canvas;
+		const ctx = canvas.getContext("2d");
+		let width, height;
+
+		function resize() {
+			width = window.innerWidth;
+			height = window.innerHeight;
+			canvas.width = width;
+			canvas.height = height;
+		}
+		window.addEventListener("resize", resize);
+		resize();
+
+		class Particle {
+			constructor() {
+				this.reset();
+			}
+			reset() {
+				this.x = Math.random() * width;
+				this.y = Math.random() * height;
+				this.size = 1 + Math.random() * 5;
+				this.speedX = (Math.random() - 0.5) * 0.5;
+				this.speedY = (Math.random() - 0.5) * 0.5;
+				this.opacity = 0.1 + Math.random() * 0.4;
+			}
+			update() {
+				this.x += this.speedX;
+				this.y += this.speedY;
+				if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+					this.reset();
+				}
+			}
+			draw(ctx) {
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+				ctx.fillStyle = "rgba(13, 148, 136, " + this.opacity + ")"; // Tailwind teal-600
+				ctx.fill();
+			}
+		}
+
+		const particles = [];
+		const PARTICLE_COUNT = 80;
+		for (let i = 0; i < PARTICLE_COUNT; i++) {
+		particles.push(new Particle());
+		}
+
+		function animate() {
+			ctx.clearRect(0, 0, width, height);
+			for (let i = 0; i < particles.length; i++) {
+				const p = particles[i];
+				p.update();
+				p.draw(ctx);
+			}
+			requestAnimationFrame(animate);
+		}
+		animate();
+	}
 }
 class Index extends Page {
 	constructor() {

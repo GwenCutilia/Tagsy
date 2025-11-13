@@ -8,18 +8,18 @@
 <body style="display:none" class="flex items-center justify-center min-h-screen bg-teal-100 relative">
 
 <!-- 背景动画canvas -->
-<canvas id="bg_canvas" class="fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
+<canvas id="animation_canvas" class="fixed top-0 left-0 w-screen h-screen z-0 pointer-events-none"></canvas>
 
 <!-- 登录框 -->
 <div class="relative z-10 bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md text-center">
 	<h1 class="text-3xl font-semibold text-gray-800 mb-8">欢迎</h1>
 
-	<div id="login_container" class="space-y-6">
+	<div class="space-y-6">
 
 	<!-- 主内容区域（用户名密码 / 二维码 二选一） -->
 	<div class="relative w-full h-[160px] flex items-center justify-center">
 		<!-- 用户名密码区 -->
-		<div id="form_section" class="absolute inset-0 flex flex-col justify-center w-full space-y-5 transition-opacity duration-300 opacity-100">
+		<div id="infomation_div" class="absolute inset-0 flex flex-col justify-center w-full space-y-5 transition-opacity duration-300 opacity-100">
 			<div class="relative">
 				<i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
 				<input type="text" id="username_input" placeholder="用户名" class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200" />
@@ -31,15 +31,15 @@
 					id="password_input"
 					placeholder="密码"
 					class="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200" />
-				<i id="toggle_password" class="fa-solid fa-eye absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer transition-all duration-200"></i>
+				<i id="password_toggle_btn" class="fa-solid fa-eye absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer transition-all duration-200"></i>
 			</div>
 		</div>
 
 		<!-- 二维码区 -->
-		<div id="qr_section" class="absolute inset-0 flex flex-col items-center justify-center space-y-3 transition-opacity duration-300 opacity-0 pointer-events-none">
+		<div id="qr_div" class="absolute inset-0 flex flex-col items-center justify-center space-y-3 transition-opacity duration-300 opacity-0 pointer-events-none">
 			<!-- 正方形容器 -->
 			<div class="w-[165px] aspect-square bg-gray-100 flex items-center justify-center rounded-xl shadow-md">
-				<img src="" alt="二维码" class="w-[150px] aspect-square object-cover rounded-lg" id="qr_image">
+				<img id="qr_url_img" src="" alt="二维码" class="w-[150px] aspect-square object-cover rounded-lg">
 			</div>
 			<p class="text-sm text-gray-500">请使用微信扫码</p>
 		</div>
@@ -61,86 +61,5 @@
 	</div>
 </div>
 
-<script>
-	// 密码显示切换
-	const toggle_password = document.getElementById('toggle_password');
-	const password_input = document.getElementById('password_input');
-	toggle_password.addEventListener('click', () => {
-		const type = password_input.getAttribute('type') === 'password' ? 'text' : 'password';
-		password_input.setAttribute('type', type);
-		toggle_password.classList.toggle('fa-eye');
-		toggle_password.classList.toggle('fa-eye-slash');
-	});
-
-	// 二维码切换逻辑
-	const qr_toggle = document.getElementById('qr_toggle');
-	const form_section = document.getElementById('form_section');
-	const qr_section = document.getElementById('qr_section');
-	qr_toggle.addEventListener('click', () => {
-		const form_visible = form_section.classList.contains('opacity-100');
-
-		if (form_visible) {
-			form_section.classList.replace('opacity-100', 'opacity-0');
-			form_section.classList.add('pointer-events-none');
-
-			qr_section.classList.replace('opacity-0', 'opacity-100');
-			qr_section.classList.remove('pointer-events-none');
-		} else {
-			form_section.classList.replace('opacity-0', 'opacity-100');
-			form_section.classList.remove('pointer-events-none');
-
-			qr_section.classList.replace('opacity-100', 'opacity-0');
-			qr_section.classList.add('pointer-events-none');
-		}
-	});
-
-	// 背景粒子动画
-	const canvas = document.getElementById('bg_canvas');
-	const ctx = canvas.getContext('2d');
-	let width, height;
-
-	function resize() {
-		width = window.innerWidth;
-		height = window.innerHeight;
-		canvas.width = width;
-		canvas.height = height;
-	}
-	window.addEventListener('resize', resize);
-	resize();
-
-	class Particle {
-		constructor() { this.reset(); }
-		reset() {
-			this.x = Math.random() * width;
-			this.y = Math.random() * height;
-			this.size = 1 + Math.random() * 5;
-			this.speedX = (Math.random() - 0.5) * 0.5;
-			this.speedY = (Math.random() - 0.5) * 0.5;
-			this.opacity = 0.1 + Math.random() * 0.4;
-		}
-		update() {
-			this.x += this.speedX;
-			this.y += this.speedY;
-			if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.reset();
-		}
-		draw(ctx) {
-			ctx.beginPath();
-			ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-			ctx.fillStyle = `rgba(13, 148, 136, ${this.opacity})`; // Tailwind teal-600 对应色
-			ctx.fill();
-		}
-	}
-
-	const particles = [];
-	const PARTICLE_COUNT = 80;
-	for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
-
-	function animate() {
-		ctx.clearRect(0,0,width,height);
-		for (const p of particles) { p.update(); p.draw(ctx); }
-		requestAnimationFrame(animate);
-	}
-	animate();
-</script>
 </body>
 </html>
