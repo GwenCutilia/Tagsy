@@ -80,6 +80,10 @@ class Template {
 	}
 	static async initPage() {
 		document.body.style.display = "";
+		// const app_root = DomHelper.bySelector("#app_root");
+		// app_root.style.display = "block";
+		// const loading_screen = DomHelper.bySelector("#loading_screen");
+		// loading_screen.style.display = "none";
 	}
 	static async W2Task() {
 		await W2.login();
@@ -110,11 +114,11 @@ class Login extends Page {
 		this.password_toggle_btn = DomHelper.bySelector("#password_toggle_btn");
 		this.password_input = DomHelper.bySelector("#password_input");
 		// 登录&&注册
-		this.login_button = DomHelper.bySelector("#login_button");
-		this.register_button = DomHelper.bySelector("#register_button");
+		this.login_btn = DomHelper.bySelector("#login_btn");
+		this.register_btn = DomHelper.bySelector("#register_btn");
 		// 二维码
 		this.qr_div = DomHelper.bySelector("#qr_div");
-		this.qr_toggle = DomHelper.bySelector("#qr_toggle");
+		this.qr_toggle_btn = DomHelper.bySelector("#qr_toggle_btn");
 		this.qr_url_img = DomHelper.bySelector("#qr_url_img");
 	}
 	updateUIElement() {
@@ -133,10 +137,10 @@ class Login extends Page {
 		});
 
 		// 二维码切换逻辑
-		const qr_toggle = this.qr_toggle;
+		const qr_toggle_btn = this.qr_toggle_btn;
 		const infomation_div = this.infomation_div;
 		const qr_div = this.qr_div;
-		qr_toggle.addEventListener('click', async () => {
+		qr_toggle_btn.addEventListener('click', async () => {
 			const form_visible = infomation_div.classList.contains('opacity-100');
 
 			if (form_visible) {
@@ -144,7 +148,7 @@ class Login extends Page {
 				result = await ApiboxRequest.getQrCode();
 				if (result.code == 200) {
 					qr_url_img.src = result.logqrcode;
-					Global.config.login.cxid = result.cxid;
+					Global.config.login.query_id = result.cxid;
 				}
 				infomation_div.classList.replace('opacity-100', 'opacity-0');
 				infomation_div.classList.add('pointer-events-none');
@@ -157,12 +161,35 @@ class Login extends Page {
 				while(loginStatusFlag && i <= 5) {
 					result = await ApiboxRequest.queryLogin();
 					if (result.code == 200) {
-						this.log.log("登录成功");
-						
 						loginStatusFlag = false;
+						// 验证登录
+						const result1 = await ApiboxRequest.verifyLogin();
+						if (result1.code == 200) {
+							Global.config.login.user_name = result1.name;
+							Global.config.login.user_password = result1.pwd;
+						} else if (result1.msg.includes("未查询到账号")) {
+							// 注册账号
+							Global.config.login.user_name = result.nickname;
+							Global.config.login.user_avatar_url = result.faceimg;
+							Global.config.login.user_password = "000000";
+							await ApiboxRequest.regAccount();
+							// 绑定账号
+							Global.config.login.user_nick_name = result.nickname;
+							Global.config.login.user_uid = result.social_uid;
+							await ApiboxRequest.bindAccount();
+							this.log.log("登录成功");
+							await ApiboxRequest.loginAccount();
+						}
 					}
 					await System.sleepSeconds(10);
 					i++;
+				}
+				if (i == 6) {
+					// 重新获取验证码
+					const overlay = document.getElementById("qr_retry_overlay");
+					overlay.classList.remove("opacity-0", "pointer-events-none");
+					this.log.error("登录超时");
+
 				}
 			} else {
 				infomation_div.classList.replace('opacity-0', 'opacity-100');

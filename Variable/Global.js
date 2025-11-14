@@ -10,7 +10,12 @@ class Global {
 
 		},
 		login: {
-			cxid: null, // 查询id
+			query_id: null, // 查询id
+			user_avatar_url: null, // 头像地址
+			user_name: null,
+			user_password: null,
+			user_uid: null,
+			user_nick_name: null,
 		},
 		system: {
 			status: false,

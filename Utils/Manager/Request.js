@@ -436,13 +436,15 @@ class ApiboxRequest extends HttpRequest {
 		const headers = this.CONFIG.HEADERS;
 		const data = {
 			id: Global.config.apibox.user_id,
-			key: Global.config.apibox.api_key
+			key: Global.config.apibox.api_key,
 		}
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getInfo result: ", result);
 		return result;
 	}
+	// 获取二维码
 	static async getQrCode() {
+
 		const url = this.CONFIG.URL + "api/user/jhdl.php";
 
 		const headers = this.CONFIG.HEADERS
@@ -450,15 +452,15 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
-			type: "2",
+			type: "1",
 		}
 
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getQrCode result: ", result);
 		return result;
 	}
+	// 查询登录
 	static async queryLogin() {
-		// 查询登录
 		const url = this.CONFIG.URL + "api/user/jhdlq.php";
 
 		const headers = this.CONFIG.HEADERS
@@ -466,10 +468,104 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
-			cxid: Global.config.login.cxid,
+			cxid: Global.config.login.query_id,
 		}
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("queryLogin result: ", result);
+		return result;
+	}
+	// 验证登录
+	static async verifyLogin() {
+		const url = this.CONFIG.URL + "/api/user/jhdly.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: "10008362",
+			key: "1d0c8fec499fb7057027e09fc4662fb0",
+			type: "1",
+			socialuid: Global.config.login.user_uid
+		};
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("verifyLogin result: ", result);
+		if (result.code === 200) {
+
+		} else {
+
+		}
+		return result;
+	}
+	// 注册账号
+	static async regAccount() {
+		const url = this.CONFIG.URL + "/api/user/reg.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: "10008362",
+			key: "1d0c8fec499fb7057027e09fc4662fb0",
+			name: Global.config.login.user_name,
+			pwd: Global.config.login.user_password,
+		};
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("regAccount result: ", result);
+		if (result.code === 200) {
+
+		} else {
+			if (result.msg.includes("该用户名已被注册")) {
+				result.code = 500;
+				this.log.debug("用户名已注册");
+			}
+		}
+		return result;
+	}
+	// 登录账号
+		static async loginAccount() {
+		const url = this.CONFIG.URL + "/api/user/login.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: "10008362",
+			key: "1d0c8fec499fb7057027e09fc4662fb0",
+			name: Global.config.login.user_name,
+			pwd: Global.config.login.user_password,
+		};
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("loginAccount result: ", result);
+		if (result.code === 200) {
+
+		} else {
+
+		}
+		return result;
+	}
+	// 绑定账号
+	static async bindAccount() {
+		const url = this.CONFIG.URL + "/api/user/jhdlb.php";
+
+		const headers = this.CONFIG.HEADERS
+
+		const data = {
+			id: "10008362",
+			key: "1d0c8fec499fb7057027e09fc4662fb0",
+			type: "1",
+			username: Global.config.login.user_name,
+			pwd: Global.config.login.user_password,
+			nickname: Global.config.login.user_nick_name,
+			socialuid: Global.config.login.user_uid
+		};
+
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("bindAccount result: ", result);
+		if (result.code === 200) {
+
+		} else {
+
+		}
 		return result;
 	}
 	static async getEmailApi() {
