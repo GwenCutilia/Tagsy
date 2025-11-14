@@ -79,11 +79,11 @@ class Template {
 		return location.pathname.includes('/Template/');
 	}
 	static async initPage() {
-		document.body.style.display = "";
-		// const app_root = DomHelper.bySelector("#app_root");
-		// app_root.style.display = "block";
+		// document.body.style.display = "";
 		// const loading_screen = DomHelper.bySelector("#loading_screen");
 		// loading_screen.style.display = "none";
+		// const app_root = DomHelper.bySelector("#app_root");
+		// app_root.style.display = "block";
 	}
 	static async W2Task() {
 		await W2.login();
