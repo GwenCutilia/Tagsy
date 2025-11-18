@@ -2123,6 +2123,10 @@ class Framework extends Page {
 			model_status_w2_i.classList.replace("text-gray-500", "text-green-500");
 			model_status_w2_loading.classList.add("hidden");
 			model_status_w2_label.classList.remove("hidden");
+		} else {
+			model_status_w2_i.classList.replace("text-green-500", "text-gray-500");
+			model_status_w2_loading.classList.remove("hidden");
+			model_status_w2_label.classList.add("hidden");
 		}
 		// 待优化, 将日报是否填写不再由updateUIElement来判断, 而由Template模块来判断
 		if (Global.config.ls.login_status === LS.status.login_success) {
@@ -2136,6 +2140,10 @@ class Framework extends Page {
 			} else {
 				model_status_ls_label.innerText = LS.status.not_loginfill_daily_report;
 			}
+		} else {
+			model_status_ls_i.classList.replace("text-green-500", "text-gray-500");
+			model_status_ls_loading.classList.remove("hidden");
+			model_status_ls_label.classList.add("hidden");
 		}
 	}
 	static async weatherComponent() {
