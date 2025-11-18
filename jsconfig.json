@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ES6",            // 目标语法
+		"module": "commonjs",       // 模块类型
+		"allowJs": true,            // 允许 .js 文件
+		// "checkJs": true,         // 对 JS 做类型检查（可选, 但能提升跳转准确度）
+		"baseUrl": ".",             // 根路径
+		"paths": {                  // 如果你用到别名, 可以在这里设置
+			"*": ["*"]
+		}
+	},
+	"include": [
+		"**/*.js"                   // 包含所有 JS 文件
+	],
+	"exclude": [
+		"node_modules",             // 排除第三方库
+		"**/dist"                   // 排除打包目录
+	]
+}

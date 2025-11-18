@@ -1,0 +1,23 @@
+{
+	"manifest_version": 3,
+	"name": "Tagsy_Extension",
+	"version": "1.0.0",
+	"description": "Tagsy所需的Chrome辅助拓展",
+	"permissions": [
+		"declarativeNetRequest",
+		"declarativeNetRequestWithHostAccess",
+		"webNavigation"
+	],
+	"host_permissions": [
+		"<all_urls>"
+	],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"icons": {
+		"16": "icon16.png",
+		"48": "icon48.png",
+		"128": "icon128.png"
+	},
+	"author": "Gwencutilia"
+}
