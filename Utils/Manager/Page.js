@@ -1506,52 +1506,55 @@ class Setting extends Page {
 		this.updateUIElement();
 	}
 	init() {
-		// API盒子账号设置
-		this.api_box_user_test_account_setting_button = DomHelper.bySelector("#api_box_user_test_account_setting_button"); // API盒子账号测试按钮
-		this.api_box_user_id_account_setting_input = DomHelper.bySelector("#api_box_user_id_account_setting_input"); // API盒子通讯ID输入框
-		this.api_box_api_key_account_setting_input = DomHelper.bySelector("#api_box_api_key_account_setting_input"); // API盒子通讯密钥输入框
-		this.api_box_info_account_setting_message_box = DomHelper.bySelector("#api_box_info_account_setting_message_box"); // API盒子信息框
-		this.api_box_error_account_setting_message_box = DomHelper.bySelector("#api_box_error_account_setting_message_box"); // API盒子错误信息框
-		// W2账号设置
-		this.w2_user_test_account_setting_button = DomHelper.bySelector("#w2_user_test_account_setting_button"); // W2账号测试按钮
-		this.w2_user_name_account_setting_input = DomHelper.bySelector("#w2_user_name_account_setting_input"); // W2账号输入框 账号
-		this.w2_user_password_account_setting_input = DomHelper.bySelector("#w2_user_password_account_setting_input"); // W2密码输入框
-		this.w2_email_api_test_account_setting_button = DomHelper.bySelector("#w2_email_api_test_account_setting_button"); // W2API测试按钮
-		this.w2_email_api_address_account_setting_input = DomHelper.bySelector("#w2_email_api_address_account_setting_input"); // W2邮箱输入框
-		this.w2_email_api_pop3_auth_code_account_setting_input = DomHelper.bySelector("#w2_email_api_pop3_auth_code_account_setting_input"); // W2POP3授权码输入框
-		this.w2_error_account_setting_message_box = DomHelper.bySelector("#w2_error_account_setting_message_box") // W2错误提示
-		this.w2_info_account_setting_message_box = DomHelper.bySelector("#w2_info_account_setting_message_box"); // W2提示信息
-		// W2模块设置
-		this.w2_time_range_validate_format_module_setting_button = DomHelper.bySelector("#w2_time_range_validate_format_module_setting_button"); // W2验证格式按钮
-		this.w2_time_range_login_start_module_setting_input = DomHelper.bySelector("#w2_time_range_login_start_module_setting_input"); // W2登录时间段开始输入框
-		this.w2_time_range_login_end_module_setting_input = DomHelper.bySelector("#w2_time_range_login_end_module_setting_input"); // W2登录时间段结束输入框
-		this.w2_time_range_login_out_start_module_setting_input = DomHelper.bySelector("#w2_time_range_login_out_start_module_setting_input"); // W2登出时间段开始输入框
-		this.w2_time_range_login_out_end_module_setting_input = DomHelper.bySelector("#w2_time_range_login_out_end_module_setting_input"); // W2登出时间段结束输入框
-		this.w2_time_range_check_in_start_module_setting_input = DomHelper.bySelector("#w2_time_range_check_in_start_module_setting_input"); // W2上班时间段开始输入框
-		this.w2_time_range_check_in_end_module_setting_input = DomHelper.bySelector("#w2_time_range_check_in_end_module_setting_input"); // W2上班时间段结束输入框
-		this.w2_time_range_check_out_start_module_setting_input = DomHelper.bySelector("#w2_time_range_check_out_start_module_setting_input"); // W2下班时间段开始输入框
-		this.w2_time_range_check_out_end_module_setting_input = DomHelper.bySelector("#w2_time_range_check_out_end_module_setting_input"); // W2下班时间段结束输入框
-		this.w2_time_range_meal_start_module_setting_input = DomHelper.bySelector("#w2_time_range_meal_start_module_setting_input"); // W2吃饭时间段开始输入框
-		this.w2_time_range_meal_end_module_setting_input = DomHelper.bySelector("#w2_time_range_meal_end_module_setting_input"); // W2吃饭时间段结束输入框
-		this.w2_time_range_working_start_module_setting_input = DomHelper.bySelector("#w2_time_range_working_start_module_setting_input"); // W2工作时间段开始输入框
-		this.w2_time_range_working_end_module_setting_input = DomHelper.bySelector("#w2_time_range_working_end_module_setting_input"); // W2工作时间段结束输入框
-		this.w2_info_setting_message_box = DomHelper.bySelector("#w2_info_setting_message_box"); // W2高级设置提示信息
-		this.w2_error_setting_message_box = DomHelper.bySelector("#w2_error_setting_message_box"); // W2高级设置错误提示
-		// LS账号设置
-		this.ls_user_test_account_setting_button = DomHelper.bySelector("#ls_user_test_account_setting_button"); // LS账号测试按钮
-		this.ls_user_name_account_setting_input = DomHelper.bySelector("#ls_user_name_account_setting_input"); // LS账号输入框 账号
-		this.ls_user_password_account_setting_input = DomHelper.bySelector("#ls_user_password_account_setting_input"); // LS密码输入框
-		this.ls_info_account_setting_message_box = DomHelper.bySelector("#ls_info_account_setting_message_box"); // LS提示信息
-		this.ls_error_account_setting_message_box = DomHelper.bySelector("#ls_error_account_setting_message_box"); // LS错误提示
-		// LS模块设置
-		this.ls_time_range_login_start_module_setting_input = DomHelper.bySelector("#ls_time_range_login_start_module_setting_input");
-		this.ls_time_range_login_end_module_setting_input = DomHelper.bySelector("#ls_time_range_login_end_module_setting_input");
-		this.ls_time_range_login_out_start_module_setting_input = DomHelper.bySelector("#ls_time_range_login_out_start_module_setting_input");
-		this.ls_time_range_login_out_end_module_setting_input = DomHelper.bySelector("#ls_time_range_login_out_end_module_setting_input");
-		this.ls_time_range_fill_daily_report_start_module_setting_input = DomHelper.bySelector("#ls_time_range_fill_daily_report_start_module_setting_input");
-		this.ls_time_range_fill_daily_report_end_module_setting_input = DomHelper.bySelector("#ls_time_range_fill_daily_report_end_module_setting_input");
-		this.ls_info_setting_message_box = DomHelper.bySelector("#ls_info_setting_message_box");
-		this.ls_error_setting_message_box = DomHelper.bySelector("#ls_error_setting_message_box");
+		this.initValue();
+	}
+	initValue() {
+		this.domMap = SettingGlobal.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
+		});
+	}
+	/**
+	 * 通用 UI 更新方法
+	 * @param {Object} options
+	 * @param {HTMLElement} options.box - 提示框
+	 * @param {HTMLElement[]} options.inputs - 输入框列表
+	 * @param {Boolean} options.success - 是否成功
+	 * @param {String} options.message - 提示文本
+	 */
+	updateStatusUI({ box, inputs = [], success, message }) {
+		// 显示提示框
+		box.classList.remove("hidden");
+
+		// 清空两套提示框样式
+		box.classList.remove("bg-blue-50","text-blue-500","border-blue-200");
+		box.classList.remove("bg-red-50","text-red-500","border-red-200");
+
+		// 设置提示框样式 & 图标
+		const icon = box.querySelector("i");
+		const text = box.querySelector("span");
+
+		if (success) {
+			box.classList.add("bg-blue-50","text-blue-500","border-blue-200");
+			icon.classList.replace("fa-exclamation-circle", "fa-info-circle");
+		} else {
+			box.classList.add("bg-red-50","text-red-500","border-red-200");
+			icon.classList.replace("fa-info-circle", "fa-exclamation-circle");
+		}
+
+		text.innerText = message;
+
+		// 输入框成功失败样式
+		inputs.forEach(input => {
+			input.classList.remove("border-red-500","focus:ring-red-500");
+			input.classList.remove("border-gray-300","focus:ring-blue-500");
+
+			if (success) {
+				input.classList.add("border-gray-300","focus:ring-blue-500");
+			} else {
+				input.classList.add("border-red-500","focus:ring-red-500");
+			}
+		});
 	}
 	bindEvents() {
 		this.api_box_user_test_account_setting_button.addEventListener("click", async () => {
@@ -1559,23 +1562,18 @@ class Setting extends Page {
 			Global.config.apibox.api_key = this.api_box_api_key_account_setting_input.value;
 			let result = await ApiboxRequest.getInfo(); // 直接返回状态信息
 			this.log.debug("getInfo: ", result);
-			if (result.code === 200) {
-				this.api_box_info_account_setting_message_box.querySelector("span").innerText = "API账号信息正确";
-				this.api_box_error_account_setting_message_box.classList.add('hidden');
-				this.api_box_info_account_setting_message_box.classList.remove('hidden');
-				this.api_box_user_id_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-				this.api_box_api_key_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-				this.api_box_user_id_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-				this.api_box_api_key_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-			} else {
-				this.api_box_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
-				this.api_box_error_account_setting_message_box.classList.remove('hidden');
-				this.api_box_info_account_setting_message_box.classList.add('hidden');
-				this.api_box_user_id_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-				this.api_box_api_key_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-				this.api_box_user_id_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-				this.api_box_api_key_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-
+			this.updateStatusUI({
+				box: this.api_box_account_setting_message_box,
+				inputs: [
+					this.api_box_user_id_account_setting_input,
+					this.api_box_api_key_account_setting_input
+				],
+				success: result.code === 200,
+				message: result.code === 200 
+				? "API账号信息正确"
+				: "错误代码: " + result.code + " " + result.msg
+			});
+			if (!result.code === 200) {
 				Global.config.apibox.user_id = null;
 				Global.config.apibox.api_key = null;
 			}
@@ -1586,34 +1584,20 @@ class Setting extends Page {
 				Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
 				let result = await W2Request.getVerifyCode(); // 直接返回状态信息
 				this.log.debug("getVerifyCode: ", result);
-				if (result.code === 200) {
-					this.w2_info_account_setting_message_box.querySelector("span").innerText = "W2连通性测试无误, 已为邮箱发送验证码";
-					this.w2_user_name_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.w2_user_password_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.w2_info_account_setting_message_box.classList.remove('hidden');
-					this.w2_user_name_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_password_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.w2_error_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
-					Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
-				} else if (result === 5000) {
-					this.w2_error_account_setting_message_box.querySelector("span").innerText = "W2账号信息错误";
-					this.w2_error_account_setting_message_box.classList.remove('hidden');
-					this.w2_user_name_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_password_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_info_account_setting_message_box.classList.add('hidden');
-					Global.config.w2.user_name = null;
-					Global.config.w2.user_password = null;
-				} else {
-					this.w2_error_account_setting_message_box.querySelector("span").innerText = "其他未知错误, 请重试";
-					this.w2_error_account_setting_message_box.classList.remove('hidden');
-					this.w2_user_name_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_password_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_info_account_setting_message_box.classList.add('hidden');
+				this.updateStatusUI({
+					box: this.api_box_account_setting_message_box,
+					inputs: [
+						this.w2_user_name_account_setting_input,
+						this.w2_user_password_account_setting_input
+					],
+					success: result.code === 200,
+					message: result.code === 200
+						? "W2连通性测试无误, 已为邮箱发送验证码"
+						: result.code === 5000
+							? "W2账号信息错误"
+							: "其他未知错误, 请重试"
+				});
+				if (result.code !== 200) {
 					Global.config.w2.user_name = null;
 					Global.config.w2.user_password = null;
 				}
@@ -1621,260 +1605,208 @@ class Setting extends Page {
 		}
 		if (DomHelper.exists(this.w2_email_api_test_account_setting_button)) {
 			this.w2_email_api_test_account_setting_button.addEventListener("click", async () => {
-				let result;
-
+				// 先设置 W2 和 API Box 输入值到 config
 				Global.config.apibox.user_id = this.api_box_user_id_account_setting_input.value;
 				Global.config.apibox.api_key = this.api_box_api_key_account_setting_input.value;
+				Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
+				Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 
-				result = await ApiboxRequest.getInfo(); // 直接返回状态信息
+				// 第一次接口：验证 Apibox
+				let result = await ApiboxRequest.getInfo();
 				this.log.debug("getInfo: ", result);
+
 				if (result.code !== 200) {
-					this.w2_error_account_setting_message_box.querySelector("span").innerText = "Apibox通讯ID与密钥错误";
-					this.w2_error_account_setting_message_box.classList.remove('hidden');
-					this.w2_email_api_address_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_email_api_pop3_auth_code_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.api_box_user_id_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.api_box_api_key_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					this.updateStatusUI({
+						box: this.w2_account_setting_message_box,
+						inputs: [
+							this.api_box_user_id_account_setting_input,
+							this.api_box_api_key_account_setting_input,
+							this.w2_email_api_address_account_setting_input,
+							this.w2_email_api_pop3_auth_code_account_setting_input
+						],
+						success: false,
+						message: "Apibox通讯ID与密钥错误"
+					});
+
+					Global.config.apibox.user_id = null;
+					Global.config.apibox.api_key = null;
+					Global.config.w2.email_api_address = null;
+					Global.config.w2.email_api_pop3_auth_code = null;
 					return;
 				}
 
-				Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
-				Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
-				result = await ApiboxRequest.getEmailApi(); // 返回结果
-				if (result.code === 200) {
-					this.w2_info_account_setting_message_box.querySelector("span").innerText = "W2邮箱API连通性测试无误, 已获取邮箱列表";
-					this.w2_email_api_address_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.w2_email_api_pop3_auth_code_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.api_box_user_id_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					this.api_box_api_key_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-					
-					this.w2_email_api_address_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.w2_email_api_pop3_auth_code_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.api_box_user_id_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					this.api_box_api_key_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-					
-					this.w2_info_account_setting_message_box.classList.remove('hidden');
-					this.w2_error_account_setting_message_box.classList.add('hidden');
+				// 第二次接口：验证 W2 邮箱 API
+				result = await ApiboxRequest.getEmailApi();
+				this.log.debug("getEmailApi: ", result);
 
-					Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
-					Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
-				} else {
-					this.w2_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
+				const success = result.code === 200;
+				this.updateStatusUI({
+					box: this.w2_account_setting_message_box,
+					inputs: [
+						this.api_box_user_id_account_setting_input,
+						this.api_box_api_key_account_setting_input,
+						this.w2_email_api_address_account_setting_input,
+						this.w2_email_api_pop3_auth_code_account_setting_input
+					],
+					success,
+					message: success
+						? "W2邮箱API连通性测试无误, 已获取邮箱列表"
+						: "错误代码: " + result.code + " " + result.msg
+				});
 
-					this.w2_email_api_address_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.w2_email_api_pop3_auth_code_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.api_box_user_id_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-					this.api_box_api_key_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-
-					this.w2_email_api_address_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.w2_email_api_pop3_auth_code_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-					this.api_box_user_id_account_setting_input.classList.add('border-red-300', 'focus:ring-red-500');
-					this.api_box_api_key_account_setting_input.classList.add('border-red-300', 'focus:ring-red-500');
-
-					this.w2_error_account_setting_message_box.classList.remove('hidden');
-					this.w2_info_account_setting_message_box.classList.add('hidden');
-
+				if (!success) {
 					Global.config.w2.email_api_address = null;
 					Global.config.w2.email_api_pop3_auth_code = null;
 				}
 			});
 		}
-		this.ls_time_range_validate_format_module_setting_button = DomHelper.bySelector("#ls_time_range_validate_format_module_setting_button");
-		this.ls_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
-			
-			// const time_range_login_start = this.ls_time_range_login_start_module_setting_input.value;
-			// const time_range_login_end = this.ls_time_range_login_end_module_setting_input.value;
-			// const time_range_login_out_start = this.ls_time_range_login_out_start_module_setting_input.value;
-			// const time_range_login_out_end = this.ls_time_range_login_out_end_module_setting_input.value;
-			// const time_range_fill_daily_report_start = this.ls_time_range_fill_daily_report_start_module_setting_input.value;
-			// const time_range_fill_daily_report_end = this.ls_time_range_fill_daily_report_end_module_setting_input.value;
-			// 获取所有时间值
-			const timeFields = [
-				{
-					start: this.ls_time_range_login_start_module_setting_input.value,
-					end: this.ls_time_range_login_end_module_setting_input.value,
-					configStart: 'time_range_login_start',
-					configEnd: 'time_range_login_end',
-					fieldName: '登录',
-					startInput: this.ls_time_range_login_start_module_setting_input,
-					endInput: this.ls_time_range_login_end_module_setting_input
-				},
-				{
-					start: this.ls_time_range_login_out_start_module_setting_input.value,
-					end: this.ls_time_range_login_out_end_module_setting_input.value,
-					configStart: 'time_range_login_out_start',
-					configEnd: 'time_range_login_out_end',
-					fieldName: '退出登录',
-					startInput: this.ls_time_range_login_out_start_module_setting_input,
-					endInput: this.ls_time_range_login_out_end_module_setting_input
-				},
-				{
-					start: this.ls_time_range_fill_daily_report_start_module_setting_input.value,
-					end: this.ls_time_range_fill_daily_report_end_module_setting_input.value,
-					configStart: 'time_range_fill_daily_report_start',
-					configEnd: 'time_range_fill_daily_report_end',
-					fieldName: '填报日报',
-					startInput: this.ls_time_range_fill_daily_report_start_module_setting_input,
-					endInput: this.ls_time_range_fill_daily_report_end_module_setting_input
-				}
-			];
-			// 将时间字符串转换为秒数进行比较的函数
-			function timeToSeconds(timeStr) {
-				const parts = timeStr.split(':');
-				if (parts.length !== 3) return 0;
-				return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
-			}
-			// 循环检查所有时间字段
-			for (const field of timeFields) {
-				if (timeToSeconds(field.start) > timeToSeconds(field.end)) {
-					DomHelper.bySelectorFromParent(this.ls_error_setting_message_box, "span").innerText = field.fieldName + " 开始时间不能晚于结束时间";
-					this.ls_error_setting_message_box.classList.remove("hidden");
-					this.ls_info_setting_message_box.classList.add("hidden");
-					field.startInput.classList.add("border-red-500");
-					field.endInput.classList.add("border-red-500");
-					return;
-				} else {
-					field.startInput.classList.remove("border-red-500");
-					field.endInput.classList.remove("border-red-500");
-				}
-			}
-			// 如果没有错误, 保存配置
-			for (const field of timeFields) {
-				Global.config.ls[field.configStart] = field.start;
-				Global.config.ls[field.configEnd] = field.end;
-			}
-			DomHelper.bySelectorFromParent(this.ls_info_setting_message_box, "span").innerText = "时间段配置已保存";
-			this.ls_info_setting_message_box.classList.remove("hidden");
-			this.ls_error_setting_message_box.classList.add("hidden");
-		});
+
 		this.w2_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
-			// 获取所有时间值
 			const timeFields = [
 				{
-					start: this.w2_time_range_login_start_module_setting_input.value,
-					end: this.w2_time_range_login_end_module_setting_input.value,
+					startInput: this.w2_time_range_login_start_module_setting_input,
+					endInput: this.w2_time_range_login_end_module_setting_input,
 					configStart: 'time_range_login_start',
 					configEnd: 'time_range_login_end',
-					fieldName: '登录',
-					startInput: this.w2_time_range_login_start_module_setting_input,
-					endInput: this.w2_time_range_login_end_module_setting_input
+					fieldName: '登录'
 				},
 				{
-					start: this.w2_time_range_login_out_start_module_setting_input.value,
-					end: this.w2_time_range_login_out_end_module_setting_input.value,
+					startInput: this.w2_time_range_login_out_start_module_setting_input,
+					endInput: this.w2_time_range_login_out_end_module_setting_input,
 					configStart: 'time_range_login_out_start',
 					configEnd: 'time_range_login_out_end',
-					fieldName: '退出登录',
-					startInput: this.w2_time_range_login_out_start_module_setting_input,
-					endInput: this.w2_time_range_login_out_end_module_setting_input
+					fieldName: '退出登录'
 				},
 				{
-					start: this.w2_time_range_check_in_start_module_setting_input.value,
-					end: this.w2_time_range_check_in_end_module_setting_input.value,
+					startInput: this.w2_time_range_check_in_start_module_setting_input,
+					endInput: this.w2_time_range_check_in_end_module_setting_input,
 					configStart: 'time_range_check_in_start',
 					configEnd: 'time_range_check_in_end',
-					fieldName: '上班打卡',
-					startInput: this.w2_time_range_check_in_start_module_setting_input,
-					endInput: this.w2_time_range_check_in_end_module_setting_input
+					fieldName: '上班打卡'
 				},
 				{
-					start: this.w2_time_range_check_out_start_module_setting_input.value,
-					end: this.w2_time_range_check_out_end_module_setting_input.value,
+					startInput: this.w2_time_range_check_out_start_module_setting_input,
+					endInput: this.w2_time_range_check_out_end_module_setting_input,
 					configStart: 'time_range_check_out_start',
 					configEnd: 'time_range_check_out_end',
-					fieldName: '下班打卡',
-					startInput: this.w2_time_range_check_out_start_module_setting_input,
-					endInput: this.w2_time_range_check_out_end_module_setting_input
+					fieldName: '下班打卡'
 				},
 				{
-					start: this.w2_time_range_meal_start_module_setting_input.value,
-					end: this.w2_time_range_meal_end_module_setting_input.value,
+					startInput: this.w2_time_range_meal_start_module_setting_input,
+					endInput: this.w2_time_range_meal_end_module_setting_input,
 					configStart: 'time_range_meal_start',
 					configEnd: 'time_range_meal_end',
-					fieldName: '前往用餐',
-					startInput: this.w2_time_range_meal_start_module_setting_input,
-					endInput: this.w2_time_range_meal_end_module_setting_input
+					fieldName: '前往用餐'
 				},
 				{
-					start: this.w2_time_range_working_start_module_setting_input.value,
-					end: this.w2_time_range_working_end_module_setting_input.value,
+					startInput: this.w2_time_range_working_start_module_setting_input,
+					endInput: this.w2_time_range_working_end_module_setting_input,
 					configStart: 'time_range_working_start',
 					configEnd: 'time_range_working_end',
-					fieldName: '切换标注',
-					startInput: this.w2_time_range_working_start_module_setting_input,
-					endInput: this.w2_time_range_working_end_module_setting_input
+					fieldName: '切换标注'
 				}
 			];
-			
-			// 将时间字符串转换为秒数进行比较的函数
-			function timeToSeconds(timeStr) {
-				const parts = timeStr.split(':');
-				if (parts.length !== 3) return 0;
-				return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
-			}
-			
-			// 循环检查所有时间字段
+
+			let hasError = false;
+			let errorMessage = '';
+			let errorInputs = [];
+
 			for (const field of timeFields) {
-				if (timeToSeconds(field.start) > timeToSeconds(field.end)) {
-					DomHelper.bySelectorFromParent(w2_error_setting_message_box, "span").innerText = field.fieldName + " 开始时间不能晚于结束时间";
-					this.w2_error_setting_message_box.classList.remove("hidden");
-					this.w2_info_setting_message_box.classList.add("hidden");
-					field.startInput.classList.add("border-red-500");
-					field.endInput.classList.add("border-red-500");
-					return;
-				} else {
-					field.startInput.classList.remove("border-red-500");
-					field.endInput.classList.remove("border-red-500");
+				const start = field.startInput.value;
+				const end = field.endInput.value;
+
+				try {
+					// 使用 Time 类方法检查时间是否合法
+					Time.getRandomTimeInRange(start, end);
+				} catch (err) {
+					hasError = true;
+					errorMessage = `${field.fieldName} 错误: ${err.message}`;
+					errorInputs = [field.startInput, field.endInput];
+					break;
 				}
 			}
-			
-			// 如果没有错误, 保存配置
-			for (const field of timeFields) {
-				Global.config.w2[field.configStart] = field.start;
-				Global.config.w2[field.configEnd] = field.end;
+
+			// 更新 UI
+			this.updateStatusUI({
+				box: this.w2_module_setting_message_box,
+				inputs: hasError ? errorInputs : timeFields.flatMap(f => [f.startInput, f.endInput]),
+				success: !hasError,
+				message: hasError ? errorMessage : '时间段配置已保存'
+			});
+
+			if (!hasError) {
+				// 保存配置
+				for (const field of timeFields) {
+					Global.config.w2[field.configStart] = field.startInput.value;
+					Global.config.w2[field.configEnd] = field.endInput.value;
+				}
+				// 重新开始任务
+				await W2.currentTask();
 			}
-			// w2_info_account_setting_message_box.querySelector("span").innerText = "W2连通性测试无误, 已为邮箱发送验证码";
-			DomHelper.bySelectorFromParent(w2_info_setting_message_box, "span").innerText = "时间段配置已保存";
-			this.w2_info_setting_message_box.classList.remove("hidden");
-			this.w2_error_setting_message_box.classList.add("hidden");
-			// 重新开始任务
-			await W2.currentTask();
 		});
-		this.ls_user_test_account_setting_button.addEventListener("click", async () => {
-			Global.config.ls.user_name = this.ls_user_name_account_setting_input.value;
-			Global.config.ls.user_password = this.ls_user_password_account_setting_input.value;
-	
-			let result = await LSRequest.login(); // 返回结果
-			if (result.code === 200) {
-				this.ls_info_account_setting_message_box.querySelector("span").innerText = "LS连通性测试无误";
-				this.ls_user_name_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-				this.ls_user_password_account_setting_input.classList.remove('border-red-500', 'focus:ring-red-500');
-				
-				this.ls_user_name_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-				this.ls_user_password_account_setting_input.classList.add('border-gray-300', 'focus:ring-blue-500');
-				
 
-				this.ls_info_account_setting_message_box.classList.remove('hidden');
-				this.ls_error_account_setting_message_box.classList.add('hidden');
+		if (DomHelper.exists(this.ls_time_range_validate_format_module_setting_button)) {
+			this.ls_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
+				const timeFields = [
+					{
+						startInput: this.ls_time_range_login_start_module_setting_input,
+						endInput: this.ls_time_range_login_end_module_setting_input,
+						configStart: 'time_range_login_start',
+						configEnd: 'time_range_login_end',
+						fieldName: '登录'
+					},
+					{
+						startInput: this.ls_time_range_login_out_start_module_setting_input,
+						endInput: this.ls_time_range_login_out_end_module_setting_input,
+						configStart: 'time_range_login_out_start',
+						configEnd: 'time_range_login_out_end',
+						fieldName: '退出登录'
+					},
+					{
+						startInput: this.ls_time_range_fill_daily_report_start_module_setting_input,
+						endInput: this.ls_time_range_fill_daily_report_end_module_setting_input,
+						configStart: 'time_range_fill_daily_report_start',
+						configEnd: 'time_range_fill_daily_report_end',
+						fieldName: '填报日报'
+					}
+				];
 
-				Global.config.ls.user_name = this.ls_user_name_account_setting_input.value;
-				Global.config.ls.user_password = this.ls_user_password_account_setting_input.value;
-			} else {
-				this.ls_error_account_setting_message_box.querySelector("span").innerText = "错误代码: " + result.code + " " + result.msg;
+				let hasError = false;
+				let errorMessage = '';
+				let errorInputs = [];
 
-				this.ls_user_name_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
-				this.ls_user_password_account_setting_input.classList.remove('border-gray-300', 'focus:ring-blue-500');
+				for (const field of timeFields) {
+					const start = field.startInput.value;
+					const end = field.endInput.value;
 
-				this.ls_user_name_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
-				this.ls_user_password_account_setting_input.classList.add('border-red-500', 'focus:ring-red-500');
+					try {
+						// 调用 Time 类下的严格验证
+						Time.getRandomTimeInRange(start, end);
+					} catch (err) {
+						hasError = true;
+						errorMessage = `${field.fieldName} 错误: ${err.message}`;
+						errorInputs = [field.startInput, field.endInput];
+						break;
+					}
+				}
 
-				this.ls_error_account_setting_message_box.classList.remove('hidden');
-				this.ls_info_account_setting_message_box.classList.add('hidden');
+				// 更新 UI
+				this.updateStatusUI({
+					box: this.ls_module_setting_message_box,
+					inputs: hasError ? errorInputs : timeFields.flatMap(f => [f.startInput, f.endInput]),
+					success: !hasError,
+					message: hasError ? errorMessage : '时间段配置已保存'
+				});
 
-				Global.config.ls.user_name = null;
-				Global.config.ls.user_password = null;
-			}
-		})
+				// 保存配置
+				if (!hasError) {
+					for (const field of timeFields) {
+						Global.config.ls[field.configStart] = field.startInput.value;
+						Global.config.ls[field.configEnd] = field.endInput.value;
+					}
+				}
+			});
+		}
 	}
 	async updateUIElement() {
 		if (Global.config.apibox.user_id !== null && Global.config.apibox.api_key !== null) {
@@ -2074,8 +2006,8 @@ class Framework extends Page {
 		const notice_time_label = this.notice_time_label;
 		let result = await JsonBinRequest.getNotice();
 		// result.record.notice
-		notice_label.innerText = FrameworkGlobal.commonValue.notice;
-		if (FrameworkGlobal.commonValue.notice !== result.record.notice) {
+		notice_label.innerText = FrameworkGlobal.cache.notice;
+		if (FrameworkGlobal.cache.notice !== result.record.notice) {
 			notice_label.innerText = result.record.notice;
 			notice_i.classList.remove("fa-bell");
 			notice_i.classList.add("fa-bell-ring");
@@ -2088,7 +2020,7 @@ class Framework extends Page {
 			notice_i.classList.remove("fa-shake");
 			notice_i.classList.remove("fa-bell-ring");
 			notice_i.classList.add("fa-bell");
-			FrameworkGlobal.commonValue.notice = result.record.notice;
+			FrameworkGlobal.cache.notice = result.record.notice;
 		});
 	}
 	static async modelStatus() {

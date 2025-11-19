@@ -128,16 +128,10 @@
 												<input type="text" id="api_box_api_key_account_setting_input" placeholder="数字小写英文混合" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
 											</div>
 											<!-- 提示框 -->
-											<div id="api_box_error_account_setting_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+											<div id="api_box_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
 												<div class="flex items-center">
-													<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-													<span class="text-red-700 text-sm">--</span>
-												</div>
-											</div>
-											<div id="api_box_info_account_setting_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-info-circle text-blue-500 mr-2"></i>
-													<span class="text-blue-700 text-sm">--</span>
+													<i class="fas fa-info-circle mr-2"></i>
+													<span class="text-sm">--</span>
 												</div>
 											</div>
 										</div>
@@ -194,16 +188,10 @@
 												<input type="text" id="w2_email_api_pop3_auth_code_account_setting_input" placeholder="输入邮箱的POP3授权码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
 											</div>
 											<!-- 提示框 -->
-											<div id="w2_error_account_setting_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+											<div id="w2_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
 												<div class="flex items-center">
-													<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-													<span class="text-red-700 text-sm">--</span>
-												</div>
-											</div>
-											<div id="w2_info_account_setting_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-info-circle text-blue-500 mr-2"></i>
-													<span class="text-blue-700 text-sm">--</span>
+													<i class="fas fa-info-circle mr-2"></i>
+													<span class="text-sm">--</span>
 												</div>
 											</div>
 										</div>
@@ -235,16 +223,10 @@
 												<input type="password" id="ls_user_password_account_setting_input" placeholder="输入LS密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
 											</div>
 											<!-- 提示框 -->
-											<div id="ls_info_account_setting_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+											<div id="ls_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
 												<div class="flex items-center">
-													<i class="fas fa-info-circle text-blue-500 mr-2"></i>
-													<span class="text-blue-700 text-sm">--</span>
-												</div>
-											</div>
-											<div id="ls_error_account_setting_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-													<span class="text-red-700 text-sm">--</span>
+													<i class="fas fa-info-circle mr-2"></i>
+													<span class="text-sm">--</span>
 												</div>
 											</div>
 										</div>
@@ -263,7 +245,7 @@
 							<div class="space-y-4">
 								<div class="p-5">
 								<!-- 第一个板块: 万维平台(W2)模块设置 -->
-									<div id="w2_advanced_settings_block" class="mb-6">
+									<div id="w2_module_settings" class="mb-6">
 										<div class="flex items-center justify-between mb-3">
 											<div class="flex items-center">
 												<i class="fas fa-server text-blue-500 mr-2"></i>
@@ -342,17 +324,11 @@
 													</div>
 												</div>
 											</div>
-											<!-- 错误提示 -->
-											<div id="w2_error_setting_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+											<!-- 提示框 -->
+											<div id="w2_module_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
 												<div class="flex items-center">
-													<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-													<span class="text-red-700 text-sm">--</span>
-												</div>
-											</div>
-											<div id="w2_info_setting_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-info-circle text-blue-500 mr-2"></i>
-													<span class="text-blue-700 text-sm">--</span>
+													<i class="fas fa-info-circle mr-2"></i>
+													<span class="text-sm">--</span>
 												</div>
 											</div>
 										</div>
@@ -360,7 +336,7 @@
 								</div>
 								<div class="p-5">
 								<!-- 第二个板块: 灵波微步(LS)模块设置 -->
-									<div id="ls_advanced_settings_block" class="mb-6">
+									<div id="ls_module_setting" class="mb-6">
 										<div class="flex items-center justify-between mb-3">
 											<div class="flex items-center">
 												<i class="fas fa-file-alt text-blue-500 mr-2"></i>
@@ -409,17 +385,11 @@
 												<div class="flex-1 min-w-[280px] max-w-[500px]">
 												</div>
 											</div>
-											<!-- 错误提示 -->
-											<div id="ls_error_setting_message_box" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
+											<!-- 提示框 -->
+											<div id="ls_module_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
 												<div class="flex items-center">
-													<i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-													<span class="text-red-700 text-sm">--</span>
-												</div>
-											</div>
-											<div id="ls_info_setting_message_box" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-info-circle text-blue-500 mr-2"></i>
-													<span class="text-blue-700 text-sm">--</span>
+													<i class="fas fa-info-circle mr-2"></i>
+													<span class="text-sm">--</span>
 												</div>
 											</div>
 										</div>

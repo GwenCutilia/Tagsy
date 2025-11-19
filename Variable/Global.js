@@ -209,9 +209,108 @@ class Global {
 		this.log.log(`已更新路径: ${fullKey} = ${newValue}`);
 	}
 }
+class LSGlobal extends Global {
+	static async init() {
+		// 可以调用父类方法初始化子类自己的对象
+		this.cache = await super.initObject(this.cache, "LSGlobal.cache");
+		this.setting = await super.initObject(this.setting, "LSGlobal.setting");
+	}
+	static cache = {
+		// 账号信息
+		user_name: null,
+		user_password: null,
+		// 登录状态
+		login_status: null,
+		// fill_daily_report_status: null, // 日报打卡状态
+		// cookie缓存
+		token: null, // 令牌
+		user_id: null, // 用户编号
+		task_id: null, // 工作区编号
+		sub_task_id: null, // 子工作区编号
+		daily_report_list: null, // 日报列表
+	}
+	static setting = {
+		// 日报列表的页数 && 页大小
+		daily_report_page_num: 1,
+		daily_report_page_size: 3,
+		// 模块时间区间任务设置
+		time_range_login_start: "08:50",
+		time_range_login_end: "08:50",
+		time_range_login_out_start: "18:35", 
+		time_range_login_out_end: "18:35", 
+		time_range_fill_daily_report_start: "17:00",
+		time_range_fill_daily_report_end: "17:00",
+	}
+	static domMap = {
+		// 登录状态
+		login_btn: "#login_btn", // 登录按钮
+		login_out_btn: "#login_out_btn", // 登录状态标签
+		login_status_label: "#login_status_label", // 签到签出标签
+		// 打卡状态
+		fill_daily_report_btn: "#fill_daily_report_btn", // 打卡按钮
+		fill_daily_report_label: "#fill_daily_report_label", // 打卡状态标签
+		// 日报列表
+		daily_report_list_loading: "#daily_report_list_loading",
+		daily_report_list_label: "#daily_report_list_label", // 日报列表标题
+		daily_report_list_table: "#daily_report_list_table", // 日报列表表格
+	}
+}
+class SettingGlobal extends Global {
+	static domMap = {
+		// API盒子账号设置
+		api_box_user_test_account_setting_button: "#api_box_user_test_account_setting_button",	// API盒子账号测试按钮
+		api_box_user_id_account_setting_input: "#api_box_user_id_account_setting_input",	// API盒子通讯ID输入框
+		api_box_api_key_account_setting_input: "#api_box_api_key_account_setting_input",	// API盒子通讯密钥输入框
+		api_box_account_setting_message_box: "#api_box_account_setting_message_box",	// API盒子信息框
+
+		// W2账号设置
+		w2_user_test_account_setting_button: "#w2_user_test_account_setting_button",	// W2账号测试按钮
+		w2_user_name_account_setting_input: "#w2_user_name_account_setting_input",	// W2账号输入框 账号
+		w2_user_password_account_setting_input: "#w2_user_password_account_setting_input",	// W2密码输入框
+		w2_email_api_test_account_setting_button: "#w2_email_api_test_account_setting_button",	// W2API测试按钮
+		w2_email_api_address_account_setting_input: "#w2_email_api_address_account_setting_input",	// W2邮箱输入框
+		w2_email_api_pop3_auth_code_account_setting_input: "#w2_email_api_pop3_auth_code_account_setting_input",	// W2POP3授权码输入框
+		w2_account_setting_message_box: "#w2_account_setting_message_box",	// W2提示信息
+
+		// W2模块设置
+		w2_time_range_validate_format_module_setting_button: "#w2_time_range_validate_format_module_setting_button",	// W2验证格式按钮
+		w2_time_range_login_start_module_setting_input: "#w2_time_range_login_start_module_setting_input",	// W2登录时间段开始输入框
+		w2_time_range_login_end_module_setting_input: "#w2_time_range_login_end_module_setting_input",	// W2登录时间段结束输入框
+		w2_time_range_login_out_start_module_setting_input: "#w2_time_range_login_out_start_module_setting_input",	// W2登出时间段开始输入框
+		w2_time_range_login_out_end_module_setting_input: "#w2_time_range_login_out_end_module_setting_input",	// W2登出时间段结束输入框
+		w2_time_range_check_in_start_module_setting_input: "#w2_time_range_check_in_start_module_setting_input",	// W2上班时间段开始输入框
+		w2_time_range_check_in_end_module_setting_input: "#w2_time_range_check_in_end_module_setting_input",	// W2上班时间段结束输入框
+		w2_time_range_check_out_start_module_setting_input: "#w2_time_range_check_out_start_module_setting_input",	// W2下班时间段开始输入框
+		w2_time_range_check_out_end_module_setting_input: "#w2_time_range_check_out_end_module_setting_input",	// W2下班时间段结束输入框
+		w2_time_range_meal_start_module_setting_input: "#w2_time_range_meal_start_module_setting_input",	// W2吃饭时间段开始输入框
+		w2_time_range_meal_end_module_setting_input: "#w2_time_range_meal_end_module_setting_input",	// W2吃饭时间段结束输入框
+		w2_time_range_working_start_module_setting_input: "#w2_time_range_working_start_module_setting_input",	// W2工作时间段开始输入框
+		w2_time_range_working_end_module_setting_input: "#w2_time_range_working_end_module_setting_input",	// W2工作时间段结束输入框
+		w2_module_setting_message_box: "#w2_module_setting_message_box",	// W2高级设置提示信息
+
+		// LS账号设置
+		ls_user_test_account_setting_button: "#ls_user_test_account_setting_button",	// LS账号测试按钮
+		ls_user_name_account_setting_input: "#ls_user_name_account_setting_input",	// LS账号输入框 账号
+		ls_user_password_account_setting_input: "#ls_user_password_account_setting_input",	// LS密码输入框
+		lso_account_setting_message_box: "#ls_account_setting_message_box",	// LS提示信息
+
+		// LS模块设置
+		ls_time_range_validate_format_module_setting_button: "#ls_time_range_validate_format_module_setting_button", // 格式校验按钮
+		ls_time_range_login_start_module_setting_input: "#ls_time_range_login_start_module_setting_input",	// LS登录时间段开始输入框
+		ls_time_range_login_end_module_setting_input: "#ls_time_range_login_end_module_setting_input",	// LS登录时间段结束输入框
+		ls_time_range_login_out_start_module_setting_input: "#ls_time_range_login_out_start_module_setting_input",	// LS登出时间段开始输入框
+		ls_time_range_login_out_end_module_setting_input: "#ls_time_range_login_out_end_module_setting_input",	// LS登出时间段结束输入框
+		ls_time_range_fill_daily_report_start_module_setting_input: "#ls_time_range_fill_daily_report_start_module_setting_input",	// LS日报开始输入框
+		ls_time_range_fill_daily_report_end_module_setting_input: "#ls_time_range_fill_daily_report_end_module_setting_input",	// LS日报结束输入框
+		ls_module_setting_message_box: "#ls_module_setting_message_box",	// LS高级设置提示信息
+	};
+	static async init() {
+
+	}
+}
 class FrameworkGlobal extends Global {
 	// Framework所需要的全局变量
-	static commonValue = {
+	static cache = {
 		notice: null,
 	}
 	// DOM元素映射表
@@ -246,9 +345,6 @@ class FrameworkGlobal extends Global {
 	};
 	static async init() {
 		// 可以调用父类方法初始化子类自己的对象
-		this.value = await super.initObject(this.commonValue, "FrameworkGlobal.commonValue");
-
-		// DOM 映射表也可以调用父类方法初始化
-		// this.domMap = await super.initObject(this.domMap, "FrameworkGlobal.domMap");
+		this.value = await super.initObject(this.cache, "FrameworkGlobal.commonValue");
 	}
 }
