@@ -16,6 +16,13 @@ class Page {
 		this.log = new Logger(this.constructor.name);
 	}
 
+	// 将已有代码重构, 油猴的全局的变量不需要很长的索引, 引用更改成w2.any
+	// 将各个UI任务不以TASK结尾
+	// 写一个DOM控制器, 用来控制DOM的获取
+	// 不要重复的操作
+	// DOM的class不要重复性太高
+	// 写一个result结构体
+
 	// 静态方法: 初始化页面路由
 	static async init() {
 		Template.init();
@@ -70,10 +77,6 @@ class Template {
 	static async loadTask() {
 		this.W2Task();
 		this.LSTask();
-		// 为每日任务写单独的函数出来
-		// 在登录成功后禁用登录按钮 待定, 有空再看看要不要添加这个功能
-		// 添加一个重新登录的按钮监听事件
-		// 当前任务卡有bug, 每一次更新ui时将所有ui更新
 	}
 	static isTemplatePage() {
 		return location.pathname.includes('/Template/');
@@ -1937,6 +1940,7 @@ class Framework extends Page {
 		if (!DomHelper.exists("#user_avatar")) {
 			return;
 		}
+		FrameworkGlobal.init();
 		Framework.init();
 		Framework.updateUIElement();
 		Framework.addInteraction();
@@ -1960,7 +1964,7 @@ class Framework extends Page {
 				action: async () => {
 					this.modelStatus();
 				},
-				intervalMs: 1000 * 3,
+				intervalMs: 1000 * 10,
 				name: "FRAMEWORK_MODEL_STATUS_TASK"
 			}
 		]
@@ -1985,33 +1989,10 @@ class Framework extends Page {
 		if (!DomHelper.exists("#user_avatar")) {
 			return;
 		}
-		this.user_avatar = DomHelper.bySelector("#user_avatar");
-		// 消息中心
-		this.notice_btn = DomHelper.bySelector("#notice_btn");
-		this.notice_i = DomHelper.bySelector("#notice_i");
-		this.notice_panel_div = DomHelper.bySelector("#notice_panel_div");
-		this.notice_list_div = DomHelper.bySelector("#notice_list_div");
-		this.notice_div = DomHelper.bySelector("#notice_div");
-		this.notice_label = DomHelper.bySelector("#notice_label");
-		this.notice_time_label = DomHelper.bySelector("#notice_time_label");
-		this.notice_close = DomHelper.bySelector("#notice_close");
-
-		// 底部导航栏
-		// 模块状态
-		this.model_status = DomHelper.bySelector("#model_status");
-		this.model_status_w2_i = DomHelper.bySelector("#model_status_w2_i");
-		this.model_status_w2_loading = DomHelper.bySelector("#model_status_w2_loading");
-		this.model_status_w2_label = DomHelper.bySelector("#model_status_w2_label");
-		this.model_status_ls_i = DomHelper.bySelector("#model_status_ls_i");
-		this.model_status_ls_loading = DomHelper.bySelector("#model_status_ls_loading");
-		this.model_status_ls_label = DomHelper.bySelector("#model_status_ls_label");
-		// 天气状态
-		this.weather_message_box = DomHelper.bySelector("#weather_message_box");
-		this.weather_div = DomHelper.bySelector("#weather_div");
-		this.weather_icon = DomHelper.bySelector("#weather_icon");
-		this.weather_temp_label = DomHelper.bySelector("#weather_temp_label");
-		this.weather_city_label = DomHelper.bySelector("#weather_city_label");
-		this.weather_wind_label = DomHelper.bySelector("#weather_wind_label");
+		this.domMap = FrameworkGlobal.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
+		});
 	}
 
 	// 添加框架辅助逻辑
@@ -2086,7 +2067,6 @@ class Framework extends Page {
 		});
 	}
 	static async getNotice() {
-		// 从这里继续
 		const notice_btn = this.notice_btn;
 		const notice_i = this.notice_i;
 		const notice_div = this.notice_div;
@@ -2094,8 +2074,8 @@ class Framework extends Page {
 		const notice_time_label = this.notice_time_label;
 		let result = await JsonBinRequest.getNotice();
 		// result.record.notice
-		notice_label.innerText = Global.config.cache.notice;
-		if (Global.config.cache.notice !== result.record.notice) {
+		notice_label.innerText = FrameworkGlobal.commonValue.notice;
+		if (FrameworkGlobal.commonValue.notice !== result.record.notice) {
 			notice_label.innerText = result.record.notice;
 			notice_i.classList.remove("fa-bell");
 			notice_i.classList.add("fa-bell-ring");
@@ -2107,8 +2087,8 @@ class Framework extends Page {
 		notice_div.addEventListener("click", () => {
 			notice_i.classList.remove("fa-shake");
 			notice_i.classList.remove("fa-bell-ring");
-			notice_i.classList.add("fa-bell");			
-			Global.config.cache.notice = result.record.notice;
+			notice_i.classList.add("fa-bell");
+			FrameworkGlobal.commonValue.notice = result.record.notice;
 		});
 	}
 	static async modelStatus() {
@@ -2130,17 +2110,24 @@ class Framework extends Page {
 		}
 		// 待优化, 将日报是否填写不再由updateUIElement来判断, 而由Template模块来判断
 		if (Global.config.ls.login_status === LS.status.login_success) {
+			this.log.log("正在获取日报列表");
 			let result = await LSRequest.getDailyReportList();
 			Global.config.ls.daily_report_list = result;
 			if (Time.isSameDay(result.rows[0].recordTime, Time.getCurrentDate())) {
+				this.log.log("true 触发");
 				model_status_ls_label.innerText = LS.status.already_fill_daily_report;
 				model_status_ls_i.classList.replace("text-gray-500", "text-green-500");
 				model_status_ls_loading.classList.add("hidden");
 				model_status_ls_label.classList.remove("hidden");
 			} else {
+				this.log.log("false 触发");
 				model_status_ls_label.innerText = LS.status.not_loginfill_daily_report;
+				model_status_ls_i.classList.replace("text-gray-500", "text-green-500");
+				model_status_ls_loading.classList.add("hidden");
+				model_status_ls_label.classList.remove("hidden");
 			}
 		} else {
+			this.log.log("外层false 触发");
 			model_status_ls_i.classList.replace("text-green-500", "text-gray-500");
 			model_status_ls_loading.classList.remove("hidden");
 			model_status_ls_label.classList.add("hidden");

@@ -117,129 +117,138 @@ class Global {
 
 	static log = new Logger("Global");
 
-	static async init() {
-		await this.traverseConfig(this.config);
-		this.setupConfigProxy(); // 初始化代理
+	/**
+	 * 通用对象初始化方法，返回代理对象
+	 */
+	static async initObject(obj, rootKey) {
+		await this.traverseConfig(obj, rootKey);
+		return this.setupProxyFor(obj, rootKey);
 	}
 
-	static async traverseConfig(configObj, parentKey = '') {
-		for (const key in configObj) {
+	static async traverseConfig(obj, parentKey = '') {
+		for (const key in obj) {
 			const fullKey = parentKey ? `${parentKey}.${key}` : key;
-			if (typeof configObj[key] === 'object' && configObj[key] !== null && !Array.isArray(configObj[key])) {
-				await this.traverseConfig(configObj[key], fullKey);
+			if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+				await this.traverseConfig(obj[key], fullKey);
 			} else {
 				const storedValue = await GM.GetValue(fullKey);
 				if (storedValue !== undefined) {
-					configObj[key] = storedValue;
+					obj[key] = storedValue;
 					this.log.log(`已从存储加载配置: ${fullKey}`);
 				} else {
-					await GM.SetValue(fullKey, configObj[key]);
-					this.log.log(`已初始化配置: ${fullKey} = ${configObj[key]}`);
+					await GM.SetValue(fullKey, obj[key]);
+					this.log.log(`已初始化配置: ${fullKey} = ${obj[key]}`);
 				}
 			}
 		}
 	}
 
-	static setupConfigProxy() {
-		// 递归为对象及所有嵌套对象创建代理
-		const createProxy = (obj, parentKey = '') => {
-			// 1. 先为现有嵌套对象递归创建代理
-			for (const key in obj) {
-				if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key]) && !(obj[key] instanceof Date)) {
-					obj[key] = createProxy(obj[key], `${parentKey ? parentKey + '.' : ''}${key}`);
+	static setupProxyFor(obj, parentKey = '') {
+		const createProxy = (targetObj, path = '') => {
+			for (const key in targetObj) {
+				if (typeof targetObj[key] === 'object' && targetObj[key] !== null && !Array.isArray(targetObj[key]) && !(targetObj[key] instanceof Date)) {
+					targetObj[key] = createProxy(targetObj[key], `${path ? path + '.' : ''}${key}`);
 				}
 			}
 
-			// 2. 创建当前对象的代理
-			return new Proxy(obj, {
-				set(target, key, value) {
-					const fullKey = parentKey ? `${parentKey}.${key}` : key;
-					
-					// 如果新值是对象，为其创建代理
-					if (typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Date)) {
-						target[key] = createProxy(value, fullKey);
+			return new Proxy(targetObj, {
+				set(t, k, v) {
+					const fullKey = path ? `${path}.${k}` : k;
+
+					if (typeof v === 'object' && v !== null && !Array.isArray(v) && !(v instanceof Date)) {
+						t[k] = createProxy(v, fullKey);
 					} else {
-						target[key] = value;
-						// 同步到存储并输出日志（现在会正常触发）
-						GM.SetValue(fullKey, value);
-						Global.log.log(`已更新配置: ${fullKey} = ${value}`);
+						t[k] = v;
+						GM.SetValue(fullKey, v);
+						Global.log.log(`已更新配置: ${fullKey} = ${v}`);
 					}
 					return true;
 				}
 			});
 		};
 
-		// 为根配置对象应用代理（会自动递归处理所有嵌套对象）
-		this.config = createProxy(this.config);
+		return createProxy(obj, parentKey);
 	}
 
-	/**
-	 * 获取指定路径的配置值（可选，用于兼容旧代码）
-	 * @static
-	 * @param {string} path - 配置路径，如 'system.status'
-	 * @returns {any|null} 对应的值，若路径不存在则返回null并记录错误
-	 */
-	static getKey(path) {
+	static async init() {
+		this.config = await this.initObject(this.config, "config");
+	}
+	static getKey(obj, path) {
 		const keys = path.split('.');
-		let value = this.config;
-		
+		let value = obj;
 		for (const key of keys) {
 			if (value && typeof value === 'object' && key in value) {
 				value = value[key];
 			} else {
-				this.log.error(`Global 中没有找到路径: ${path}`);
+				this.log.error(`路径不存在: ${path}`);
 				return null;
 			}
 		}
-		
 		return value;
 	}
-
-	/**
-	 * 设置指定路径的配置值（可选，用于兼容旧代码）
-	 * @static
-	 * @param {string} path - 配置路径，如 'system.status'
-	 * @param {any} value - 要设置的新值
-	 */
-	static setKey(path, value) {
+	static setKey(obj, path, newValue) {
 		const keys = path.split('.');
-		let obj = this.config;
-		
-		// 遍历到最后一个键的父对象
+		let target = obj;
+
 		for (let i = 0; i < keys.length - 1; i++) {
 			const key = keys[i];
-			if (obj && typeof obj === 'object' && key in obj) {
-				obj = obj[key];
+			if (target && typeof target === 'object' && key in target) {
+				target = target[key];
 			} else {
-				this.log.error(`Global 中没有找到路径: ${path}`);
+				this.log.error(`路径不存在: ${path}`);
 				return;
 			}
 		}
-		// 设置最后一个键的值
+
 		const lastKey = keys[keys.length - 1];
-		obj[lastKey] = value;
+		target[lastKey] = newValue;
+
+		// 同步 GM 存储
+		const fullKey = path; // 这里可以根据需要加前缀，比如 "config." 或 "FrameworkGlobal.value."
+		GM.SetValue(fullKey, newValue);
+		this.log.log(`已更新路径: ${fullKey} = ${newValue}`);
 	}
-	// /**
-	//  * 清空配置，将所有值恢复为初始默认值或 null
-	//  * 并同步更新到 GM 存储
-	//  */
-	// static clearConfig() {
-	// 	const clearObj = (obj, parentKey = '') => {
-	// 		for (const key in obj) {
-	// 			const fullKey = parentKey ? `${parentKey}.${key}` : key;
+}
+class FrameworkGlobal extends Global {
+	// Framework所需要的全局变量
+	static commonValue = {
+		notice: null,
+	}
+	// DOM元素映射表
+	static domMap = {
+		user_avatar: "#user_avatar",
+		// 消息中心
+		notice_btn: "#notice_btn",
+		notice_i: "#notice_i",
+		notice_panel_div: "#notice_panel_div",
+		notice_list_div: "#notice_list_div",
+		notice_div: "#notice_div",
+		notice_label: "#notice_label",
+		notice_time_label: "#notice_time_label",
+		notice_close: "#notice_close",
 
-	// 			if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key]) && !(obj[key] instanceof Date)) {
-	// 				clearObj(obj[key], fullKey); // 递归清空嵌套对象
-	// 			} else {
-	// 				// 重置值为 null
-	// 				obj[key] = null;
-	// 				GM.SetValue(fullKey, null);
-	// 				this.log.log(`已清空配置: ${fullKey}`);
-	// 			}
-	// 		}
-	// 	};
+		// 底部导航栏
+		model_status: "#model_status",
+		model_status_w2_i: "#model_status_w2_i",
+		model_status_w2_loading: "#model_status_w2_loading",
+		model_status_w2_label: "#model_status_w2_label",
+		model_status_ls_i: "#model_status_ls_i",
+		model_status_ls_loading: "#model_status_ls_loading",
+		model_status_ls_label: "#model_status_ls_label",
 
-	// 	clearObj(this.config);
-	// 	this.log.log("全局配置已全部清空");
-	// }
+		// 天气状态
+		weather_message_box: "#weather_message_box",
+		weather_div: "#weather_div",
+		weather_icon: "#weather_icon",
+		weather_temp_label: "#weather_temp_label",
+		weather_city_label: "#weather_city_label",
+		weather_wind_label: "#weather_wind_label"
+	};
+	static async init() {
+		// 可以调用父类方法初始化子类自己的对象
+		this.value = await super.initObject(this.commonValue, "FrameworkGlobal.commonValue");
+
+		// DOM 映射表也可以调用父类方法初始化
+		// this.domMap = await super.initObject(this.domMap, "FrameworkGlobal.domMap");
+	}
 }
