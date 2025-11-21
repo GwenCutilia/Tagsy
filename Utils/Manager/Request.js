@@ -43,15 +43,15 @@ class W2Request extends HttpRequest {
 		const data = this._buildAuthData({
 			login_type: 4,
 			rand_str: "HYWmN2JLmqJAEKF1Y9wzSFduiCFQEmtS",
-			verify_code: Global.config.w2.email_api_verify_code
+			verify_code: W2Global.cache.information.mail_address
 		});
 
 		const result = await this._request("POST", url, headers, data);
 		
 		// 保存token
-		Global.config.w2.token = result.data.token;
-		Global.config.w2.tenant_token = result.data.tenant_token;
-
+		W2Global.cache.cookie.token = result.data.token;
+		W2Global.cache.cookie.tenant_token = result.data.tenant_token;
+		
 		return result;
 	}
 	// 退出登录
@@ -61,7 +61,7 @@ class W2Request extends HttpRequest {
 
 		const data = {
 			header: this._buildHeader({
-				staff: Global.config.w2.user_name
+				staff: W2Global.cache.information.name
 			})
 		};
 
@@ -74,7 +74,7 @@ class W2Request extends HttpRequest {
 		const url = this.CONFIG.BASE_URL + "/user_center/login_check";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
-			staff: Global.config.w2.user_name,
+			staff: W2Global.cache.information.name,
 			header: this._buildHeader()
 		};
 		
@@ -96,13 +96,13 @@ class W2Request extends HttpRequest {
 		let eventTimestamp;
 		if (eventType === "check_in") {
 			eventTimestamp = Time.generateRandomTimestampInRange(
-				Global.config.w2.time_range_check_in_start, 
-				Global.config.w2.time_range_check_in_end
+				W2Global.setting.time_range_check_in_start, 
+				W2Global.setting.time_range_check_in_end
 			);
 		} else if (eventType === "check_out") {
 			eventTimestamp = Time.generateRandomTimestampInRange(
-				Global.config.w2.time_range_check_out_start, 
-				Global.config.w2.time_range_check_out_end
+				W2Global.setting.time_range_check_out_start, 
+				W2Global.setting.time_range_check_out_end
 			);
 		} else {
 			eventTimestamp = Math.floor(Date.now() / 1000);
@@ -128,19 +128,19 @@ class W2Request extends HttpRequest {
 	static async _applyActivityTransfer(activityType) {
 		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
-		let eventTimestamp = Time.getTimeRangeTimestamp(Global.config.w2.apply_activity_transfer_time);
+		let eventTimestamp = Time.getTimeRangeTimestamp(W2Global.cache.applyActivityTransfer.time);
 
 		const data = {
 			"activity_type": activityType,
 			"begin_time": eventTimestamp[0],
 			"end_time": eventTimestamp[1],
-			"memo": Global.config.w2.apply_activity_transfer_momo,
+			"memo": W2Global.cache.applyActivityTransfer.momo,
 			"header": {
-				"staff": Global.config.w2.user_name,
+				"staff": W2Global.cache.information.name,
 				"staff_id": 0,
-				"oa_ticket": Global.config.w2.token,
+				"oa_ticket": W2Global.cache.cookie.token,
 				"tracer": "|b077b6d5cc0a68|1760692722212",
-				"tenant_token": Global.config.w2.tenant_token
+				"tenant_token": W2Global.cache.cookie.tenant_token
 			}
 		}
 		const result = await this._request("POST", url, headers, data);
@@ -151,10 +151,10 @@ class W2Request extends HttpRequest {
 		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/get_my_apply_approval";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
-			"page": Global.value.apply_approval_transfer_list_page,
+			"page": W2Global.setting.applyActivityTransferList.page,
 			"page_size": 3,
-			"begin_date": Time.getDateRangeByToday(-9, 0)[0], // 开始查询的时间
-			"end_date": Time.getDateRangeByToday(-9, 0)[1], // 结束查询的时间
+			"begin_date": Time.getDateRangeByToday(-30, 0)[0], // 开始查询的时间
+			"end_date": Time.getDateRangeByToday(-30, 0)[1], // 结束查询的时间
 			"apply_type_list": [ // 类型
 				"transfer",
 				"holiday",
@@ -167,11 +167,11 @@ class W2Request extends HttpRequest {
 				"approved_reject"
 			],
 			"header": {
-				"staff": Global.config.w2.user_name,
+				"staff": W2Global.cache.information.name,
 				"staff_id": 0,
-				"oa_ticket": Global.config.w2.token,
+				"oa_ticket": W2Global.cache.cookie.token,
 				"tracer": "|b0454389a32168|1762074840048",
-				"tenant_token": Global.config.w2.tenant_token
+				"tenant_token": W2Global.cache.cookie.tenant_token
 			}
 		}
 
@@ -206,7 +206,7 @@ class W2Request extends HttpRequest {
 		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/get_personal_information";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		const data = {
-			// staff: Global.config.w2.w2_user_id,
+			// staff: W2Global.setting.w2_user_id,
 			header: this._buildHeader()
 		};
 
@@ -221,8 +221,8 @@ class W2Request extends HttpRequest {
 		};
 		const data = {
 			is_owner: true,
-			begin_date: Time.getCurrentMonthBoundary(Number(Global.value.month), "beginDate"),
-			end_date: Time.getCurrentMonthBoundary(Number(Global.value.month), "endDate"),
+			begin_date: Time.getCurrentMonthBoundary(Number(W2Global.setting.calendar.month), "beginDate"),
+			end_date: Time.getCurrentMonthBoundary(Number(W2Global.setting.calendar.month), "endDate"),
 			header: this._buildHeader()
 		};
 
@@ -234,11 +234,11 @@ class W2Request extends HttpRequest {
 	// 构建请求头
 	static _buildHeader(additionalData = {}) {
 		return {
-			staff: Global.config.w2.user_name,
+			staff: W2Global.cache.information.name,
 			staff_id: 0,
-			oa_ticket: Global.config.w2.token,
+			oa_ticket: W2Global.cache.cookie.token,
 			tracer: "|7b0f57ef3ac51|1749259397196",
-			tenant_token: Global.config.w2.tenant_token,
+			tenant_token: W2Global.cache.cookie.tenant_token,
 			...additionalData
 		};
 	}
@@ -251,8 +251,8 @@ class W2Request extends HttpRequest {
 
 	static _buildAuthData(additionalData = {}) {
 		return {
-			username: Global.config.w2.user_name,
-			password: Global.config.w2.user_password,
+			username: W2Global.cache.information.name,
+			password: W2Global.cache.information.password,
 			header: {
 				staff: "",
 				staff_id: 0,
@@ -283,25 +283,26 @@ class LSRequest extends HttpRequest {
 			"Content-Type": "application/json;charset=UTF-8"
 		};
 		const data = {
-			username: Global.config.ls.user_name,
-			password: Global.config.ls.user_password
+			username: LSGlobal.cache.information.name,
+			password: LSGlobal.cache.information.password
 		};
 
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("login result: ", result);
 		if (result.code === 200) {
-			Global.config.ls.token = result.token;
+			LSGlobal.cache.cookie.token = result.token;
 		} else {
 			this.log.error("LS login failed: ", result.message);
 		}
+		
 		return result;
 	}
 	static async loginOut() {
 		const url = "http://biaoju.labelvibe.com:8088/prod-api/logout";
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.token,
-			"Cookie": "Admin-Token=" + Global.config.ls.token
+			"Authorization": "Bearer " + LSGlobal.cache.cookie.token,
+			"Cookie": "Admin-Token=" + LSGlobal.cache.cookie.token
 		};
 
 		const result = await this._request("POST", url, headers);
@@ -314,13 +315,13 @@ class LSRequest extends HttpRequest {
 
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.token,
-			"Cookie": "Admin-Token=" + Global.config.ls.token
+			"Authorization": "Bearer " + LSGlobal.cache.cookie.token,
+			"Cookie": "Admin-Token=" + LSGlobal.cache.cookie.token
 		}
 
 		const result = await this._request("GET", url, headers);
 		if (result.code === 200) {
-			Global.config.ls.user_id = result.user.userId;
+			LSGlobal.cache.cookie.id = result.user.userId;
 		}
 		this.log.log("getInfo result: ", result);
 		return result;
@@ -331,8 +332,8 @@ class LSRequest extends HttpRequest {
 
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.token,
-			"Cookie": "Admin-Token=" + Global.config.ls.token
+			"Authorization": "Bearer " + LSGlobal.cache.cookie.token,
+			"Cookie": "Admin-Token=" + LSGlobal.cache.cookie.token
 		}
 
 		const data = {
@@ -345,8 +346,8 @@ class LSRequest extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getPersonalInformat result: ", result);
 		if (result.code === 200) {
-			Global.config.ls.sub_task_id = result.rows[0].subTaskId;
-			Global.config.ls.task_id = result.rows[0].taskId;
+			LSGlobal.cache.cookie.sub_task_id = result.rows[0].subTaskId;
+			LSGlobal.cache.cookie.task_id = result.rows[0].taskId;
 		} else {
 
 		}
@@ -358,8 +359,8 @@ class LSRequest extends HttpRequest {
 
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.token,
-			"Cookie": "Admin-Token=" + Global.config.ls.token
+			"Authorization": "Bearer " + LSGlobal.cache.cookie.token,
+			"Cookie": "Admin-Token=" + LSGlobal.cache.cookie.token
 		};
 		const data = {
 			"workCount": [
@@ -374,9 +375,9 @@ class LSRequest extends HttpRequest {
 					"dataCount": "0"
 				}
 			],
-			"account": Global.config.ls.user_name,
+			"account": LSGlobal.cache.information.name,
 			"recordTime": Time.generateISOTimestamp(undefined, 16, -1),
-			"subTaskId": Global.config.ls.sub_task_id,
+			"subTaskId": LSGlobal.cache.cookie.sub_task_id,
 			"platform": "企鹅标注-在线标注平台",
 			"workHours": "8"
 		}
@@ -390,16 +391,16 @@ class LSRequest extends HttpRequest {
 
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
-			"Authorization": "Bearer " + Global.config.ls.token,
-			"Cookie": "Admin-Token=" + Global.config.ls.token
+			"Authorization": "Bearer " + LSGlobal.cache.cookie.token,
+			"Cookie": "Admin-Token=" + LSGlobal.cache.cookie.token
 		}
 
 		const data = {
-			"taskId": Global.config.ls.task_id,
-			"pageSize": Global.config.ls.daily_report_page_size,
-			"pageNum": Global.config.ls.daily_report_page_num,
+			"taskId": LSGlobal.cache.cookie.task_id,
+			"pageSize": LSGlobal.setting.daily_report_page_size,
+			"pageNum": LSGlobal.setting.daily_report_page_num,
 			"recordDate": "",
-			"userId": Global.config.ls.user_id
+			"userId": LSGlobal.cache.cookie.id
 		}
 		// const data = {
 		// 	"taskId": "459",
@@ -435,8 +436,8 @@ class ApiboxRequest extends HttpRequest {
 		const url = this.CONFIG.URL + "api/xitong/info.php";
 		const headers = this.CONFIG.HEADERS;
 		const data = {
-			id: Global.config.apibox.user_id,
-			key: Global.config.apibox.api_key,
+			id: ApiboxGlobal.cache.information.id,
+			key: ApiboxGlobal.cache.information.key,
 		}
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getInfo result: ", result);
@@ -474,7 +475,7 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
-			cxid: Global.config.login.query_id,
+			cxid: LoginGlobal.cache.cookie.query_id,
 		}
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("queryLogin result: ", result);
@@ -490,7 +491,7 @@ class ApiboxRequest extends HttpRequest {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
 			type: "1",
-			socialuid: Global.config.login.user_uid
+			socialuid: LoginGlobal.cache.cookie.uid
 		};
 
 		const result = await this._request("POST", url, headers, data);
@@ -511,8 +512,8 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
-			name: Global.config.login.user_name,
-			pwd: Global.config.login.user_password,
+			name: LoginGlobal.cache.information.name,
+			pwd: LoginGlobal.cache.information.password,
 		};
 
 		const result = await this._request("POST", url, headers, data);
@@ -522,7 +523,6 @@ class ApiboxRequest extends HttpRequest {
 		} else {
 			if (result.msg.includes("该用户名已被注册")) {
 				result.code = 500;
-				this.log.debug("用户名已注册");
 			}
 		}
 		return result;
@@ -536,8 +536,8 @@ class ApiboxRequest extends HttpRequest {
 		const data = {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
-			name: Global.config.login.user_name,
-			pwd: Global.config.login.user_password,
+			name: LoginGlobal.cache.information.name,
+			pwd: LoginGlobal.cache.information.password,
 		};
 
 		const result = await this._request("POST", url, headers, data);
@@ -559,10 +559,10 @@ class ApiboxRequest extends HttpRequest {
 			id: "10008362",
 			key: "1d0c8fec499fb7057027e09fc4662fb0",
 			type: "1",
-			username: Global.config.login.user_name,
-			pwd: Global.config.login.user_password,
-			nickname: Global.config.login.user_nick_name,
-			socialuid: Global.config.login.user_uid
+			username: LoginGlobal.cache.information.name,
+			pwd: LoginGlobal.cache.information.password,
+			nickname: LoginGlobal.cache.cookie.nick_name,
+			socialuid: LoginGlobal.cache.cookie.uid
 		};
 
 		const result = await this._request("POST", url, headers, data);
@@ -580,10 +580,10 @@ class ApiboxRequest extends HttpRequest {
 		const headers = this.CONFIG.HEADERS
 
 		const data = {
-			id: Global.config.apibox.user_id,
-			key: Global.config.apibox.api_key,
-			mail: Global.config.w2.email_api_address,
-			pwd: Global.config.w2.email_api_pop3_auth_code,
+			id: ApiboxGlobal.cache.information.id,
+			key: ApiboxGlobal.cache.information.key,
+			mail: W2Global.cache.information.address,
+			pwd: W2Global.cache.information.pop3_auth_code,
 			popimap: "pop3",
 			ip: "pop.qq.com",
 			port: "995",
@@ -593,7 +593,6 @@ class ApiboxRequest extends HttpRequest {
 		};
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.debug("获取邮箱API结果: ", result);
 		return result;
 	}
 	// 天气
@@ -603,8 +602,8 @@ class ApiboxRequest extends HttpRequest {
 		const headers = this.CONFIG.HEADERS;
 
 		const data = {
-			id: Global.config.apibox.user_id,
-			key: Global.config.apibox.api_key,
+			id: ApiboxGlobal.cache.information.id,
+			key: ApiboxGlobal.cache.information.key,
 		}
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("getWeatherInfo result: ", result);
@@ -651,9 +650,9 @@ class JsonBinRequest extends HttpRequest {
 		};
 
 		const data = {
-			"notice": Global.config.cache.notice,
+			"notice": FrameworkGlobal.cache.notice.content,
 		}
-
+		
 		const result = await this._request("PUT", url, headers, data);
 		this.log.log("test result: ", result);
 		return result;

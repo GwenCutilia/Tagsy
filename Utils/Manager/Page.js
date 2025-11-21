@@ -25,7 +25,7 @@ class Page {
 
 	// 静态方法: 初始化页面路由
 	static async init() {
-		Template.init();
+		await Template.init();
 		const page = location.pathname.split("/").pop();
 		if (this.routes[page]) {
 			this.routes[page]();
@@ -63,6 +63,7 @@ class Template {
 		if (!this.isTemplatePage()) {
 			return;
 		}
+		await this.initValue();
 		this.loadTask();
 		this.loadFramework();
 		this.log.log('Template初始化完成');
@@ -73,7 +74,14 @@ class Template {
 		this.initPage();
 		new Framework();
 	}
-
+	static async initValue() {
+		await LoginGlobal.init();
+		await W2Global.init();
+		await LSGlobal.init();
+		await ApiboxGlobal.init();
+		await FrameworkGlobal.init();
+		await SystemGlobal.init();
+	}
 	static async loadTask() {
 		this.W2Task();
 		this.LSTask();
@@ -84,13 +92,13 @@ class Template {
 	// 页面跳转
 	static async initPage() {
 		if (location.pathname.endsWith("Login.html")) {
-			if (Global.config.cache.login_status === true) {
+			if (LoginGlobal.status.login === true) {
 				location.href = "./Index.html";
 			}
 			return;
 		}
 
-		if (Global.config.cache.login_status === false) {
+		if (LoginGlobal.status.login === false) {
 			location.href = "./Login.html";
 		}
 	}
@@ -117,20 +125,10 @@ class Login extends Page {
 		this.initValue();
 	}
 	initValue() {
-		// 背景
-		this.animation_canvas = DomHelper.bySelector("#animation_canvas");
-		// 用户名&&密码
-		this.infomation_div = DomHelper.bySelector("#infomation_div");
-		this.password_toggle_btn = DomHelper.bySelector("#password_toggle_btn");
-		this.username_input = DomHelper.bySelector("#username_input");
-		this.password_input = DomHelper.bySelector("#password_input");
-		// 登录&&注册
-		this.login_btn = DomHelper.bySelector("#login_btn");
-		this.register_btn = DomHelper.bySelector("#register_btn");
-		// 二维码
-		this.qr_div = DomHelper.bySelector("#qr_div");
-		this.qr_toggle_btn = DomHelper.bySelector("#qr_toggle_btn");
-		this.qr_url_img = DomHelper.bySelector("#qr_url_img");
+		this.domMap = LoginGlobal.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
+		});
 	}
 	updateUIElement() {
 		
@@ -159,12 +157,12 @@ class Login extends Page {
 		const username_input = this.username_input;
 		const password_input = this.password_input;
 		login_btn.addEventListener('click', async () => {
-			Global.config.login.user_name = username_input.value;
-			Global.config.login.user_password = password_input.value;
+			LoginGlobal.cache.information.name = username_input.value;
+			LoginGlobal.cache.information.password = password_input.value;
 			let result = await ApiboxRequest.loginAccount();
 			if (result.code == 200) {
 				this.log.log("登录成功");
-				Global.config.cache.login_status = true;
+				LoginGlobal.status.login = true;
 				location.href = "./Index.html";
 			}
 		});
@@ -210,7 +208,7 @@ class Login extends Page {
 		result = await ApiboxRequest.getQrCode();
 		if (result.code == 200) {
 			qr_url_img.src = result.logqrcode;
-			Global.config.login.query_id = result.cxid;
+			LoginGlobal.cache.cookie.query_id = result.cxid;
 		}
 		await System.sleepSeconds(5);
 		let i = 0;
@@ -222,26 +220,26 @@ class Login extends Page {
 				// 验证登录
 				const result1 = await ApiboxRequest.verifyLogin();
 				if (result1.code == 200) {
-					Global.config.login.user_name = result1.name;
-					Global.config.login.user_password = result1.pwd;
+					LoginGlobal.cache.information.name = result1.name;
+					LoginGlobal.cache.information.password = result1.pwd;
 				} else if (result1.msg.includes("未查询到账号")) {
 					// 注册账号
-					Global.config.login.user_name = result.nickname;
-					Global.config.login.user_avatar_url = result.faceimg;
-					Global.config.login.user_password = "000000";
+					LoginGlobal.cache.information.name = result.nickname;
+					LoginGlobal.cache.cookie.avatar_url = result.faceimg;
+					LoginGlobal.cache.information.password = "000000";
 					await ApiboxRequest.regAccount();
 					// 绑定账号
-					Global.config.login.user_nick_name = result.nickname;
-					Global.config.login.user_uid = result.social_uid;
+					LoginGlobal.cache.cookie.nick_name = result.nickname;
+					LoginGlobal.cache.cookie.uid = result.social_uid;
 					await ApiboxRequest.bindAccount();
 					await ApiboxRequest.loginAccount();
 				} else {
 					this.log.log("登录失败");
 				}
 				// 登录后的操作
-				Global.config.cache.login_status = true;
-				Global.config.login.user_name = result1.name;
-				Global.config.login.user_password = result1.pwd;
+				LoginGlobal.status.login = true;
+				LoginGlobal.cache.information.name = result1.name;
+				LoginGlobal.cache.information.password = result1.pwd;
 				location.href = "./Index.html";
 				this.log.log("登录成功");
 			}
@@ -327,20 +325,7 @@ class Index extends Page {
 		this.updateUIElement();
 	}
 	async init() {
-		// 加载状态
-		this.loading_status_label = DomHelper.bySelector("#loading_status_label");
-		this.load_btn = DomHelper.bySelector("#load_btn");
-		this.unload_btn = DomHelper.bySelector("#unload_btn");
-		// 运行状态
-		this.running_status_label = DomHelper.bySelector("#running_status_label");
-		this.running_start_btn = DomHelper.bySelector("#running_start_btn");
-		this.running_stop_btn = DomHelper.bySelector("#running_stop_btn");
-		// 工作时间
-		this.worked_hours_label = DomHelper.bySelector("#worked_hours_label");
-		this.remain_hours_label = DomHelper.bySelector("#remain_hours_label");
-		// 日志
-		this.running_log_content = DomHelper.bySelector("#running_log_content");
-		this.clear_log_btn = DomHelper.bySelector("#clear_log_btn");
+		this.initValue();
 	}
 	bindEvents() {
 		this.load_btn.addEventListener("click", async () => {
@@ -372,6 +357,12 @@ class Index extends Page {
 				config.intervalMs, 
 				config.name
 			);
+		});
+	}
+	initValue() {
+		this.domMap = IndexGlobal.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
 		});
 	}
 	async loadingStatusTask() {
@@ -431,71 +422,29 @@ class W2 extends Page {
 		// 待优化, 将其他h5中的页面的拖动效果取消
 		// 初始化Dom
 		this.tooltip = new ToolTip();
-		// 登录状态
-		this.login_status_label = DomHelper.bySelector("#login_status_label"); // 登录状态
-		this.login_btn = DomHelper.bySelector("#login_btn"); // 登录按钮
-		this.relogin_btn = DomHelper.bySelector("#relogin_btn"); // 重新登录按钮
-		this.login_out_btn = DomHelper.bySelector("#login_out_btn"); // 退出登录按钮
-		// 考勤状态
-		this.check_in_out_label = DomHelper.bySelector("#check_in_out_label"); // 考勤打卡状态
-		this.check_in_btn = DomHelper.bySelector("#check_in_btn"); // 打卡按钮
-		this.check_out_btn = DomHelper.bySelector("#check_out_btn"); // 下班按钮
-		// 工作状态
-		this.meal_working_status_label = DomHelper.bySelector("#meal_working_status_label"); // 工作状态
-		this.meal_working_status_btn = DomHelper.bySelector("#meal_working_status_btn"); // 切换状态按钮
-		// 任务线
-		this.current_time_line_task_start_btn = DomHelper.bySelector("#current_time_line_task_start_btn"); // 开始W2任务按钮
-		this.current_time_line_task_stop_btn = DomHelper.bySelector("#current_time_line_task_stop_btn"); // 停止W2任务按钮
-		// 任务开关
-		this.current_time_line_task_turn_on_off_i = DomHelper.bySelector("#current_time_line_task_turn_on_off_i"); // 任务开关图标
-		// 待优化, 图标全部改成font-awesome图标
-		this.current_time_line_task_icon_0 = DomHelper.bySelector("#current_time_line_task_icon_0"); // 任务1图标
-		this.current_time_line_task_icon_1 = DomHelper.bySelector("#current_time_line_task_icon_1"); // 任务2图标
-		this.current_time_line_task_icon_2 = DomHelper.bySelector("#current_time_line_task_icon_2"); // 任务3图标
-		this.current_time_line_task_icon_3 = DomHelper.bySelector("#current_time_line_task_icon_3"); // 任务4图标
-		this.current_time_line_task_label_0 = DomHelper.bySelector("#current_time_line_task_label_0"); // 任务1标签
-		this.current_time_line_task_label_1 = DomHelper.bySelector("#current_time_line_task_label_1"); // 任务2标签
-		this.current_time_line_task_label_2 = DomHelper.bySelector("#current_time_line_task_label_2"); // 任务3标签
-		this.current_time_line_task_label_3 = DomHelper.bySelector("#current_time_line_task_label_3"); // 任务4标签
-		// 排班列表
-		this.calendar_loading = DomHelper.bySelector("#calendar_loading");
-		this.calendar_label = DomHelper.bySelector("#calendar_label"); // 日历月份
-		this.calendar_title = DomHelper.bySelector("#calendar_title"); // 日历标题
-		this.calendar_table = DomHelper.bySelector("#calendar_table"); // 日历主体
-		this.prev_month_btn = DomHelper.bySelector("#prev_month_btn"); // 查看上个月排班按钮
-		this.next_month_btn = DomHelper.bySelector("#next_month_btn"); // 查看下个月排班按钮
-		// 抽调申请
-		this.apply_activity_transfer_btn = DomHelper.bySelector("#apply_activity_transfer_btn"); // 申请抽调按钮
-		this.apply_activity_transfer_type_div = DomHelper.bySelector("#apply_activity_transfer_type_div"); // 申请抽调类型
-		this.apply_activity_transfer_type_label = DomHelper.bySelector("#apply_activity_transfer_type_label"); // 申请抽调类型标签
-		this.apply_activity_transfer_type_ul = DomHelper.bySelector("#apply_activity_transfer_type_ul"); // 申请抽调类型列表
-		this.apply_activity_transfer_time_text = DomHelper.bySelector("#apply_activity_transfer_time_text"); // 申请抽调时间
-		this.apply_activity_transfer_momo_text = DomHelper.bySelector("#apply_activity_transfer_momo_text"); // 申请抽调备注
-		this.info_message_box = DomHelper.bySelector("#info_message_box"); // 信息提示框
-		this.error_message_box = DomHelper.bySelector("#error_message_box"); // 错误提示框
-		// 抽调列表
-		this.apply_activity_transfer_loading = DomHelper.bySelector("#apply_activity_transfer_loading"); // 加载图标
-		this.apply_activity_transfer_label = DomHelper.bySelector("#apply_activity_transfer_label"); // 申请抽调列表标签
-		this.apply_activity_transfer_table = DomHelper.bySelector("#apply_activity_transfer_table"); // 申请抽调列表表格
-		this.apply_activity_transfer_prev_page_btn = DomHelper.bySelector("#apply_activity_transfer_prev_page_btn"); // 抽调列表上一页按钮
-		this.apply_activity_transfer_next_page_btn = DomHelper.bySelector("#apply_activity_transfer_next_page_btn"); // 抽调列表下一页按钮
-		this.apply_activity_transfer_refresh_page_btn = DomHelper.bySelector("#apply_activity_transfer_refresh_page_btn"); // 抽调列表刷新按钮
+		
+		this.initValue();
+	}
+	initValue() {
+		this.domMap = W2Global.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
+		});
 	}
 	// 登录W2
 	static async login() {
 		if (await W2.isLoginStatus()) {
-			Global.config.w2.login_status = W2.status.login_success;
+			W2Global.status.login = W2.status.login_success;
 			this.log.log("W2已登录, 无需重复登录");
 			W2.loginCheck();
 			return;
 		}
 		let result;
 		this.log.log("正在进行登录W2操作...");
-		Global.config.w2.login_status = W2.status.logining;
+		W2Global.status.login = W2.status.logining;
 		result = await W2Request.getVerifyCode(); // 直接返回状态信息
-		this.log.debug("getVerifyCode: ", result);
 		if (result.code !== 200) {
-			Global.config.w2.login_status = W2.status.login_failed;
+			W2Global.status.login = W2.status.login_failed;
 			this.log.error("获取验证码失败, 请检查账户信息");
 			return;
 		}
@@ -503,13 +452,12 @@ class W2 extends Page {
 		// await System.sleepSeconds(5);
 		result = await ApiboxRequest.getEmailApi();
 		if (result.code !== 200) {
-			Global.config.w2.login_status = W2.status.login_failed;
+			W2Global.status.login = W2.status.login_failed;
 			this.log.error("获取邮件失败, 请检查邮箱API信息");
 			return;
 		}
-		this.log.debug("邮箱API结果: ", result);
-		// Global.config.w2.email_api_verify_code = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
-		Global.config.w2.email_api_verify_code = "000000";
+		// W2Global.cache.information.mail_address = result.data.data[0].content.match(new RegExp("\\d{6}", "g"))[0];
+		W2Global.cache.information.mail_address = "000000";
 		this.log.log("正在登录");
 		await W2Request.login();
 		this.log.log("获取心跳");
@@ -521,7 +469,7 @@ class W2 extends Page {
 	static async isLoginStatus() {
 		let result = await W2Request.loginCheck();
 		if (result.code === 200) {
-			Global.config.w2.token = result.data.token;
+			W2Global.cache.cookie.token = result.data.token;
 			return true;
 		} else {
 			return false;
@@ -532,11 +480,11 @@ class W2 extends Page {
 		let result = await W2Request.loginCheck();
 		this.log.log("result: ", result);
 		if (result.code === 200) {
-			Global.config.w2.token = result.data.token;
-			Global.config.w2.login_status = W2.status.login_success;
+			W2Global.cache.cookie.token = result.data.token;
+			W2Global.status.login = W2.status.login_success;
 		} else {
 			this.log.error("Token失效, 请重新登录");
-			Global.config.w2.login_status = W2.status.login_failed;
+			W2Global.status.login = W2.status.login_failed;
 		}
 	}
 	bindEvents() {
@@ -555,8 +503,7 @@ class W2 extends Page {
 			this.calendar_label.innerText = W2.status.unknown;
 			this.calendar_table.innerHTML = "";
 
-			Global.config.w2.login_status = W2.status.not_login;
-			Global.config.w2.token_check_task = false;
+			W2Global.status.login = W2.status.not_login;
 		});
 		this.meal_working_status_btn.addEventListener("click", async () => {
 			if (meal_working_status_label.innerText === "正在标注") {
@@ -582,11 +529,11 @@ class W2 extends Page {
 			await W2.stopAllTask();
 		});
 		this.prev_month_btn.addEventListener("click", async () => {
-			Global.value.month--;
+			W2Global.setting.calendar.month--;
 			await this.calendarTask();
 		});
 		this.next_month_btn.addEventListener("click", async () => {
-			Global.value.month++;
+			W2Global.setting.calendar.month++;
 			await this.calendarTask();
 		});
 		// 申请抽调按钮
@@ -594,8 +541,6 @@ class W2 extends Page {
 			let typeLabel = this.apply_activity_transfer_type_label.innerText;
 			let timeText = this.apply_activity_transfer_time_text.value;
 			let momoText = this.apply_activity_transfer_momo_text.value;
-			// Global.config.w2.apply_activity_transfer_time = this.apply_activity_transfer_time_text.value;
-			// Global.config.w2.apply_activity_transfer_momo = this.apply_activity_transfer_momo_text.value;
 			if (!FormatValidation.validateTime(timeText)) {
 				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "时间格式错误, 请重新输入";
 				this.error_message_box.classList.remove("hidden");
@@ -612,8 +557,8 @@ class W2 extends Page {
 				this.apply_activity_transfer_momo_text.classList.add("border-red-500");
 				return;
 			}
-			Global.config.w2.apply_activity_transfer_time = this.apply_activity_transfer_time_text.value;
-			Global.config.w2.apply_activity_transfer_momo = this.apply_activity_transfer_momo_text.value;
+			W2Global.cache.applyActivityTransfer.time = this.apply_activity_transfer_time_text.value;
+			W2Global.cache.applyActivityTransfer.momo = this.apply_activity_transfer_momo_text.value;
 			let result;
 			if (typeLabel === "抽调质检") {
 				result = await W2Request.qualityInspection();
@@ -637,11 +582,11 @@ class W2 extends Page {
 		});
 		// 抽调列表
 		this.apply_activity_transfer_prev_page_btn.addEventListener("click", async () => {
-			Global.value.apply_approval_transfer_list_page--;
+			W2Global.setting.applyActivityTransferList.page--;
 			await this.applyActivityTransferList();
 		});
 		this.apply_activity_transfer_next_page_btn.addEventListener("click", async () => {
-			Global.value.apply_approval_transfer_list_page++;
+			W2Global.setting.applyActivityTransferList.page++;
 			await this.applyActivityTransferList();
 		});
 		this.apply_activity_transfer_refresh_page_btn.addEventListener("click", async () => {
@@ -657,49 +602,49 @@ class W2 extends Page {
 					
 				},
 				intervalMs: 3000,
-				name: "W2_LOGIN_STATUS_TASK",
+				name: W2Global.task.uiTask.login
 			},
 			{
 				action: async () => {
 					this.workingStatusTask();
 				},
 				intervalMs: 3000,
-				name: "W2_WORKING_STATUS_TASK",
+				name: W2Global.task.uiTask.working
 			},
 			{
 				action: async () => {
 					this.workHourStatusTask();
 				},
 				intervalMs: 3000,
-				name: "W2_WORK_HOUR_STATUS_TASK",
+				name: W2Global.task.uiTask.workHour
 			},
 			{
 				action: async () => {
 					this.currentTimeLineTask();
 				},
 				intervalMs: 3000,
-				name: "W2_CURRENT_TIME_LINE_TASK",
+				name: W2Global.task.uiTask.currentTimeLine
 			},
 			{
 				action: async () => {
 					this.personalStatusTask();
 				},
 				intervalMs: 3000,
-				name: "W2_PERSONAL_STATUS_TASK",
+				name: W2Global.task.uiTask.personal
 			},
 			{
 				action: async () => {
 					this.calendarTask();
 				},
 				intervalMs: 1000 * 10,
-				name: "W2_CALENDAR_TASK",
+				name: W2Global.task.uiTask.calendar
 			},
 			{
 				action: async () => {
 					this.applyActivityTransferList();
 				},
 				intervalMs: 1000 * 10,
-				name: "W2_APPLY_ACTIVITY_TRANSFER_LIST_TASK",
+				name: W2Global.task.uiTask.applyActivityTransferList
 			},
 		]
 		task.forEach(cofig => {
@@ -727,10 +672,9 @@ class W2 extends Page {
 			this.log.error("获取工作状态失败, 请检查是否登录");
 			return false;
 		}
-		loginInformat.loginStatus = Global.config.w2.login_status;
+		loginInformat.loginStatus = W2Global.status.login;
 		loginInformat.workingStatus = getPersonalInformatResult.data.working_status;
 		loginInformat.workHourStatus = getPersonalInformatResult.data.work_hour_status;
-		this.log.debug("登录信息: ", loginInformat);
 		return loginInformat;
 	}
 	// 常驻的提示栏
@@ -752,16 +696,16 @@ class W2 extends Page {
 	}
 	// 每三秒更新一次考勤状态和工作状态
 	async personalStatusTask() {
-		if (Global.config.w2.login_status === W2.status.login_success) {
-			Global.config.w2.personal_informat = await W2Request.getPersonalInformat();
+		if (W2Global.status.login === W2.status.login_success) {
+			W2Global.cache.information.informat = await W2Request.getPersonalInformat();
 		}
 	}
 	// 更新抽调列表
 	async applyActivityTransferList() {
 		const apply_activity_transfer_loading = this.apply_activity_transfer_loading;
 		let result = await W2Request.getApplyApprovalList();
-		if (Global.config.w2.login_status === W2.status.login_success && result.code === 200) {
-			if (Global.value.apply_approval_transfer_list_page <= 1) {
+		if (W2Global.status.login === W2.status.login_success && result.code === 200) {
+			if (W2Global.setting.applyActivityTransferList.page <= 1) {
 				this.apply_activity_transfer_prev_page_btn.disabled = true;
 				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.add('opacity-50');
 				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.add('text-gray-400');
@@ -770,7 +714,7 @@ class W2 extends Page {
 				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.remove('opacity-50');
 				DomHelper.bySelectorFromParent(this.apply_activity_transfer_prev_page_btn, "i").classList.remove('text-gray-400');
 			}
-			if (Global.value.apply_approval_transfer_list_page >= 3) {
+			if (W2Global.setting.applyActivityTransferList.page >= 3) {
 				this.apply_activity_transfer_next_page_btn.disabled = true;
 				DomHelper.bySelectorFromParent(this.apply_activity_transfer_next_page_btn, "i").classList.add('opacity-50');
 				DomHelper.bySelectorFromParent(this.apply_activity_transfer_next_page_btn, "i").classList.add('text-gray-400');
@@ -835,16 +779,16 @@ class W2 extends Page {
 	}
 	// 登录选项卡的状态显示
 	async loginStatusTask() {
-		this.login_status_label.innerText = Global.config.w2.login_status || "--";
+		this.login_status_label.innerText = W2Global.status.login || "--";
 	}
 	// 考勤打卡选项卡的状态显示
 	async workingStatusTask() {
-		if (Global.config.w2.login_status === W2.status.login_success){
-			if (Global.config.w2.personal_informat === null) {
+		if (W2Global.status.login === W2.status.login_success){
+			if (W2Global.cache.information.informat === null) {
 				
-			} else if (Global.config.w2.personal_informat.code === 200) {
+			} else if (W2Global.cache.information.informat.code === 200) {
 				// 使用的是 workingStatus 中的键值
-				this.check_in_out_label.innerText = W2.workingStatus[Global.config.w2.personal_informat.data.working_status] || W2.status.unknown;
+				this.check_in_out_label.innerText = W2.workingStatus[W2Global.cache.information.informat.data.working_status] || W2.status.unknown;
 			} else {
 				this.check_in_out_label.innerText = W2.status.unknown;
 			}
@@ -853,11 +797,11 @@ class W2 extends Page {
 		}
 	}
 	async workHourStatusTask() {
-		if (Global.config.w2.login_status === W2.status.login_success) {
-			if (Global.config.w2.personal_informat === null) {
+		if (W2Global.status.login === W2.status.login_success) {
+			if (W2Global.cache.information.informat === null) {
 
-			} else if (Global.config.w2.personal_informat.code === 200) {
-				this.meal_working_status_label.innerText = W2.workHourStatus[Global.config.w2.personal_informat.data.work_hour_status] || W2.status.unknown;
+			} else if (W2Global.cache.information.informat.code === 200) {
+				this.meal_working_status_label.innerText = W2.workHourStatus[W2Global.cache.information.informat.data.work_hour_status] || W2.status.unknown;
 			} else {
 				this.meal_working_status_label.innerText = W2.status.unknown;
 			}
@@ -867,7 +811,7 @@ class W2 extends Page {
 	}
 	// 时间线任务
 	async currentTimeLineTask() {
-		if (Global.config.w2.login_status === W2.status.login_success) {
+		if (W2Global.status.login === W2.status.login_success) {
 			if (TimerScheduler.hasTask(Global.w2_TaskConfig.W2_CHECK_IN_TASK)) {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
 			} else {
@@ -877,7 +821,8 @@ class W2 extends Page {
 				const icon = this["current_time_line_task_icon_" + i];
 				const label = this["current_time_line_task_label_" + i];
 				// currentTask的值是currentTaskStatus枚举体中的键值, 由间隔任务currentTask()变更
-				if (label.innerText === Global.config.w2.current_time_line_task_status) {
+				
+				if (label.innerText === W2Global.status.current_time_line) {
 					icon.classList.replace("text-blue-600", "text-green-600");
 				} else {
 					icon.classList.replace("text-green-600", "text-blue-600");
@@ -956,14 +901,14 @@ class W2 extends Page {
 	// 判断今天是否是休息日
 	static async isTodayOff() {
 		// 保存当前月份，避免副作用
-		const prevMonth = Global.value.month;
-		Global.value.month = Time.getCurrentMonth();
+		const prevMonth = W2Global.setting.calendar.month;
+		W2Global.setting.calendar.month = Time.getCurrentMonth();
 
 		// 获取当前月份的排班数据
 		const scheduleResult = await W2Request.queryPersonalSchedule();
 
 		// 恢复原月份
-		Global.value.month = prevMonth;
+		W2Global.setting.calendar.month = prevMonth;
 
 		// 基础数据校验
 		if (!scheduleResult || !scheduleResult.data || 
@@ -998,12 +943,12 @@ class W2 extends Page {
 	async calendarTask() {
 		const calendar_loading = this.calendar_loading;
 		let result = await W2Request.queryPersonalSchedule();
-		if (Global.config.w2.login_status === W2.status.login_success && result.code === 200) {
+		if (W2Global.status.login === W2.status.login_success && result.code === 200) {
 			// 日历标题
-			calendar_label.innerText = Time.getCurrentYear() + " 年 " + Global.value.month + " 月";
+			calendar_label.innerText = Time.getCurrentYear() + " 年 " + W2Global.setting.calendar.month + " 月";
 
 			// 下个月按钮
-			if (Global.value.month >= Time.getCurrentMonth()) {
+			if (W2Global.setting.calendar.month >= Time.getCurrentMonth()) {
 				this.next_month_btn.classList.add('opacity-50', 'pointer-events-none', 'text-gray-400');
 				DomHelper.bySelectorFromParent(this.next_month_btn, "i").classList.add('text-gray-400');
 			} else {
@@ -1012,7 +957,7 @@ class W2 extends Page {
 			}
 
 			// 上个月按钮
-			if (Global.value.month <= 1) {
+			if (W2Global.setting.calendar.month <= 1) {
 				this.prev_month_btn.classList.add('opacity-50', 'pointer-events-none', 'text-gray-400');
 				DomHelper.bySelectorFromParent(this.prev_month_btn, "i").classList.add('text-gray-400');
 			} else {
@@ -1061,7 +1006,7 @@ class W2 extends Page {
 			// 生成每一天日期
 			for (let d = 1; d <= lastDate; d++) {
 				const dateDiv = DomHelper.createDom('div');
-				const current = new Date(Time.getCurrentYear(), Global.value.month - 1, d);
+				const current = new Date(Time.getCurrentYear(), W2Global.setting.calendar.month - 1, d);
 				dateDiv.id = `calendar_date_${d}`;
 				dateDiv.textContent = d;
 
@@ -1075,7 +1020,7 @@ class W2 extends Page {
 					"text-center"
 				);
 
-				const formattedDate = Time.formatDate(Time.getCurrentYear(), Global.value.month, d);
+				const formattedDate = Time.formatDate(Time.getCurrentYear(), W2Global.setting.calendar.month, d);
 				const daySchedule = scheduleInfos[formattedDate];
 
 				// 状态判断并添加样式
@@ -1112,7 +1057,7 @@ class W2 extends Page {
 					await W2.loginCheck() 
 				},
 				intervalMs: 60 * 1000,
-				name: "W2_LOGIN_CHECK_TASK"
+				name: W2Global.task.intervalTask.loginCheck
 			}
 		]
 		task.forEach(config => {
@@ -1128,56 +1073,56 @@ class W2 extends Page {
 	static async currentTask() {
 		const task = [
 			{
-				start: Global.config.w2.time_range_login_start,
-				end: Global.config.w2.time_range_login_end,
+				start: W2Global.setting.time_range_login_start,
+				end:  W2Global.setting.time_range_login_end,
 				action: async () => { 
 					await W2.login() 
 				},
-				name: Global.w2_TaskConfig.W2_LOGIN_TASK
+				name: W2Global.task.dailyTask.login
 			},
 			{
-				start: Global.config.w2.time_range_check_in_start,
-				end: Global.config.w2.time_range_check_in_end,
+				start:  W2Global.setting.time_range_check_in_start,
+				end:  W2Global.setting.time_range_check_in_end,
 				action: async () => { 
 					await W2Request.checkIn();
-					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.workIn;
+					W2Global.status.current_time_line = W2.currentTaskStatus.workIn;
 				},
-				name: Global.w2_TaskConfig.W2_CHECK_IN_TASK
+				name: W2Global.task.dailyTask.chinekIn
 			},
 			{
-				start: Global.config.w2.time_range_meal_start,
-				end: Global.config.w2.time_range_meal_end,
+				start:  W2Global.setting.time_range_meal_start,
+				end:  W2Global.setting.time_range_meal_end,
 				action: async () => { 
 					await W2Request.meal();
-					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.meal;
+					W2Global.status.current_time_line = W2.currentTaskStatus.meal;
 				},
-				name: Global.w2_TaskConfig.W2_MEAL_TASK
+				name: W2Global.task.dailyTask.meal
 			},
 			{
-				start: Global.config.w2.time_range_working_start,
-				end: Global.config.w2.time_range_working_end,
+				start:  W2Global.setting.time_range_working_start,
+				end:  W2Global.setting.time_range_working_end,
 				action: async () => { 
 					await W2Request.working();
-					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.working;
+					W2Global.status.current_time_line = W2.currentTaskStatus.working;
 				},
-				name: Global.w2_TaskConfig.W2_WORKING_TASK
+				name: W2Global.task.dailyTask.working
 			},
 			{
-				start: Global.config.w2.time_range_check_out_start,
-				end: Global.config.w2.time_range_check_out_end,
+				start:  W2Global.setting.time_range_check_out_start,
+				end:  W2Global.setting.time_range_check_out_end,
 				action: async () => { 
 					await W2Request.checkOut();
-					Global.config.w2.current_time_line_task_status = W2.currentTaskStatus.workOut;
+					W2Global.status.current_time_line = W2.currentTaskStatus.workOut;
 				},
-				name: Global.w2_TaskConfig.W2_CHECK_OUT_TASK
+				name: W2Global.task.dailyTask.checkOut
 			},
 			{
-				start: Global.config.w2.time_range_login_out_start,
-				end: Global.config.w2.time_range_login_out_end,
+				start:  W2Global.setting.time_range_login_out_start,
+				end:  W2Global.setting.time_range_login_out_end,
 				action: async () => { 
 					await W2Request.loginOut(); 
 				},
-				name: Global.w2_TaskConfig.W2_LOGIN_OUT_TASK
+				name: W2Global.task.dailyTask.loginOut
 			}
 		];
 
@@ -1242,15 +1187,6 @@ class QLabel extends Page {
 	}
 }
 class LS extends Page {
-	static status = {
-		login_success: "登录成功",
-		login_failed: "登录失败",
-		login_out: "已登出",
-		not_loginfill_daily_report: "未打卡",
-		already_fill_daily_report: "已打卡",
-		failed_fill_daily_report: "打卡失败", // 打卡失败
-		unknown: "--"
-	};
 
 	constructor() {
 		super();
@@ -1259,35 +1195,31 @@ class LS extends Page {
 		this.updateUIElement();
 	}
 	async init() {
-		// 登录状态
-		this.login_btn = DomHelper.bySelector("#login_btn"); // 登录按钮
-		this.login_out_btn = DomHelper.bySelector("#login_out_btn"); // 登录状态标签
-		this.login_status_label = DomHelper.bySelector("#login_status_label"); // 签到签出标签
-		// 打卡状态
-		this.fill_daily_report_btn = DomHelper.bySelector("#fill_daily_report_btn"); // 打卡按钮
-		this.fill_daily_report_label = DomHelper.bySelector("#fill_daily_report_label"); // 打卡状态标签
-		// 日报列表
-		this.daily_report_list_loading = DomHelper.bySelector("#daily_report_list_loading");
-		this.daily_report_list_label = DomHelper.bySelector("#daily_report_list_label"); // 日报列表标题
-		this.daily_report_list_table = DomHelper.bySelector("#daily_report_list_table"); // 日报列表表格
+		this.initValue();
+	}
+	initValue() {
+		this.domMap = LSGlobal.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
+		});
 	}
 	// 登录
 	static async login() {
 		// 从这里继续, 写ls的登录逻辑
-		if (Global.config.ls.user_name == null && Global.config.ls.user_password === null) {
+		if (LSGlobal.cache.information.name == null && LSGlobal.cache.information.password === null) {
 			this.log.error("LS用户名或密码为失效");
-			Global.config.ls.login_status = LS.status.login_failed;
+			LSGlobal.status.login = LSGlobal.statusMap.loginStatus.failed;
 			return;
 		}
 		const result = await LSRequest.login();
 		if (result.code === 200) {
 			this.log.log("LS登录成功");
-			Global.config.ls.login_status = LS.status.login_success;
+			LSGlobal.status.login = LSGlobal.statusMap.loginStatus.success;
 		} else {
 			this.log.error("LS登录失败");
-			Global.config.ls.login_status = LS.status.login_failed;
+			LSGlobal.status.login = LSGlobal.statusMap.loginStatus.failed;
 		}
-		if (Global.config.ls.sub_task_id === null) {
+		if (LSGlobal.cache.cookie.sub_task_id === null) {
 			let result = await LSRequest.getPersonalInformat();
 			if (result.code === 200) {
 				this.log.log("获取项目工作区信息成功");
@@ -1295,7 +1227,7 @@ class LS extends Page {
 				this.log.error("LS -> login() -> 获取项目工作区信息失败");
 			}
 		}
-		if (Global.config.ls.user_id === null || Global.config.ls.task_id === null) {
+		if (LSGlobal.cache.cookie.id === null || LSGlobal.cache.cookie.task_id === null) {
 			let result = await LSRequest.getInfo();
 			if (result.code === 200) {
 				this.log.log("获取个人信息成功");
@@ -1307,7 +1239,7 @@ class LS extends Page {
 	// 退出登录
 	static async loginOut() {
 		await LSRequest.loginOut();
-		Global.config.ls.login_status = LS.status.login_out;
+		LSGlobal.status.login = LSGlobal.statusMap.loginStatus.out;
 	}
 	// 心跳 如果LS的掉线了再做
 	static async loginCheck() {
@@ -1329,7 +1261,7 @@ class LS extends Page {
 		});
 		this.login_out_btn.addEventListener("click", async () => {
 			await LS.loginOut();
-			Global.config.ls.login_status = LS.status.login_out;
+			LSGlobal.status.login = LSGlobal.statusMap.loginStatus.out;
 		});
 		this.fill_daily_report_btn.addEventListener("click", async () => {
 			await LS.fillDailyReport();
@@ -1338,22 +1270,23 @@ class LS extends Page {
 	// 刷新UI
 	async updateUIElement() {
 		// 登录状态UI
-		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 3000, Global.ls_TaskConfig.LS_LOGIN_STATUS_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 3000, LSGlobal.task.uiTask.login);
 		// 刷新日报列表的任务
-		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 3000, Global.ls_TaskConfig.LS_GET_DAILY_REPORT_LIST_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 3000, LSGlobal.task.uiTask.getDailyReportList);
 		// 打卡任务UI
-		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 3000, Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_STATUS_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 3000, LSGlobal.task.uiTask.fillDailyReportStatus);
 		// 日报列表UI
-		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 3000, Global.ls_TaskConfig.LS_DAILY_REPORT_LIST_STATUS_TASK);
+		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 3000, LSGlobal.task.uiTask.dailyReportList);
 	}
 	// 登录状态刷新
 	async loginStatus() {
-		this.login_status_label.innerText = Global.config.ls.login_status;
+		this.login_status_label.innerText = LSGlobal.status.login;
 	}
 	async getDailyReportList() {
 		let result = await LSRequest.getDailyReportList();
 		if (result.code === 200) {
-			Global.config.ls.daily_report_list = result;
+			
+			LSGlobal.cache.dailyReport.list = result;
 		} else {
 			this.log.error("LS -> getDailyReportList -> 获取日报列表失败");
 		}
@@ -1361,24 +1294,24 @@ class LS extends Page {
 	// 日报打卡状态
 	async fillDailyReportStatus() {
 		// 如果检测到当天的记录, 就更新打卡成功
-		let result = Global.config.ls.daily_report_list;
+		let result = LSGlobal.cache.dailyReport.list;
 		if (result === null) {
 			return;
 		}
 		if (result.code === 200) {
 			if (Time.isSameDay(result.rows[0].recordTime, Time.getCurrentDate())) {
-				this.fill_daily_report_label.innerText = LS.status.already_fill_daily_report;
+				this.fill_daily_report_label.innerText = LSGlobal.statusMap.dailyReportStatus.already;
 			} else {
-				this.fill_daily_report_label.innerText = LS.status.not_loginfill_daily_report;
+				this.fill_daily_report_label.innerText = LSGlobal.statusMap.dailyReportStatus.not;
 			}
 		} else {
-			this.fill_daily_report_label.innerText = LS.status.unknown;
+			this.fill_daily_report_label.innerText = LSGlobal.statusMap.unknown;
 		}
 	}
 	// 日报列表
 	async dailyReportList() {
 		const daily_report_list_loading = this.daily_report_list_loading;
-		let result = Global.config.ls.daily_report_list;
+		let result = LSGlobal.cache.dailyReport.list;
 		if (result === null) {
 			return;
 		}
@@ -1451,8 +1384,7 @@ class LS extends Page {
 	}
 	// 清除打卡状态
 	async clearDailyReportStatus() {
-		Global.config.ls.login_status = LS.status.unknown;
-		Global.config.ls.fill_daily_report_status = LS.status.unknown;
+		LSGlobal.status.login = LSGlobal.statusMap.unknown;
 	}
 	// 定时任务
 	static async currentTask() {
@@ -1463,24 +1395,26 @@ class LS extends Page {
 		// time_range_login_out_end: "18:35", 
 		// time_range_fill_daily_report_start: "17:00",
 		// time_range_fill_daily_report_end: "17:00",
+		
+		LSGlobal.setting.time_range_login_start
 		const taskConfigs = [
 			{
-				start: Global.config.ls.time_range_login_start,
-				end: Global.config.ls.time_range_login_end,
+				start: LSGlobal.setting.time_range_login_start,
+				end: LSGlobal.setting.time_range_login_end,
 				action: async () => { await LS.login() },
-				name: Global.ls_TaskConfig.LS_LOGIN_TASK
+				name: LSGlobal.task.dailyTask.login
 			},
 			{
-				start: Global.config.ls.time_range_login_out_start,
-				end: Global.config.ls.time_range_login_out_end,
+				start: LSGlobal.setting.time_range_login_out_start,
+				end: LSGlobal.setting.time_range_login_out_end,
 				action: async () => { await LS.loginOut() },
-				name: Global.ls_TaskConfig.LS_LOGIN_OUT_TASK
+				name: LSGlobal.task.dailyTask.loginOut
 			},
 			{
-				start: Global.config.ls.time_range_fill_daily_report_start,
-				end: Global.config.ls.time_range_fill_daily_report_end,
+				start: LSGlobal.setting.time_range_fill_daily_report_start,
+				end: LSGlobal.setting.time_range_fill_daily_report_end,
 				action: async () => { await LS.fillDailyReport() },
-				name: Global.ls_TaskConfig.LS_FILL_DAILY_REPORT_TASK
+				name: LSGlobal.task.dailyTask.fillDailyReport
 			}
 		]
 		if (!await W2.isTodayOff()) {
@@ -1558,10 +1492,9 @@ class Setting extends Page {
 	}
 	bindEvents() {
 		this.api_box_user_test_account_setting_button.addEventListener("click", async () => {
-			Global.config.apibox.user_id = this.api_box_user_id_account_setting_input.value;
-			Global.config.apibox.api_key = this.api_box_api_key_account_setting_input.value;
+			ApiboxGlobal.cache.information.id= this.api_box_user_id_account_setting_input.value;
+			ApiboxGlobal.cache.information.key = this.api_box_api_key_account_setting_input.value;
 			let result = await ApiboxRequest.getInfo(); // 直接返回状态信息
-			this.log.debug("getInfo: ", result);
 			this.updateStatusUI({
 				box: this.api_box_account_setting_message_box,
 				inputs: [
@@ -1574,46 +1507,43 @@ class Setting extends Page {
 				: "错误代码: " + result.code + " " + result.msg
 			});
 			if (!result.code === 200) {
-				Global.config.apibox.user_id = null;
-				Global.config.apibox.api_key = null;
+				ApiboxGlobal.cache.information.id= null;
+				ApiboxGlobal.cache.information.key = null;
 			}
 		});
-		if (DomHelper.exists(this.w2_user_test_account_setting_button)) {
-			this.w2_user_test_account_setting_button.addEventListener("click", async () => {
-				Global.config.w2.user_name = this.w2_user_name_account_setting_input.value;
-				Global.config.w2.user_password = this.w2_user_password_account_setting_input.value;
-				let result = await W2Request.getVerifyCode(); // 直接返回状态信息
-				this.log.debug("getVerifyCode: ", result);
-				this.updateStatusUI({
-					box: this.api_box_account_setting_message_box,
-					inputs: [
-						this.w2_user_name_account_setting_input,
-						this.w2_user_password_account_setting_input
-					],
-					success: result.code === 200,
-					message: result.code === 200
-						? "W2连通性测试无误, 已为邮箱发送验证码"
-						: result.code === 5000
-							? "W2账号信息错误"
-							: "其他未知错误, 请重试"
-				});
-				if (result.code !== 200) {
-					Global.config.w2.user_name = null;
-					Global.config.w2.user_password = null;
-				}
+		this.w2_user_test_account_setting_button.addEventListener("click", async () => {
+			
+			W2Global.cache.information.name = this.w2_user_name_account_setting_input.value;
+			W2Global.cache.information.password = this.w2_user_password_account_setting_input.value;
+			let result = await W2Request.getVerifyCode(); // 直接返回状态信息
+			this.updateStatusUI({
+				box: this.w2_account_setting_message_box,
+				inputs: [
+					this.w2_user_name_account_setting_input,
+					this.w2_user_password_account_setting_input
+				],
+				success: result.code === 200,
+				message: result.code === 200
+					? "W2连通性测试无误, 已为邮箱发送验证码"
+					: result.code === 5000
+						? "W2账号信息错误"
+						: "其他未知错误, 请重试"
 			});
-		}
+			if (result.code !== 200) {
+				W2Global.cache.information.name = null;
+				W2Global.cache.information.password = null;
+			}
+		});
 		if (DomHelper.exists(this.w2_email_api_test_account_setting_button)) {
 			this.w2_email_api_test_account_setting_button.addEventListener("click", async () => {
 				// 先设置 W2 和 API Box 输入值到 config
-				Global.config.apibox.user_id = this.api_box_user_id_account_setting_input.value;
-				Global.config.apibox.api_key = this.api_box_api_key_account_setting_input.value;
-				Global.config.w2.email_api_address = this.w2_email_api_address_account_setting_input.value;
-				Global.config.w2.email_api_pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
+				ApiboxGlobal.cache.information.id= this.api_box_user_id_account_setting_input.value;
+				ApiboxGlobal.cache.information.key = this.api_box_api_key_account_setting_input.value;
+				W2Global.cache.information.address = this.w2_email_api_address_account_setting_input.value;
+				W2Global.cache.information.pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 
 				// 第一次接口：验证 Apibox
 				let result = await ApiboxRequest.getInfo();
-				this.log.debug("getInfo: ", result);
 
 				if (result.code !== 200) {
 					this.updateStatusUI({
@@ -1628,16 +1558,15 @@ class Setting extends Page {
 						message: "Apibox通讯ID与密钥错误"
 					});
 
-					Global.config.apibox.user_id = null;
-					Global.config.apibox.api_key = null;
-					Global.config.w2.email_api_address = null;
-					Global.config.w2.email_api_pop3_auth_code = null;
+					ApiboxGlobal.cache.information.id= null;
+					ApiboxGlobal.cache.information.key = null;
+					W2Global.cache.information.address = null;
+					W2Global.cache.information.pop3_auth_code = null;
 					return;
 				}
 
 				// 第二次接口：验证 W2 邮箱 API
 				result = await ApiboxRequest.getEmailApi();
-				this.log.debug("getEmailApi: ", result);
 
 				const success = result.code === 200;
 				this.updateStatusUI({
@@ -1655,8 +1584,8 @@ class Setting extends Page {
 				});
 
 				if (!success) {
-					Global.config.w2.email_api_address = null;
-					Global.config.w2.email_api_pop3_auth_code = null;
+					W2Global.cache.information.address = null;
+					W2Global.cache.information.pop3_auth_code = null;
 				}
 			});
 		}
@@ -1737,14 +1666,36 @@ class Setting extends Page {
 			if (!hasError) {
 				// 保存配置
 				for (const field of timeFields) {
-					Global.config.w2[field.configStart] = field.startInput.value;
-					Global.config.w2[field.configEnd] = field.endInput.value;
+					W2Global.setting[field.configStart] = field.startInput.value;
+					W2Global.setting[field.configEnd] = field.endInput.value;
 				}
 				// 重新开始任务
 				await W2.currentTask();
 			}
 		});
 
+		this.ls_user_test_account_setting_button.addEventListener("click", async () => {
+			LSGlobal.cache.information.name = this.ls_user_name_account_setting_input.value;
+			LSGlobal.cache.information.password = this.ls_user_password_account_setting_input.value;
+	
+			let result = await LSRequest.login(); // 返回结果
+			this.updateStatusUI({
+				box: this.ls_account_setting_message_box,
+				inputs: [
+					this.ls_user_name_account_setting_input,
+					this.ls_user_password_account_setting_input
+				],
+				success: result.code === 200,
+				message: result.code === 200
+					? "LS连通性测试无误"
+					: "其他未知错误, 请重试"
+			});
+			if (!result.code === 200) {
+				LoginGlobal.cache.information.name = null;
+				LoginGlobal.cache.information.password = null;
+
+			}
+		})
 		if (DomHelper.exists(this.ls_time_range_validate_format_module_setting_button)) {
 			this.ls_time_range_validate_format_module_setting_button.addEventListener("click", async () => {
 				const timeFields = [
@@ -1801,66 +1752,52 @@ class Setting extends Page {
 				// 保存配置
 				if (!hasError) {
 					for (const field of timeFields) {
-						Global.config.ls[field.configStart] = field.startInput.value;
-						Global.config.ls[field.configEnd] = field.endInput.value;
+						LSGlobal.setting[field.configStart] = field.startInput.value;
+						LSGlobal.setting[field.configEnd] = field.endInput.value;
 					}
 				}
 			});
 		}
 	}
 	async updateUIElement() {
-		if (Global.config.apibox.user_id !== null && Global.config.apibox.api_key !== null) {
-			this.api_box_user_id_account_setting_input.value = Global.config.apibox.user_id;
-			this.api_box_api_key_account_setting_input.value = Global.config.apibox.api_key;
-		}
-		if (Global.config.w2.user_name !== null && Global.config.w2.user_password !== null) {
-			this.w2_user_name_account_setting_input.value = Global.config.w2.user_name;
-			this.w2_user_password_account_setting_input.value = Global.config.w2.user_password;
-		}
-		if (Global.config.w2.email_api_address !== null && Global.config.w2.email_api_pop3_auth_code !== null) {
-			this.w2_email_api_address_account_setting_input.value = Global.config.w2.email_api_address;
-			this.w2_email_api_pop3_auth_code_account_setting_input.value = Global.config.w2.email_api_pop3_auth_code;
-		}
-		if (Global.config.w2.time_range_login_start !== null && Global.config.w2.time_range_login_end !== null) {
-			this.w2_time_range_login_start_module_setting_input.value = Global.config.w2.time_range_login_start;
-			this.w2_time_range_login_end_module_setting_input.value = Global.config.w2.time_range_login_end;
-		}
-		if (Global.config.w2.time_range_login_out_start !== null && Global.config.w2.time_range_login_out_end !== null) {
-			this.w2_time_range_login_out_start_module_setting_input.value = Global.config.w2.time_range_login_out_start;
-			this.w2_time_range_login_out_end_module_setting_input.value = Global.config.w2.time_range_login_out_end;
-		}
-		if (Global.config.w2.time_range_check_in_start !== null && Global.config.w2.time_range_check_in_end !== null) {
-			this.w2_time_range_check_in_start_module_setting_input.value = Global.config.w2.time_range_check_in_start;
-			this.w2_time_range_check_in_end_module_setting_input.value = Global.config.w2.time_range_check_in_end;
-		}
-		if (Global.config.w2.time_range_check_out_start !== null && Global.config.w2.time_range_check_out_end !== null) {
-			this.w2_time_range_check_out_start_module_setting_input.value = Global.config.w2.time_range_check_out_start;
-			this.w2_time_range_check_out_end_module_setting_input.value = Global.config.w2.time_range_check_out_end;
-		} 
-		if (Global.config.w2.time_range_meal_start !== null && Global.config.w2.time_range_meal_end !== null) {
-			this.w2_time_range_meal_start_module_setting_input.value = Global.config.w2.time_range_meal_start;
-			this.w2_time_range_meal_end_module_setting_input.value = Global.config.w2.time_range_meal_end;
-		}
-		if (Global.config.w2.time_range_working_start !== null && Global.config.w2.time_range_working_end !== null) {
-			this.w2_time_range_working_start_module_setting_input.value = Global.config.w2.time_range_working_start;
-			this.w2_time_range_working_end_module_setting_input.value = Global.config.w2.time_range_working_end;
-		}
-		if (Global.config.ls.user_name !== null && Global.config.ls.user_password !== null) {
-			this.ls_user_name_account_setting_input.value = Global.config.ls.user_name;
-			this.ls_user_password_account_setting_input.value = Global.config.ls.user_password;
-		}
-		if (Global.config.ls.time_range_login_start !== null && Global.config.ls.time_range_login_end !== null) {
-			this.ls_time_range_login_start_module_setting_input.value = Global.config.ls.time_range_login_start;
-			this.ls_time_range_login_end_module_setting_input.value = Global.config.ls.time_range_login_end;
-		}
-		if (Global.config.ls.time_range_login_out_start !== null && Global.config.ls.time_range_login_out_end !== null) {
-			this.ls_time_range_login_out_start_module_setting_input.value = Global.config.ls.time_range_login_out_start;
-			this.ls_time_range_login_out_end_module_setting_input.value = Global.config.ls.time_range_login_out_end;
-		}
-		if (Global.config.ls.time_range_fill_daily_report_start !== null && Global.config.ls.time_range_fill_daily_report_end !== null) {
-			this.ls_time_range_fill_daily_report_start_module_setting_input.value = Global.config.ls.time_range_fill_daily_report_start;
-			this.ls_time_range_fill_daily_report_end_module_setting_input.value = Global.config.ls.time_range_fill_daily_report_end;
-		}
+		this.api_box_user_id_account_setting_input.value = ApiboxGlobal.cache.information.id;
+		this.api_box_api_key_account_setting_input.value = ApiboxGlobal.cache.information.key;
+
+		this.w2_user_name_account_setting_input.value = W2Global.cache.information.name;
+		this.w2_user_password_account_setting_input.value = W2Global.cache.information.password;
+
+		this.w2_email_api_address_account_setting_input.value = W2Global.cache.information.address;
+		this.w2_email_api_pop3_auth_code_account_setting_input.value = W2Global.cache.information.pop3_auth_code;
+
+		this.ls_user_name_account_setting_input.value = LSGlobal.cache.information.name;
+		this.ls_user_password_account_setting_input.value = LSGlobal.cache.information.password;
+
+		// W2 时间段设置
+		this.w2_time_range_login_start_module_setting_input.value = W2Global.setting.time_range_login_start;
+		this.w2_time_range_login_end_module_setting_input.value = W2Global.setting.time_range_login_end;
+
+		this.w2_time_range_login_out_start_module_setting_input.value = W2Global.setting.time_range_login_out_start;
+		this.w2_time_range_login_out_end_module_setting_input.value = W2Global.setting.time_range_login_out_end;
+
+		this.w2_time_range_check_in_start_module_setting_input.value = W2Global.setting.time_range_check_in_start;
+		this.w2_time_range_check_in_end_module_setting_input.value = W2Global.setting.time_range_check_in_end;
+
+		this.w2_time_range_check_out_start_module_setting_input.value = W2Global.setting.time_range_check_out_start;
+		this.w2_time_range_check_out_end_module_setting_input.value = W2Global.setting.time_range_check_out_end;
+
+		this.w2_time_range_meal_start_module_setting_input.value = W2Global.setting.time_range_meal_start;
+		this.w2_time_range_meal_end_module_setting_input.value = W2Global.setting.time_range_meal_end;
+
+		this.w2_time_range_working_start_module_setting_input.value = W2Global.setting.time_range_working_start;
+		this.w2_time_range_working_end_module_setting_input.value = W2Global.setting.time_range_working_end;
+
+		this.ls_time_range_login_start_module_setting_input.value = LSGlobal.setting.time_range_login_start;
+		this.ls_time_range_login_end_module_setting_input.value = LSGlobal.setting.time_range_login_end;
+		this.ls_time_range_login_out_start_module_setting_input.value = LSGlobal.setting.time_range_login_out_start;
+		this.ls_time_range_login_out_end_module_setting_input.value = LSGlobal.setting.time_range_login_out_end;
+		this.ls_time_range_fill_daily_report_start_module_setting_input.value = LSGlobal.setting.time_range_fill_daily_report_start;
+		this.ls_time_range_fill_daily_report_end_module_setting_input.value = LSGlobal.setting.time_range_fill_daily_report_end;
+		
 	}
 }
 // 界面逻辑
@@ -1872,7 +1809,6 @@ class Framework extends Page {
 		if (!DomHelper.exists("#user_avatar")) {
 			return;
 		}
-		FrameworkGlobal.init();
 		Framework.init();
 		Framework.updateUIElement();
 		Framework.addInteraction();
@@ -1880,6 +1816,7 @@ class Framework extends Page {
 	}
 	static async init() {
 		await this.initValue();
+		FrameworkGlobal.init();
 	}
 	static updateUIElement() {
 		this.avatarImg();
@@ -1999,30 +1936,37 @@ class Framework extends Page {
 		});
 	}
 	static async getNotice() {
-		const notice_btn = this.notice_btn;
 		const notice_i = this.notice_i;
 		const notice_div = this.notice_div;
 		const notice_label = this.notice_label;
-		const notice_time_label = this.notice_time_label;
-		let result = await JsonBinRequest.getNotice();
-		// result.record.notice
-		notice_label.innerText = FrameworkGlobal.cache.notice;
-		if (FrameworkGlobal.cache.notice !== result.record.notice) {
-			notice_label.innerText = result.record.notice;
-			notice_i.classList.remove("fa-bell");
-			notice_i.classList.add("fa-bell-ring");
-			notice_i.classList.add("fa-shake");
-			notice_div.classList.remove("hidden");
-		} else {
 
+		let result = await JsonBinRequest.getNotice();
+		let latest = result.record.notice;
+		let cached = FrameworkGlobal.cache.notice;
+
+		// 更新文字
+		notice_label.innerText = latest;
+
+		// 判断是否为新通知
+		let isNew = latest !== cached;
+
+		if (isNew) {
+			// 新通知 → 图标变动 + 动画
+			notice_i.classList.remove("fa-bell");
+			notice_i.classList.add("fa-bell-ring", "fa-shake");
+
+			// 显示提示条
+			notice_div.classList.remove("hidden");
 		}
+
+		// 点击提示条 → 清除动画并写入缓存
 		notice_div.addEventListener("click", () => {
-			notice_i.classList.remove("fa-shake");
-			notice_i.classList.remove("fa-bell-ring");
+			notice_i.classList.remove("fa-shake", "fa-bell-ring");
 			notice_i.classList.add("fa-bell");
-			FrameworkGlobal.cache.notice = result.record.notice;
+			FrameworkGlobal.cache.notice = latest;
 		});
 	}
+
 	static async modelStatus() {
 		const model_status_w2_i = this.model_status_w2_i;
 		const model_status_w2_loading = this.model_status_w2_loading;
@@ -2030,41 +1974,52 @@ class Framework extends Page {
 		const model_status_ls_i = this.model_status_ls_i;
 		const model_status_ls_loading = this.model_status_ls_loading;
 		const model_status_ls_label = this.model_status_ls_label;
-		if (Global.config.w2.login_status === W2.status.login_success) {
-			model_status_w2_label.innerText = Global.config.w2.current_time_line_task_status;
-			model_status_w2_i.classList.replace("text-gray-500", "text-green-500");
-			model_status_w2_loading.classList.add("hidden");
-			model_status_w2_label.classList.remove("hidden");
+
+		// W2 status
+		if (W2Global.status.login === W2.status.login_success) {
+			this.setStatus({
+				icon: model_status_w2_i,
+				loading: model_status_w2_loading,
+				label: model_status_w2_label,
+				success: true,
+				text: W2Global.status.current_time_line
+			});
 		} else {
-			model_status_w2_i.classList.replace("text-green-500", "text-gray-500");
-			model_status_w2_loading.classList.remove("hidden");
-			model_status_w2_label.classList.add("hidden");
+			this.setStatus({
+				icon: model_status_w2_i,
+				loading: model_status_w2_loading,
+				label: model_status_w2_label,
+				success: false
+			});
 		}
-		// 待优化, 将日报是否填写不再由updateUIElement来判断, 而由Template模块来判断
-		if (Global.config.ls.login_status === LS.status.login_success) {
-			this.log.log("正在获取日报列表");
+
+		// LS status
+		if (LSGlobal.status.login === LSGlobal.statusMap.loginStatus.success) {
 			let result = await LSRequest.getDailyReportList();
-			Global.config.ls.daily_report_list = result;
-			if (Time.isSameDay(result.rows[0].recordTime, Time.getCurrentDate())) {
-				this.log.log("true 触发");
-				model_status_ls_label.innerText = LS.status.already_fill_daily_report;
-				model_status_ls_i.classList.replace("text-gray-500", "text-green-500");
-				model_status_ls_loading.classList.add("hidden");
-				model_status_ls_label.classList.remove("hidden");
-			} else {
-				this.log.log("false 触发");
-				model_status_ls_label.innerText = LS.status.not_loginfill_daily_report;
-				model_status_ls_i.classList.replace("text-gray-500", "text-green-500");
-				model_status_ls_loading.classList.add("hidden");
-				model_status_ls_label.classList.remove("hidden");
-			}
+			LSGlobal.cache.dailyReport.list = result;
+
+			let isToday = Time.isSameDay(result.rows[0].recordTime, Time.getCurrentDate());
+			let text = isToday
+				? LSGlobal.statusMap.dailyReportStatus.already
+				: LSGlobal.statusMap.dailyReportStatus.not;
+
+			this.setStatus({
+				icon: model_status_ls_i,
+				loading: model_status_ls_loading,
+				label: model_status_ls_label,
+				success: true,
+				text
+			});
 		} else {
-			this.log.log("外层false 触发");
-			model_status_ls_i.classList.replace("text-green-500", "text-gray-500");
-			model_status_ls_loading.classList.remove("hidden");
-			model_status_ls_label.classList.add("hidden");
+			this.setStatus({
+				icon: model_status_ls_i,
+				loading: model_status_ls_loading,
+				label: model_status_ls_label,
+				success: false
+			});
 		}
 	}
+
 	static async weatherComponent() {
 		const weatherIconMap = {
 			"晴": "fa-sun",
@@ -2098,7 +2053,7 @@ class Framework extends Page {
 
 		// 创建 img 元素
 		const img = document.createElement("img");
-		img.src = Global.config.login.user_avatar_url;
+		img.src = LoginGlobal.cache.cookie.avatar_url;
 		img.className = "w-7 h-7 rounded-full object-cover";
 
 		// 清空原有内容
@@ -2106,5 +2061,33 @@ class Framework extends Page {
 
 		// 插入头像
 		avatarBtn.appendChild(img);
+	}
+	static setStatus({
+		icon = null,        // 图标元素
+		loading = null,     // loading 元素
+		label = null,       // 文本元素
+		success = false,    // 是否成功状态
+		text = null,        // label 文案
+		successClass = "text-green-500",
+		failClass = "text-gray-500",
+	}) {
+		// 切换图标颜色
+		if (icon) {
+			icon.classList.remove(success ? failClass : successClass);
+			icon.classList.add(success ? successClass : failClass);
+		}
+
+		// 文案
+		if (label && text !== null) {
+			label.innerText = text;
+		}
+
+		// 控制显示和隐藏
+		if (loading) {
+			loading.classList.toggle("hidden", success);
+		}
+		if (label) {
+			label.classList.toggle("hidden", !success);
+		}
 	}
 }

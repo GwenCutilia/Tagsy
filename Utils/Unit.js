@@ -4,11 +4,8 @@ class Resource {
 	static scriptsAdd = 0;
 	static log = new Logger("Resource");
 	static AllLoaded() {
-		// this.log.debug("All scripts loaded: " + ScriptLoader.scriptsTotal);
-		// this.log.debug("Scripts added: " + ScriptLoader.scriptsAdded);
 		if (Resource.scriptsNum && Resource.scriptsAdd && Resource.scriptsAdd === Resource.scriptsNum) {
-			Global.config.system.status = true;
-			this.log.log("资源加载成功");
+			SystemGlobal.status.load = true;
 			return true;
 		} else {
 			this.log.error("this.scriptsNum:" + Resource.scriptsNum + ", this.scriptsAdd:" + Resource.scriptsAdd);
