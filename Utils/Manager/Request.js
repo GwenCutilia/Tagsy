@@ -146,6 +146,26 @@ class W2Request extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		return result;
 	}
+	// 申请加班
+	static async applyOvertime() {
+		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/apply_overtime";
+		const headers = this.CONFIG.DEFAULT_HEADERS;
+		let eventTimestamp = Time.getTimeRangeTimestamp(W2Global.cache.applyActivityTransfer.time);
+		const data = {
+			"begin_time": eventTimestamp[0],
+			"end_time": eventTimestamp[1],
+			"memo": W2Global.cache.applyActivityTransfer.momo,
+			"header": {
+				"staff": W2Global.cache.information.name,
+				"staff_id": 0,
+				"oa_ticket": W2Global.cache.cookie.token,
+				"tracer": "|b077b6d5cc0a68|1760692722212",
+				"tenant_token": W2Global.cache.cookie.tenant_token
+			}
+		}
+		const result = await this._request("POST", url, headers, data);
+		return result;
+	}
 	// 获取抽调列表
 	static async getApplyApprovalList() {
 		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/get_my_apply_approval";
