@@ -564,6 +564,8 @@ class W2 extends Page {
 				result = await W2Request.qualityInspection();
 			} else if (typeLabel === "线下培训") {
 				result = await W2Request.training();
+			} else if (typeLabel === "申请加班") {
+				result = await W2Request.applyOvertime();
 			}
 			
 			if (FormatValidation.validateMomo(momoText) && FormatValidation.validateTime(timeText) && result.code === 200) {
@@ -812,7 +814,7 @@ class W2 extends Page {
 	// 时间线任务
 	async currentTimeLineTask() {
 		if (W2Global.status.login === W2.status.login_success) {
-			if (TimerScheduler.hasTask(Global.w2_TaskConfig.W2_CHECK_IN_TASK)) {
+			if (TimerScheduler.hasTask(W2Global.task.uiTask.login)) {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
 			} else {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
@@ -1816,11 +1818,10 @@ class Framework extends Page {
 	}
 	static async init() {
 		await this.initValue();
-		FrameworkGlobal.init();
 	}
 	static updateUIElement() {
 		this.avatarImg();
-		// this.getNotice();
+		this.getNotice();
 		let task = [
 			{
 				action: async () => {

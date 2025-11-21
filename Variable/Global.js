@@ -487,10 +487,6 @@ class FrameworkGlobal extends Global {
 		weather_city_label: "#weather_city_label",
 		weather_wind_label: "#weather_wind_label"
 	};
-	static async init() {
-		// 可以调用父类方法初始化子类自己的对象
-		this.value = await super.initObject(this.cache, "FrameworkGlobal.commonValue");
-	}
 }
 class SystemGlobal extends Global {
 	static async init() {

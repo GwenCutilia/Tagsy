@@ -118,20 +118,12 @@ class W2Request extends HttpRequest {
 		this.log.log(eventType + " result: ", result);
 		return result;
 	}
-	// W2抽调
-	static async qualityInspection() {
-		return await this._applyActivityTransfer("quality_inspection");
-	}
-	static async training() {
-		return await this._applyActivityTransfer("training");
-	}
-	static async _applyActivityTransfer(activityType) {
-		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
+	// 申请加班
+	static async applyOvertime() {
+		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/apply_overtime";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		let eventTimestamp = Time.getTimeRangeTimestamp(W2Global.cache.applyActivityTransfer.time);
-
 		const data = {
-			"activity_type": activityType,
 			"begin_time": eventTimestamp[0],
 			"end_time": eventTimestamp[1],
 			"memo": W2Global.cache.applyActivityTransfer.momo,
@@ -146,12 +138,20 @@ class W2Request extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		return result;
 	}
-	// 申请加班
-	static async applyOvertime() {
-		const url = this.CONFIG.BASE_URL + "/intelligent_label_omp/apply_overtime";
+	// W2抽调
+	static async qualityInspection() {
+		return await this._applyActivityTransfer("quality_inspection");
+	}
+	static async training() {
+		return await this._applyActivityTransfer("training");
+	}
+	static async _applyActivityTransfer(activityType) {
+		const url = "https://api-wanwei.myapp.com/intelligent_label_omp/apply_activity_transfer";
 		const headers = this.CONFIG.DEFAULT_HEADERS;
 		let eventTimestamp = Time.getTimeRangeTimestamp(W2Global.cache.applyActivityTransfer.time);
+
 		const data = {
+			"activity_type": activityType,
 			"begin_time": eventTimestamp[0],
 			"end_time": eventTimestamp[1],
 			"memo": W2Global.cache.applyActivityTransfer.momo,
