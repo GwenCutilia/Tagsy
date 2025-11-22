@@ -569,20 +569,20 @@ class W2 extends Page {
 				result = await W2Request.applyOvertime();
 			}
 			
-			if (FormatValidation.validateMomo(momoText) && FormatValidation.validateTime(timeText) && result.code === 200) {
-				DomHelper.bySelectorFromParent(this.info_message_box, "span").innerText = "已发送抽调请求";
-				this.error_message_box.classList.add("hidden");
-				this.info_message_box.classList.remove("hidden");
-				this.apply_activity_transfer_time_text.classList.remove("border-red-500");
-				this.apply_activity_transfer_momo_text.classList.remove("border-red-500");
-			} else {
-				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "错误代码: " + result.code + " " + result.msg;
-				this.error_message_box.classList.remove("hidden");
-				this.info_message_box.classList.add("hidden");
-				this.apply_activity_transfer_time_text.classList.add("border-red-500");
-				this.apply_activity_transfer_momo_text.classList.add("border-red-500");
-			}
+			const success = FormatValidation.validateMomo(momoText)
+				&& FormatValidation.validateTime(timeText)
+				&& result.code === 200;
+
+			this.updateStatusUI({
+				box: this.apply_activity_transfer_message_box,
+				inputs: [], // 如果需要可以传输入框
+				success,
+				message: success
+					? "已发送抽调请求"
+					: "错误代码: " + result.code + " " + result.msg
+			});
 		});
+
 		// 抽调列表
 		this.apply_activity_transfer_prev_page_btn.addEventListener("click", async () => {
 			W2Global.setting.applyActivityTransferList.page--;
@@ -594,6 +594,48 @@ class W2 extends Page {
 		});
 		this.apply_activity_transfer_refresh_page_btn.addEventListener("click", async () => {
 			await this.applyActivityTransferList();
+		});
+	}
+	/**
+	 * 通用 UI 更新方法
+	 * @param {Object} options
+	 * @param {HTMLElement} options.box - 提示框
+	 * @param {HTMLElement[]} options.inputs - 输入框列表
+	 * @param {Boolean} options.success - 是否成功
+	 * @param {String} options.message - 提示文本
+	 */
+	updateStatusUI({ box, inputs = [], success, message }) {
+		// 显示提示框
+		box.classList.remove("hidden");
+
+		// 清空两套提示框样式
+		box.classList.remove("bg-blue-50","text-blue-500","border-blue-200");
+		box.classList.remove("bg-red-50","text-red-500","border-red-200");
+
+		// 设置提示框样式 & 图标
+		const icon = box.querySelector("i");
+		const text = box.querySelector("span");
+
+		if (success) {
+			box.classList.add("bg-blue-50","text-blue-500","border-blue-200");
+			icon.classList.replace("fa-exclamation-circle", "fa-info-circle");
+		} else {
+			box.classList.add("bg-red-50","text-red-500","border-red-200");
+			icon.classList.replace("fa-info-circle", "fa-exclamation-circle");
+		}
+
+		text.innerText = message;
+
+		// 输入框成功失败样式
+		inputs.forEach(input => {
+			input.classList.remove("border-red-500","focus:ring-red-500");
+			input.classList.remove("border-gray-300","focus:ring-blue-500");
+
+			if (success) {
+				input.classList.add("border-gray-300","focus:ring-blue-500");
+			} else {
+				input.classList.add("border-red-500","focus:ring-red-500");
+			}
 		});
 	}
 	async updateUIElement() {
