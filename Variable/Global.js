@@ -448,7 +448,7 @@ class SettingGlobal extends Global {
 }
 class FrameworkGlobal extends Global {
 	static async init() {
-		this.cache = await super.initObject(this.cache, "W2Global.cache");
+		this.cache = await super.initObject(this.cache, "FrameworkGlobal.cache");
 	}
 
 	// Framework所需要的全局变量

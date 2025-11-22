@@ -814,7 +814,7 @@ class W2 extends Page {
 	// 时间线任务
 	async currentTimeLineTask() {
 		if (W2Global.status.login === W2.status.login_success) {
-			if (TimerScheduler.hasTask(W2Global.task.uiTask.login)) {
+			if (TimerScheduler.hasTask(W2Global.task.dailyTask.login)) {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-regular", "fa-solid");
 			} else {
 				this.current_time_line_task_turn_on_off_i.classList.replace("fa-solid", "fa-regular");
@@ -1147,7 +1147,7 @@ class W2 extends Page {
 	}
 	// 停止所有W2时间线任务
 	static async stopAllTask() {
-		Object.values(Global.w2_TaskConfig).forEach(taskName => {
+		Object.values(W2Global.task.dailyTask).forEach(taskName => {
 			TimerScheduler.stopTask(taskName);
 		});
 	}
@@ -1943,7 +1943,7 @@ class Framework extends Page {
 
 		let result = await JsonBinRequest.getNotice();
 		let latest = result.record.notice;
-		let cached = FrameworkGlobal.cache.notice;
+		let cached = FrameworkGlobal.cache.notice.content;
 
 		// 更新文字
 		notice_label.innerText = latest;
@@ -1964,7 +1964,7 @@ class Framework extends Page {
 		notice_div.addEventListener("click", () => {
 			notice_i.classList.remove("fa-shake", "fa-bell-ring");
 			notice_i.classList.add("fa-bell");
-			FrameworkGlobal.cache.notice = latest;
+			FrameworkGlobal.cache.notice.content = latest;
 		});
 	}
 
