@@ -1421,7 +1421,10 @@ class LS extends Page {
 			{
 				start: LSGlobal.setting.time_range_fill_daily_report_start,
 				end: LSGlobal.setting.time_range_fill_daily_report_end,
-				action: async () => { await LS.fillDailyReport() },
+				action: async () => { 
+					await LS.fillDailyReport() ;
+					Message.notify({body: "LS 日报填写成功"});
+				},
 				name: LSGlobal.task.dailyTask.fillDailyReport
 			}
 		]
