@@ -511,11 +511,6 @@ class W2 extends Page {
 			} else if (meal_working_status_label.innerText === "前往用餐") {
 				await W2Request.working();
 			}
-			Message.init();
-			Message.notify({
-				title: "点击了按钮哦",
-				body: "点击即可回到网页"
-			});
 		});
 		// 考勤打卡状态 -> 签到按钮 // 添加未登录逻辑
 		this.check_in_btn.addEventListener("click", async () => {
