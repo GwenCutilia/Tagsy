@@ -1428,7 +1428,7 @@ class LS extends Page {
 				name: LSGlobal.task.dailyTask.fillDailyReport
 			}
 		]
-		if (!await W2.isTodayOff()) {
+		// if (!await W2.isTodayOff()) {
 			for (const config of taskConfigs) {
 				TimerScheduler.setDailyTask(
 					Time.getRandomTimeInRange(config.start, config.end),
@@ -1437,10 +1437,10 @@ class LS extends Page {
 				);
 			}
 			this.log.log("今天是工作日, 定时任务已启动");
-		} else {
+		// } else {
 			// LS.stopAllTask();
-			this.log.log("今天是休息日");
-		}
+		// 	this.log.log("今天是休息日");
+		// }
 	}
 }
 class Setting extends Page {
