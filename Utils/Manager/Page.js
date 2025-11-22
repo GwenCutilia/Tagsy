@@ -542,22 +542,23 @@ class W2 extends Page {
 			let typeLabel = this.apply_activity_transfer_type_label.innerText;
 			let timeText = this.apply_activity_transfer_time_text.value;
 			let momoText = this.apply_activity_transfer_momo_text.value;
-			if (!FormatValidation.validateTime(timeText)) {
-				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "时间格式错误, 请重新输入";
-				this.error_message_box.classList.remove("hidden");
-				this.info_message_box.classList.add("hidden");
-				this.apply_activity_transfer_time_text.classList.add("border-red-500");
-				this.apply_activity_transfer_momo_text.classList.remove("border-red-500");
-				return;
-			}
-			if (!FormatValidation.validateMomo(momoText)) {
-				DomHelper.bySelectorFromParent(this.error_message_box, "span").innerText = "备注格式错误, 请重新输入";
-				this.error_message_box.classList.remove("hidden");
-				this.info_message_box.classList.add("hidden");
-				this.apply_activity_transfer_time_text.classList.remove("border-red-500");
-				this.apply_activity_transfer_momo_text.classList.add("border-red-500");
-				return;
-			}
+			const okTime = this.validateField({
+				inputDom: this.apply_activity_transfer_time_text,
+				messageBox: this.apply_activity_transfer_message_box,
+				validateFn: FormatValidation.validateTime,
+				errorMessage: "时间格式错误, 请重新输入"
+			});
+
+			if (!okTime) return;
+
+			const okMomo = this.validateField({
+				inputDom: this.apply_activity_transfer_momo_text,
+				messageBox: this.apply_activity_transfer_message_box,
+				validateFn: FormatValidation.validateMomo,
+				errorMessage: "备注格式错误, 请重新输入"
+			});
+
+			if (!okMomo) return;
 			W2Global.cache.applyActivityTransfer.time = this.apply_activity_transfer_time_text.value;
 			W2Global.cache.applyActivityTransfer.momo = this.apply_activity_transfer_momo_text.value;
 			let result;
@@ -568,7 +569,6 @@ class W2 extends Page {
 			} else if (typeLabel === "申请加班") {
 				result = await W2Request.applyOvertime();
 			}
-			
 			const success = FormatValidation.validateMomo(momoText)
 				&& FormatValidation.validateTime(timeText)
 				&& result.code === 200;
@@ -595,6 +595,40 @@ class W2 extends Page {
 		this.apply_activity_transfer_refresh_page_btn.addEventListener("click", async () => {
 			await this.applyActivityTransferList();
 		});
+	}
+	validateField({
+		inputDom,
+		messageBox,
+		validateFn,
+		errorMessage
+	}) {
+		const iconDom = DomHelper.bySelectorFromParent(messageBox, "i");
+		const textDom = DomHelper.bySelectorFromParent(messageBox, "span");
+
+		const ok = validateFn(inputDom.value);
+
+		if (!ok) {
+			textDom.innerText = errorMessage;
+			iconDom.classList.replace("fa-info-circle", "fa-exclamation-circle");
+
+			messageBox.classList.remove("hidden");
+			messageBox.classList.remove("bg-blue-50","text-blue-500","border-blue-200");
+			messageBox.classList.add("bg-red-50","text-red-500","border-red-200");
+
+			inputDom.classList.remove("border-gray-300","focus:ring-blue-500");
+			inputDom.classList.add("border-red-500","focus:ring-red-500");
+
+			return false;
+		}
+
+		messageBox.classList.add("hidden");
+		messageBox.classList.remove("bg-red-50","text-red-500","border-red-200");
+		messageBox.classList.add("bg-blue-50","text-blue-500","border-blue-200");
+
+		inputDom.classList.remove("border-red-500","focus:ring-red-500");
+		inputDom.classList.add("border-gray-300","focus:ring-blue-500");
+
+		return true;
 	}
 	/**
 	 * 通用 UI 更新方法

@@ -7,36 +7,48 @@
 
 if (!window.ResourceLoader) {
 	class ResourceLoader {
-		static resourcesAdded = 0; // 已成功加载数量
-		static resourcesTotal = 0; // 总资源数量
+		static resourcesAdded = 0;
+		static resourcesTotal = 0;
 
 		constructor() { }
 
-		// 异步加载单个 JS 脚本
+		// 获取真实页面 URL，避免 Tampermonkey 沙盒导致 location 失效
+		static getRealUrl() {
+			try {
+				// 强制获取真实浏览器上下文
+				return unsafeWindow.location.href;
+			} catch (e) {
+				// 退而求其次
+				try {
+					return document.currentScript.ownerDocument.URL;
+				} catch (err) {
+					return window.location.href;
+				}
+			}
+		}
+
 		static loadJsAsync(jsUrl) {
 			return new Promise((resolve, reject) => {
 				const script = document.createElement("script");
-				script.src = jsUrl + `?v=${Date.now()}`; // 防缓存
+				script.src = jsUrl + `?v=${Date.now()}`;
 				script.dataset.dynamic = "true";
-				script.onload = () => resolve(1); // 成功返回 1
+				script.onload = () => resolve(1);
 				script.onerror = () => reject(new Error(`Failed to load JS: ${jsUrl}`));
 				document.head.appendChild(script);
 			});
 		}
 
-		// 异步加载单个 CSS
 		static loadCssAsync(cssUrl) {
 			return new Promise((resolve, reject) => {
 				const link = document.createElement("link");
 				link.rel = "stylesheet";
-				link.href = cssUrl + `?v=${Date.now()}`; // 防缓存
-				link.onload = () => resolve(1); // 成功返回 1
+				link.href = cssUrl + `?v=${Date.now()}`;
+				link.onload = () => resolve(1);
 				link.onerror = () => reject(new Error(`Failed to load CSS: ${cssUrl}`));
 				document.head.appendChild(link);
 			});
 		}
 
-		// 根据后缀动态选择 JS 或 CSS 加载
 		static async loadResourceAsync(url) {
 			if (url.endsWith(".css")) {
 				try {
@@ -54,17 +66,17 @@ if (!window.ResourceLoader) {
 				}
 			} else {
 				console.warn("Unknown resource type:", url);
-				return Promise.resolve(0);
+				return 0;
 			}
 		}
 
-		// 并行加载一组资源
 		static async loadResourcesParallel(resources) {
-			const results = await Promise.all(resources.map(url => ResourceLoader.loadResourceAsync(url)));
-			return results.reduce((sum, val) => sum + val, 0); // 返回成功数量
+			const results = await Promise.all(
+				resources.map(url => ResourceLoader.loadResourceAsync(url))
+			);
+			return results.reduce((sum, v) => sum + v, 0);
 		}
 
-		// 分组顺序加载，每组内部并行
 		static async loadResourcesByGroups(groups) {
 			let totalSuccess = 0;
 			for (const group of groups) {
@@ -73,22 +85,21 @@ if (!window.ResourceLoader) {
 			return totalSuccess;
 		}
 
-		// 全局加载入口
 		static async loadAllResources() {
-			// 自动判断环境
+			const href = ResourceLoader.getRealUrl();
+
 			let Url;
-			if (location.href.startsWith("file:///D:")) {
-				Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/";
-			} else if (location.href.startsWith("file:///C:")) {
-				Url = "file:///C:/ProgramData/Tagsy/";
+
+			if (href.startsWith("file:///D:")) {
+                Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/";
+			} else if (href.startsWith("file:///C:")) {
+                Url = "file:///C:/ProgramData/Tagsy/";
 			} else {
-				Url = "https://weavefate.asia/";
+                Url = "https://weavefate.asia/";
 			}
 
 			const resourceGroups = [
 				[
-					// Url + "Resource/Lib/Font_Awesome/All.css",
-					// Url + "Resource/Lib/Tail_Wind/Tail_Wind.js",
 					Url + "Utils/Tool.js",
 				],
 				[
@@ -113,6 +124,5 @@ if (!window.ResourceLoader) {
 		}
 	}
 
-	// 挂载到全局，防止重复声明
 	window.ResourceLoader = ResourceLoader;
 }
