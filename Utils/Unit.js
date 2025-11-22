@@ -33,10 +33,10 @@ class Running {
  * Message 类 - 管理应用程序的通知功能(桌面通知)
  */
 class Message {
-
+	static log = new Logger("Resource");
 	static async init() {
 		if (!("Notification" in window)) {
-			console.warn("当前浏览器不支持桌面通知");
+			this.log.warn("当前浏览器不支持桌面通知");
 			return;
 		}
 		if (Notification.permission === "default") {
@@ -46,14 +46,14 @@ class Message {
 
 	static notify(options = {}) {
 		const {
-			title = "通知",
+			title = "Tagsy",
 			body = "",
-			icon = "",
-			duration = 5000
+			icon = "../../Setup/RelyFile/Tagsy.ico",
+			duration = 10000
 		} = options;
 
 		if (Notification.permission !== "granted") {
-			console.warn("通知未授权");
+			this.log.warn("通知未授权");
 			return;
 		}
 

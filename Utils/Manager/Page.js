@@ -72,6 +72,7 @@ class Template {
 	static async loadFramework() {
 		W2Request.getLoginPage();
 		this.initPage();
+		Message.init();
 		new Framework();
 	}
 	static async initValue() {
@@ -1078,7 +1079,8 @@ class W2 extends Page {
 				start: W2Global.setting.time_range_login_start,
 				end:  W2Global.setting.time_range_login_end,
 				action: async () => { 
-					await W2.login() 
+					await W2.login();
+					// Message.notify({ content: "W2登录成功" });
 				},
 				name: W2Global.task.dailyTask.login
 			},
@@ -1087,6 +1089,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_check_in_end,
 				action: async () => { 
 					await W2Request.checkIn();
+					Message.notify({ content: " W2 签到成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.workIn;
 				},
 				name: W2Global.task.dailyTask.chinekIn
@@ -1096,6 +1099,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_meal_end,
 				action: async () => { 
 					await W2Request.meal();
+					Message.notify({ content: "W2 前往用餐 切换成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.meal;
 				},
 				name: W2Global.task.dailyTask.meal
@@ -1105,6 +1109,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_working_end,
 				action: async () => { 
 					await W2Request.working();
+					Message.notify({ content: "W2 前往标注 切换成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.working;
 				},
 				name: W2Global.task.dailyTask.working
@@ -1114,6 +1119,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_check_out_end,
 				action: async () => { 
 					await W2Request.checkOut();
+					Message.notify({ content: "W2 签退成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.workOut;
 				},
 				name: W2Global.task.dailyTask.checkOut
