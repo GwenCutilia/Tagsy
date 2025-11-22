@@ -24,6 +24,7 @@
 // @grant		GM_addStyle
 // @connect		api.apihz.cn
 // @connect		cn.apihz.cn
+// @connect		api.jsonbin.io
 // @connect		ark.cn-beijing.volces.com
 // @connect		api-wanwei.myapp.com
 // @connect		wanwei.myapp.com
