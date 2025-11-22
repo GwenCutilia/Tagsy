@@ -98,7 +98,6 @@ if (!window.ResourceLoader) {
 				],
 				[
 					Url + "Variable/Global.js",
-					Url + "Variable/Message.js",
 				],
 				[
 					Url + "Module/Tagsy_Import.js",
