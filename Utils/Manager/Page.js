@@ -13,6 +13,7 @@ class Page {
 
 	// 实例属性: 每个页面实例的日志
 	constructor() {
+		this.tooltip = new ToolTip();
 		this.log = new Logger(this.constructor.name);
 	}
 
@@ -422,7 +423,6 @@ class W2 extends Page {
 	async init() {
 		// 待优化, 将其他h5中的页面的拖动效果取消
 		// 初始化Dom
-		this.tooltip = new ToolTip();
 		
 		this.initValue();
 	}
@@ -581,6 +581,9 @@ class W2 extends Page {
 					? "已发送抽调请求"
 					: "错误代码: " + result.code + " " + result.msg
 			});
+
+			this.apply_activity_transfer_time_text.value = "";
+			this.apply_activity_transfer_momo_text.value = "";
 		});
 
 		// 抽调列表
@@ -708,7 +711,7 @@ class W2 extends Page {
 				action: async () => {
 					this.personalStatusTask();
 				},
-				intervalMs: 1000,
+				intervalMs: 1000 * 4,
 				name: W2Global.task.uiTask.personal
 			},
 			{

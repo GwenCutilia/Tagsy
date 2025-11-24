@@ -9,203 +9,203 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
 
-<div id="app" class="flex min-h-screen">
-	<!-- 侧边栏 -->
-	<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
-		<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 h-16 flex items-center justify-center border-b border-gray-50">
-				Tagsy_V2.0.0
-			</div>
-		<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
-			<li id="menu_overview">
-				<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
-					<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
-				</a>
-			</li>
-			<li id="menu_w2">
-				<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-					<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
-				</a>
-			</li>
-			<li id="menu_qlabel">
-				<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-					<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
-				</a>
-			</li>
-			<li id="menu_ls">
-				<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-					<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
-				</a>
-			</li>
-			<li id="menu_wecom">
-				<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-					<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
-				</a>
-			</li>
-			<li id="menu_setting">
-				<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-					<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
-				</a>
-			</li>
-		</ul>
-		<div id="sidebar_footer" class="h-16 mt-auto px-4 py-4 flex items-center justify-center text-xs text-gray-400">
-			由 @Gwencutilia 打造
-		</div>
-	</aside>
-	<!-- 主内容区域 -->
-	<div class="flex-1 ml-64 flex flex-col">
-		<!-- 顶部导航栏 -->
-		<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
-			<div class="flex-1 text-lg font-semibold text-gray-600"></div>
-
-			<div class="flex items-center space-x-4 relative">
-				<!-- 通知按钮及面板 -->
-				<div class="relative">
-					<button id="notice_btn" class="w-7 h-7 rounded text-gray-700 hover:bg-gray-100 flex items-center justify-center">
-						<i id="notice_i" class="fas fa-bell"></i>
-					</button>
-
-					<!-- 面板相对于按钮弹出 -->
-					<div id="notice_panel_div"
-						class="notice-panel hidden absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-xl border border-gray-200 z-40 transform scale-95 opacity-0 transition-all duration-200">
-						<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-							<div class="font-semibold text-gray-700">通知中心</div>
-							<button id="notice_close" class="text-gray-400 hover:text-gray-600">
-								<i class="fas fa-times"></i>
-							</button>
-						</div>
-
-						<div id="notice_list_div" class="max-h-80 overflow-y-auto p-4 space-y-3">
-							<div id="notice_div" class="rounded-lg bg-gray-50 hover:bg-gray-100 transition hidden">
-								<div id="notice_label" class="text-gray-800 font-medium">系统更新完成</div>
-								<div id="notice_time_label" class="text-gray-500 text-xs mt-1">5 分钟前</div>
-							</div>
-						</div>
-					</div>
+	<div id="app" class="flex min-h-screen">
+		<!-- 侧边栏 -->
+		<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
+			<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 h-16 flex items-center justify-center border-b border-gray-50">
+					Tagsy_V2.0.0
 				</div>
-
-				<!-- 用户头像 -->
-				<button id="user_avatar" class="w-7 h-7 rounded-full overflow-hidden hover:bg-gray-100 flex items-center justify-center">
-					<i class="fas fa-user-circle"></i>
-				</button>
+			<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
+				<li id="menu_overview">
+					<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+						<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
+					</a>
+				</li>
+				<li id="menu_w2">
+					<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
+					</a>
+				</li>
+				<li id="menu_qlabel">
+					<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
+					</a>
+				</li>
+				<li id="menu_ls">
+					<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
+					</a>
+				</li>
+				<li id="menu_wecom">
+					<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
+					</a>
+				</li>
+				<li id="menu_setting">
+					<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
+					</a>
+				</li>
+			</ul>
+			<div id="sidebar_footer" class="h-16 mt-auto px-4 py-4 flex items-center justify-center text-xs text-gray-400">
+				由 @Gwencutilia 打造
 			</div>
-		</header>
+		</aside>
 		<!-- 主内容区域 -->
-		<main id="main_content" class="flex-1 p-6 mt-16 pb-16 overflow-y-auto">
-			<div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<!-- 第一列 -->
-				<div class="flex flex-col space-y-6">
-					<!-- 加载状态 -->
-					<div id="loading_status" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-						<div class="flex items-center justify-between">
-							<div class="text-gray-500 text-sm mb-1">加载状态</div>
-							<div class="flex space-x-2">
-								<button id="load_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
-										<i class="fa-solid fa-play"></i>
-								</button>
-								<button id="unload_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
-									<i class="fa-solid fa-stop"></i>
-								</button>
-							</div>
-						</div>
-						<div id="loading_status_label" class="text-2xl font-bold text-blue-600">--</div>
-					</div>
-					<!-- 作业量统计 -->
-					<div class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center col-span-2">
-						<div class="text-gray-500 text-sm mb-2">作业量统计</div>
-						<div class="w-full bg-gray-200 rounded-full h-4">
-							<div class="bg-purple-600 h-4 rounded-full" style="width: 65%;"></div>
-						</div>
-					</div>
-				</div>
-				<!-- 第二列 -->
-				<div class="flex flex-col space-y-6">
-					<!-- 运行状态 -->
-					<div id="running_status" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-						<div class="flex items-center justify-between">
-							<div class="text-gray-500 text-sm mb-1">运行状态</div>
-							<div class="flex space-x-2">
-								<button id="running_start_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
-										<i class="fa-solid fa-play"></i>
-								</button>
-								<button id="running_stop_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
-									<i class="fa-solid fa-stop"></i>
+		<div class="flex-1 ml-64 flex flex-col">
+			<!-- 顶部导航栏 -->
+			<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
+				<div class="flex-1 text-lg font-semibold text-gray-600"></div>
+
+				<div class="flex items-center space-x-4 relative">
+					<!-- 通知按钮及面板 -->
+					<div class="relative">
+						<button id="notice_btn" class="w-7 h-7 rounded text-gray-700 hover:bg-gray-100 flex items-center justify-center">
+							<i id="notice_i" class="fas fa-bell"></i>
+						</button>
+
+						<!-- 面板相对于按钮弹出 -->
+						<div id="notice_panel_div"
+							class="notice-panel hidden absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-xl border border-gray-200 z-40 transform scale-95 opacity-0 transition-all duration-200">
+							<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+								<div class="font-semibold text-gray-700">通知中心</div>
+								<button id="notice_close" class="text-gray-400 hover:text-gray-600">
+									<i class="fas fa-times"></i>
 								</button>
 							</div>
-						</div>
-						<div id="running_status_label" class="text-2xl font-bold text-blue-600">--</div>
-					</div>
-					<div id="worked_hours" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-						<div class="flex items-center justify-between">
-							<div class="text-gray-500 text-sm mb-1">工作时间</div>
-						</div>
-						<div class="flex items-end flex-1">
-							<div id="worked_hours_label" class="text-2xl font-bold text-blue-600">--</div>
-							<div id="remain_hours_label" class="hidden text font-bold text-green-600">--</div>
+
+							<div id="notice_list_div" class="max-h-80 overflow-y-auto p-4 space-y-3">
+								<div id="notice_div" class="rounded-lg bg-gray-50 hover:bg-gray-100 transition hidden">
+									<div id="notice_label" class="text-gray-800 font-medium">系统更新完成</div>
+									<div id="notice_time_label" class="text-gray-500 text-xs mt-1">5 分钟前</div>
+								</div>
+							</div>
 						</div>
 					</div>
+
+					<!-- 用户头像 -->
+					<button id="user_avatar" class="w-7 h-7 rounded-full overflow-hidden hover:bg-gray-100 flex items-center justify-center">
+						<i class="fas fa-user-circle"></i>
+					</button>
 				</div>
-				<!-- 第三列 -->
-				<div class="flex flex-col space-y-6">
-					<!-- 运行日志 -->
-					<div id="running_log" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-						<div class="flex items-center justify-between">
-							<!-- 左边: 标题 -->
-							<div class="text-gray-500 text-sm mb-1">运行日志</div>
-							<!-- 右边: 清空按钮 -->
-							<button id="clear_log_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
-								<i class="fas fa-trash-alt"></i>
-							</button>
+			</header>
+			<!-- 主内容区域 -->
+			<main id="main_content" class="flex-1 p-6 mt-16 pb-16 overflow-y-auto">
+				<div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+					<!-- 第一列 -->
+					<div class="flex flex-col space-y-6">
+						<!-- 加载状态 -->
+						<div id="loading_status" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+							<div class="flex items-center justify-between">
+								<div class="text-gray-500 text-sm mb-1">加载状态</div>
+								<div class="flex space-x-2">
+									<button id="load_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
+											<i class="fa-solid fa-play"></i>
+									</button>
+									<button id="unload_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
+										<i class="fa-solid fa-stop"></i>
+									</button>
+								</div>
+							</div>
+							<div id="loading_status_label" class="text-2xl font-bold text-blue-600">--</div>
 						</div>
-						<div id="running_log_content" class="flex-1 overflow-y-auto">静态日志内容示例...</div>
+						<!-- 作业量统计 -->
+						<div class="bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center col-span-2">
+							<div class="text-gray-500 text-sm mb-2">作业量统计</div>
+							<div class="w-full bg-gray-200 rounded-full h-4">
+								<div class="bg-purple-600 h-4 rounded-full" style="width: 65%;"></div>
+							</div>
+						</div>
+					</div>
+					<!-- 第二列 -->
+					<div class="flex flex-col space-y-6">
+						<!-- 运行状态 -->
+						<div id="running_status" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+							<div class="flex items-center justify-between">
+								<div class="text-gray-500 text-sm mb-1">运行状态</div>
+								<div class="flex space-x-2">
+									<button id="running_start_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
+											<i class="fa-solid fa-play"></i>
+									</button>
+									<button id="running_stop_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
+										<i class="fa-solid fa-stop"></i>
+									</button>
+								</div>
+							</div>
+							<div id="running_status_label" class="text-2xl font-bold text-blue-600">--</div>
+						</div>
+						<div id="worked_hours" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+							<div class="flex items-center justify-between">
+								<div class="text-gray-500 text-sm mb-1">工作时间</div>
+							</div>
+							<div class="flex items-end flex-1">
+								<div id="worked_hours_label" class="text-2xl font-bold text-blue-600">--</div>
+								<div id="remain_hours_label" class="hidden text font-bold text-green-600">--</div>
+							</div>
+						</div>
+					</div>
+					<!-- 第三列 -->
+					<div class="flex flex-col space-y-6">
+						<!-- 运行日志 -->
+						<div id="running_log" class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
+							<div class="flex items-center justify-between">
+								<!-- 左边: 标题 -->
+								<div class="text-gray-500 text-sm mb-1">运行日志</div>
+								<!-- 右边: 清空按钮 -->
+								<button id="clear_log_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
+									<i class="fas fa-trash-alt"></i>
+								</button>
+							</div>
+							<div id="running_log_content" class="flex-1 overflow-y-auto">静态日志内容示例...</div>
+						</div>
 					</div>
 				</div>
-			</div>
-		</main>
-		<!-- 底部导航栏 -->
-		<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-between fixed bottom-0 left-64 right-0 z-30 px-6">
+			</main>
+			<!-- 底部导航栏 -->
+			<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-between fixed bottom-0 left-64 right-0 z-30 px-6">
 
-			<div id="model_status" class="flex space-x-3">
-				<!-- W2 状态 -->
-				<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
-					<i id="model_status_w2_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
-					<span class="text-gray-600 text-sm mr-1">W2状态:</span>
+				<div id="model_status" class="flex space-x-3">
+					<!-- W2 状态 -->
+					<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
+						<i id="model_status_w2_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
+						<span class="text-gray-600 text-sm mr-1">W2状态:</span>
 
-					<!-- 占位区: loading和文字都在这里, 宽度固定 -->
-					<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
-						<i id="model_status_w2_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
-						<span id="model_status_w2_label" class="hidden"></span>
-					</span>
+						<!-- 占位区: loading和文字都在这里, 宽度固定 -->
+						<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
+							<i id="model_status_w2_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
+							<span id="model_status_w2_label" class="hidden"></span>
+						</span>
+					</div>
+
+					<!-- LS 状态 -->
+					<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
+						<i id="model_status_ls_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
+						<span class="text-gray-600 text-sm mr-1">LS状态:</span>
+
+						<!-- 占位区 -->
+						<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
+							<i id="model_status_ls_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
+							<span id="model_status_ls_label" class="hidden"></span>
+						</span>
+					</div>
 				</div>
 
-				<!-- LS 状态 -->
-				<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
-					<i id="model_status_ls_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
-					<span class="text-gray-600 text-sm mr-1">LS状态:</span>
-
-					<!-- 占位区 -->
-					<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
-						<i id="model_status_ls_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
-						<span id="model_status_ls_label" class="hidden"></span>
-					</span>
+				<!-- 天气信息区域 -->
+				<div id="weather" class="flex items-center text-sm text-gray-600">
+					<div id="weather_message_box">
+						<i class="fa-solid fa-spinner-third fa-spin"></i>
+					</div>
+					<div id="weather_div" class="hidden">
+						<i id="weather_icon" class="fa-solid fa-sun text-yellow-500 mr-2"></i>
+						<span id="weather_temp_label" class="mr-2"></span>
+						<span id="weather_city_label" class="mr-2"></span>
+						<i class="fa-solid fa-wind mr-1"></i>
+						<span id="weather_wind_label"></span>
+					</div>
 				</div>
-			</div>
 
-			<!-- 天气信息区域 -->
-			<div id="weather" class="flex items-center text-sm text-gray-600">
-				<div id="weather_message_box">
-					<i class="fa-solid fa-spinner-third fa-spin"></i>
-				</div>
-				<div id="weather_div" class="hidden">
-					<i id="weather_icon" class="fa-solid fa-sun text-yellow-500 mr-2"></i>
-					<span id="weather_temp_label" class="mr-2"></span>
-					<span id="weather_city_label" class="mr-2"></span>
-					<i class="fa-solid fa-wind mr-1"></i>
-					<span id="weather_wind_label"></span>
-				</div>
-			</div>
-
-		</footer>
+			</footer>
+		</div>
 	</div>
-</div>
 </body>
 </html>
