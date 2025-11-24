@@ -680,49 +680,49 @@ class W2 extends Page {
 					this.loginStatusTask();
 					
 				},
-				intervalMs: 3000,
+				intervalMs: 1000,
 				name: W2Global.task.uiTask.login
 			},
 			{
 				action: async () => {
 					this.workingStatusTask();
 				},
-				intervalMs: 3000,
+				intervalMs: 1000,
 				name: W2Global.task.uiTask.working
 			},
 			{
 				action: async () => {
 					this.workHourStatusTask();
 				},
-				intervalMs: 3000,
+				intervalMs: 1500,
 				name: W2Global.task.uiTask.workHour
 			},
 			{
 				action: async () => {
 					this.currentTimeLineTask();
 				},
-				intervalMs: 3000,
+				intervalMs: 1000,
 				name: W2Global.task.uiTask.currentTimeLine
 			},
 			{
 				action: async () => {
 					this.personalStatusTask();
 				},
-				intervalMs: 3000,
+				intervalMs: 1000,
 				name: W2Global.task.uiTask.personal
 			},
 			{
 				action: async () => {
 					this.calendarTask();
 				},
-				intervalMs: 1000 * 10,
+				intervalMs: 1000 * 5,
 				name: W2Global.task.uiTask.calendar
 			},
 			{
 				action: async () => {
 					this.applyActivityTransferList();
 				},
-				intervalMs: 1000 * 10,
+				intervalMs: 1000 * 5,
 				name: W2Global.task.uiTask.applyActivityTransferList
 			},
 		]
@@ -1165,7 +1165,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_check_in_end,
 				action: async () => { 
 					await W2Request.checkIn();
-					Message.notify({ content: " W2 签到成功" });
+					Message.notify({ body: " W2 签到成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.workIn;
 				},
 				name: W2Global.task.dailyTask.chinekIn
@@ -1175,7 +1175,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_meal_end,
 				action: async () => { 
 					await W2Request.meal();
-					Message.notify({ content: "W2 前往用餐 切换成功" });
+					Message.notify({ body: "W2 前往用餐 切换成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.meal;
 				},
 				name: W2Global.task.dailyTask.meal
@@ -1185,7 +1185,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_working_end,
 				action: async () => { 
 					await W2Request.working();
-					Message.notify({ content: "W2 前往标注 切换成功" });
+					Message.notify({ body: "W2 前往标注 切换成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.working;
 				},
 				name: W2Global.task.dailyTask.working
@@ -1195,7 +1195,7 @@ class W2 extends Page {
 				end:  W2Global.setting.time_range_check_out_end,
 				action: async () => { 
 					await W2Request.checkOut();
-					Message.notify({ content: "W2 签退成功" });
+					Message.notify({ body: "W2 签退成功" });
 					W2Global.status.current_time_line = W2.currentTaskStatus.workOut;
 				},
 				name: W2Global.task.dailyTask.checkOut
@@ -1354,13 +1354,13 @@ class LS extends Page {
 	// 刷新UI
 	async updateUIElement() {
 		// 登录状态UI
-		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 3000, LSGlobal.task.uiTask.login);
+		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 1000, LSGlobal.task.uiTask.login);
 		// 刷新日报列表的任务
-		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 3000, LSGlobal.task.uiTask.getDailyReportList);
+		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 1000, LSGlobal.task.uiTask.getDailyReportList);
 		// 打卡任务UI
-		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 3000, LSGlobal.task.uiTask.fillDailyReportStatus);
+		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 1000, LSGlobal.task.uiTask.fillDailyReportStatus);
 		// 日报列表UI
-		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 3000, LSGlobal.task.uiTask.dailyReportList);
+		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 1500, LSGlobal.task.uiTask.dailyReportList);
 	}
 	// 登录状态刷新
 	async loginStatus() {

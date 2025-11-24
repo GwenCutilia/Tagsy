@@ -48,7 +48,6 @@ class Message {
 		const {
 			title = "Tagsy",
 			body = "",
-			icon = "../../Setup/RelyFile/Tagsy.ico",
 			duration = 10000
 		} = options;
 
@@ -59,7 +58,6 @@ class Message {
 
 		const n = new Notification(title, {
 			body,
-			icon
 		});
 
 		// 点击通知后回到当前网页
