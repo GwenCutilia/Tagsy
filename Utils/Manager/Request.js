@@ -293,7 +293,7 @@ class W2Request extends HttpRequest {
 		});
 	}
 }
-class QLabelLookup extends HttpRequest {
+class QLabelLookupRequest extends HttpRequest {
 	static async login() {
 		const url = "https://qlabel.tencent.com/api/report/workbenchUserWorkingReport";
 		const headers = {
