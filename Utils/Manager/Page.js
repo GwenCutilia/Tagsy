@@ -18,20 +18,6 @@ class Page {
 		this.log = new Logger(this.constructor.name);
 	}
 
-	// DOM控制器: 获取DOM元素并缓存，避免重复查询
-	getDom(selector) {
-		if (!this._domCache) this._domCache = {};
-		if (!this._domCache[selector]) {
-			this._domCache[selector] = document.querySelector(selector);
-		}
-		return this._domCache[selector];
-	}
-
-	// 结果结构体
-	createResult(success = true, message = "", data = null) {
-		return { success, message, data };
-	}
-
 	// 静态方法: 初始化页面路由
 	static async init() {
 		await Template.init();
@@ -51,6 +37,7 @@ class Template {
 	static log = new Logger("Template");
 	static async init() {
 		if (!this.isTemplatePage()) {
+			await QLabelLookupGlobal.init();
 			return;
 		}
 		await this.initValue();
