@@ -8,7 +8,7 @@ class Page {
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
-		"work-time": () => new QLabelWorkPage(), // 新增路由
+		"work-time": () => new QLabelLookupPage(),
 		// 可添加其他页面路由
 	};
 
@@ -46,13 +46,6 @@ class Page {
 	bindEvents() {
 		// 页面事件绑定，具体页面可覆盖
 	}
-}
-
-class QLabelWorkPage extends QLabel {
-	constructor() {
-		console.log("QLabelWorkPage 逻辑已加载");
-	}
-
 }
 class Template {
 	static log = new Logger("Template");
@@ -1268,6 +1261,18 @@ class QLabel extends Page {
 		});
 		this.log.log(result);
 	}
+}
+class QLabelWorkPage extends QLabel {
+	constructor() {
+
+	}
+
+}
+class QLabelLookupPage extends QLabel {
+	constructor() {
+		console.log("QLabelLookupPage 逻辑已加载");
+	}
+
 }
 class LS extends Page {
 
