@@ -1270,6 +1270,10 @@ class QLabelWorkPage extends QLabel {
 }
 class QLabelLookupPage extends QLabel {
 	constructor() {
+		GM.CookieList({}, list => {
+			const session = list.find(c => c.name === "SESSION");
+			console.log("SESSION:", session?.value);
+		});
 		console.log("QLabelLookupPage 逻辑已加载");
 	}
 
