@@ -1,6 +1,69 @@
+// class Page {
+// 	// 静态属性: 日志和路由配置
+// 	static log = new Logger("Page");
+// 	static routes = {
+// 		"Login.html": () => new Login(),
+// 		"Index.html": () => new Index(),
+// 		"W2.html": () => new W2(),
+// 		"QLabel.html": () => new QLabel(),
+// 		"LS.html": () => new LS(),
+// 		"Setting.html": () => new Setting(),
+// 		"/workbench/work-time": () => new WorkTime(),
+// 		// 可添加其他页面路由
+// 	};
+
+// 	// 实例属性: 每个页面实例的日志
+// 	constructor() {
+// 		this.tooltip = new ToolTip();
+// 		this.log = new Logger(this.constructor.name);
+// 	}
+
+// 	// 将已有代码重构, 油猴的全局的变量不需要很长的索引, 引用更改成w2.any
+// 	// 将各个UI任务不以TASK结尾
+// 	// 写一个DOM控制器, 用来控制DOM的获取
+// 	// 不要重复的操作
+// 	// DOM的class不要重复性太高
+// 	// 写一个result结构体
+
+// 	// 静态方法: 初始化页面路由
+// 	static async init() {
+// 		await Template.init();
+// 		const page = location.pathname.split("/").pop();
+// 		if (this.routes[page]) {
+// 			this.routes[page]();
+// 		} else {
+// 			this.log.error("没有为该页面配置逻辑:", page);
+// 		}
+// 	}
+
+// 	// // 静态方法: 初始化页面路由
+// 	// static async init() {
+// 	// 	const page = location.pathname.split("/").pop();
+
+// 	// 	if (!this.routes[page]) {
+// 	// 		this.log.error("没有为该页面配置逻辑:", page);
+// 	// 		return;
+// 	// 	}
+
+// 	// 	// 如果不是 Login.html，执行初始化逻辑
+// 	// 	if (page !== "Login.html") {
+// 	// 		await Template.init();
+// 	// 		new Framework();
+// 	// 	}
+
+// 	// 	// 执行页面对应的逻辑
+// 	// 	this.routes[page]();
+// 	// }
+
+// 	bindEvents() {
+
+// 	}
+// }
 class Page {
 	// 静态属性: 日志和路由配置
 	static log = new Logger("Page");
+
+	// 页面路由映射, 支持 HTML 文件名和路径
 	static routes = {
 		"Login.html": () => new Login(),
 		"Index.html": () => new Index(),
@@ -8,26 +71,33 @@ class Page {
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
-		// 可添加其他页面路由
+
+		// 新增腾讯 work-time 页面
+		"/workbench/work-time": () => new WorkTime(),
 	};
 
-	// 实例属性: 每个页面实例的日志
 	constructor() {
-		this.tooltip = new ToolTip();
+		// 每个页面实例自己的日志和提示工具
 		this.log = new Logger(this.constructor.name);
+		this.tooltip = new ToolTip();
 	}
 
-	// 将已有代码重构, 油猴的全局的变量不需要很长的索引, 引用更改成w2.any
-	// 将各个UI任务不以TASK结尾
-	// 写一个DOM控制器, 用来控制DOM的获取
-	// 不要重复的操作
-	// DOM的class不要重复性太高
-	// 写一个result结构体
-
-	// 静态方法: 初始化页面路由
+	/**
+	 * 初始化页面路由
+	 * - 支持 HTML 文件名
+	 * - 支持没有扩展名的路径
+	 */
 	static async init() {
 		await Template.init();
-		const page = location.pathname.split("/").pop();
+
+		let page = location.pathname;
+
+		// 如果是 HTML 文件, 获取文件名
+		if (page.endsWith(".html")) {
+			page = page.split("/").pop();
+		}
+
+		// 执行对应页面逻辑
 		if (this.routes[page]) {
 			this.routes[page]();
 		} else {
@@ -35,28 +105,20 @@ class Page {
 		}
 	}
 
-	// // 静态方法: 初始化页面路由
-	// static async init() {
-	// 	const page = location.pathname.split("/").pop();
+	/**
+	 * 通用事件绑定, 由子类实现
+	 */
+	bindEvents() {}
+}
 
-	// 	if (!this.routes[page]) {
-	// 		this.log.error("没有为该页面配置逻辑:", page);
-	// 		return;
-	// 	}
-
-	// 	// 如果不是 Login.html，执行初始化逻辑
-	// 	if (page !== "Login.html") {
-	// 		await Template.init();
-	// 		new Framework();
-	// 	}
-
-	// 	// 执行页面对应的逻辑
-	// 	this.routes[page]();
-	// }
-
-	bindEvents() {
+class QLabelWorkPage extends QLabel {
+	constructor() {
 
 	}
+
+}
+class QLabelLookupPage extends QLabel {
+
 }
 class Template {
 	static log = new Logger("Template");

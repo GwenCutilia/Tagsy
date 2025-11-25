@@ -21,6 +21,8 @@
 // @grant		GM_setClipboard
 // @grant		GM_info
 // @grant		GM_cookie
+// @grant		GM_cookie.list
+// @grant		GM_cookie.set
 // @grant		GM_addStyle
 // @connect		api.apihz.cn
 // @connect		cn.apihz.cn
@@ -55,6 +57,8 @@
 		"GM_setClipboard",
 		"GM_info",
 		"GM_cookie",
+		"GM_cookie.list",
+		"GM_cookie.set",
 		"GM_addStyle"
 	];
 
@@ -67,10 +71,36 @@
 	}
 
 	for (const api of gmAPIs) {
+		// 处理 GM_cookie 的子函数
+		if (api.startsWith("GM_cookie")) {
+			if (typeof GM_cookie !== "undefined") {
+				if (api === "GM_cookie") {
+					unsafeWindow.TAGSY_GM.GM_cookie = GM_cookie;
+					unsafeWindow.GM.Cookie = GM_cookie;
+				} else if (api === "GM_cookie.list") {
+					unsafeWindow.TAGSY_GM.GM_cookie_list = GM_cookie.list;
+					unsafeWindow.GM.CookieList = GM_cookie.list;
+				} else if (api === "GM_cookie.set") {
+					unsafeWindow.TAGSY_GM.GM_cookie_set = GM_cookie.set;
+					unsafeWindow.GM.CookieSet = GM_cookie.set;
+				}
+			}
+			continue;
+		}
+
+		// 普通 GM_* API
 		if (typeof window[api] !== "undefined") {
 			const pascalName = toPascalCase(api);
-			unsafeWindow.TAGSY_GM[api] = window[api]; 
-			unsafeWindow.GM[pascalName] = window[api]; 
+			unsafeWindow.TAGSY_GM[api] = window[api];
+			unsafeWindow.GM[pascalName] = window[api];
 		}
 	}
+
+	// for (const api of gmAPIs) {
+	// 	if (typeof window[api] !== "undefined") {
+	// 		const pascalName = toPascalCase(api);
+	// 		unsafeWindow.TAGSY_GM[api] = window[api]; 
+	// 		unsafeWindow.GM[pascalName] = window[api]; 
+	// 	}
+	// }
 })();

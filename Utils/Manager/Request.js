@@ -173,8 +173,8 @@ class W2Request extends HttpRequest {
 		const data = {
 			"page": W2Global.setting.applyActivityTransferList.page,
 			"page_size": 3,
-			"begin_date": Time.getDateRangeByToday(-30, 0)[0], // 开始查询的时间
-			"end_date": Time.getDateRangeByToday(-30, 0)[1], // 结束查询的时间
+			"begin_date": Time.getDateRangeByToday(-10, 0)[0], // 开始查询的时间
+			"end_date": Time.getDateRangeByToday(-10, 0)[1], // 结束查询的时间
 			"apply_type_list": [ // 类型
 				"transfer",
 				"holiday",

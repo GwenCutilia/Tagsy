@@ -12,7 +12,6 @@ if (!window.ResourceLoader) {
 
 		constructor() { }
 
-		// 获取真实页面 URL，避免 Tampermonkey 沙盒导致 location 失效
 		static getRealUrl() {
 			try {
 				// 强制获取真实浏览器上下文
