@@ -8,7 +8,7 @@ class Page {
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
-		"work-time": () => new QLabelWorkPage(), // 新增路由
+		"/work-time": () => new QLabelWorkPage(), // 新增路由
 		// 可添加其他页面路由
 	};
 
