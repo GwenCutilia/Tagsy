@@ -1268,7 +1268,7 @@ class QLabelLookup extends Page {
 				}
 			} else {
 				// 把现有 SESSION 持久化
-				GM_setValue("SESSION_saved", c.value);
+				GM.SetValue("SESSION_saved", c.value);
 			}
 		});
 		this.log.log("QLabelLookupPage 逻辑已加载");
