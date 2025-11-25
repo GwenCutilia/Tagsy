@@ -293,7 +293,37 @@ class W2Request extends HttpRequest {
 		});
 	}
 }
+class QLabelLookup extends HttpRequest {
+	static async login() {
+		const url = "https://qlabel.tencent.com/api/report/workbenchUserWorkingReport";
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8"
+		};
+		const data = {
+			username: LSGlobal.cache.information.name,
+			password: LSGlobal.cache.information.password
+		};
 
+		const result = await this._request("POST", url, headers, data);
+		this.log.log("login result: ", result);
+		if (result.code === 200) {
+			LSGlobal.cache.cookie.token = result.token;
+		} else {
+			this.log.error("LS login failed: ", result.message);
+		}
+		
+		return result;
+	}
+	static async _request(method, url, headers, data) {
+		return await this.fetch({
+			method,
+			url,
+			headers,
+			data,
+			responseType: "json",
+		});
+	}
+}
 class LSRequest extends HttpRequest {
 	static log = new Logger("LSRequest");
 	// 从这里继续, 写LS的请求信息

@@ -8,7 +8,7 @@ class Page {
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
-		"work-time": () => new QLabelLookupPage(),
+		"work-time": () => new QLabelLookup(),
 		// 可添加其他页面路由
 	};
 
@@ -1236,47 +1236,43 @@ class QLabel extends Page {
 	init() {
 
 	}
-	static async testurl() {
-		// let url = "https://cn.apihz.cn/api/user/jhdl.php";
-		// let header = {
-		// 	"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-		// }
-		// let data = {
-		// 	id: "10008362",
-		// 	key: "1d0c8fec499fb7057027e09fc4662fb0",
-		// 	type: "2",
-		// }
-		
-		let result = await HttpRequest.fetch({
-			url: "https://cn.apihz.cn/api/user/jhdl.php",
-			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-			},
-			data: {
-				id: "10008362",
-				key: "1d0c8fec499fb7057027e09fc4662fb0",
-				type: "2"
+}
+class QLabelWorkPage extends Page {
+	constructor() {
+
+	}
+
+}
+class QLabelLookup extends Page {
+	constructor() {
+		super();
+		// GM.CookieList({}, list => {
+		// 	const session = list.find(c => c.name === "SESSION");
+		// 	console.log.log("SESSION:", session?.value);
+		// });
+		GM.CookieList({}, list => {
+			const c = list.find(x => x.name === "SESSION");
+
+			if (!c) {
+				const saved = GM_getValue("SESSION_saved");
+
+				if (saved) {
+					GM.CookieSet({
+						name: "SESSION",
+						value: saved,
+						domain: location.hostname,
+						path: "/"
+					}, () => {
+						console.log("SESSION 已恢复");
+					});
+				}
+			} else {
+				// 把现有 SESSION 持久化
+				GM_setValue("SESSION_saved", c.value);
 			}
 		});
-		this.log.log(result);
+		this.log.log("QLabelLookupPage 逻辑已加载");
 	}
-}
-class QLabelWorkPage extends QLabel {
-	constructor() {
-
-	}
-
-}
-class QLabelLookupPage extends QLabel {
-	constructor() {
-		GM.CookieList({}, list => {
-			const session = list.find(c => c.name === "SESSION");
-			console.log("SESSION:", session?.value);
-		});
-		console.log("QLabelLookupPage 逻辑已加载");
-	}
-
 }
 class LS extends Page {
 
