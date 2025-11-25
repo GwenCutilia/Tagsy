@@ -1254,7 +1254,7 @@ class QLabelLookup extends Page {
 			const c = list.find(x => x.name === "SESSION");
 
 			if (!c) {
-				const saved = GM.GetValue("SESSION_saved");
+				const saved = QLabelLookupGlobal.cache.cookie.session;
 
 				if (saved) {
 					GM.CookieSet({
@@ -1268,8 +1268,13 @@ class QLabelLookup extends Page {
 				}
 			} else {
 				// 把现有 SESSION 持久化
-				GM.SetValue("SESSION_saved", c.value);
+				QLabelLookupGlobal.cache.cookie.session = c.value;
 			}
+		});
+		GM.CookieList({}, list => {
+			const route = list.find(c => c.name === "tgw_l7_route");
+
+			this.log.log("tgw_l7_route:", route?.value);
 		});
 		this.log.log("QLabelLookupPage 逻辑已加载");
 	}

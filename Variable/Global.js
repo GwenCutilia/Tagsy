@@ -377,6 +377,17 @@ class LSGlobal extends Global {
 		daily_report_list_table: "#daily_report_list_table", // 日报列表表格
 	}
 }
+class QLabelLookupGlobal extends Global {
+	static async init() {
+		this.cache = await super.initObject(this.cache, "ApiboxGlobal.cache");
+	}
+	static cache = {
+		cookie: {
+			session: null,
+			route: null,
+		}
+	}
+}
 class ApiboxGlobal extends Global {
 	static async init() {
 		this.cache = await super.initObject(this.cache, "ApiboxGlobal.cache");
