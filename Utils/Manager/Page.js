@@ -54,9 +54,6 @@ class QLabelWorkPage {
 	}
 
 }
-class QLabelLookupPage extends QLabel {
-
-}
 class Template {
 	static log = new Logger("Template");
 	static async init() {
