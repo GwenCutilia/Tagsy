@@ -1254,7 +1254,7 @@ class QLabelLookup extends Page {
 			const c = list.find(x => x.name === "SESSION");
 
 			if (!c) {
-				const saved = GM_getValue("SESSION_saved");
+				const saved = GM.GetValue("SESSION_saved");
 
 				if (saved) {
 					GM.CookieSet({
