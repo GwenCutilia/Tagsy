@@ -1233,34 +1233,15 @@ class QLabelWorkPage extends Page {
 class QLabelLookup extends Page {
 	constructor() {
 		super();
-		// GM.CookieList({}, list => {
-		// 	const session = list.find(c => c.name === "SESSION");
-		// 	console.log.log("SESSION:", session?.value);
-		// });
 		GM.CookieList({}, list => {
-			const c = list.find(x => x.name === "SESSION");
-
-			if (!c) {
-				const saved = QLabelLookupGlobal.cache.cookie.session;
-
-				if (saved) {
-					GM.CookieSet({
-						name: "SESSION",
-						value: saved,
-						domain: location.hostname,
-						path: "/"
-					}, () => {
-						console.log("SESSION 已恢复");
-					});
-				}
-			} else {
-				// 把现有 SESSION 持久化
-				QLabelLookupGlobal.cache.cookie.session = c.value;
-			}
+			const session = list.find(c => c.name === "SESSION");
+			QLabelLookupGlobal.cache.cookie.session = session;
+			console.log.log("SESSION:", session?.value);
 		});
+
 		GM.CookieList({}, list => {
 			const route = list.find(c => c.name === "tgw_l7_route");
-
+			QLabelLookupGlobal.cache.cookie.route = route;
 			this.log.log("tgw_l7_route:", route?.value);
 		});
 		this.log.log("QLabelLookupPage 逻辑已加载");

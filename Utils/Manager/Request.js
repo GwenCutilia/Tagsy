@@ -294,22 +294,48 @@ class W2Request extends HttpRequest {
 	}
 }
 class QLabelLookupRequest extends HttpRequest {
-	static async login() {
+	static async test() {
 		const url = "https://qlabel.tencent.com/api/report/workbenchUserWorkingReport";
 		const headers = {
-			"Content-Type": "application/json;charset=UTF-8"
+			"Content-Type": "application/json;charset=UTF-8",
+			"X-Requested-With": "XMLHttpRequest",
+			"sw8": "1-ZjE3NGEzMTMtN2EwYS00MzE5LTgxNDEtNWQ3NjRkNDM4YmZk-YmZkODkxZDYtOTg5OC00OWFhLWExMzUtYTFlNzkyNTdlNTk1-1-YWVnaXM=-MS40My43-L3dvcmtiZW5jaC93b3JrLXRpbWU=-cWxhYmVsLnRlbmNlbnQuY29t",
+			"Cookie": "SESSION=" + 
+				QLabelLookupGlobal.cache.cookie.session + 
+				"; tgw_l7_route=" + 
+				QLabelLookupGlobal.cache.cookie.route
 		};
 		const data = {
-			username: LSGlobal.cache.information.name,
-			password: LSGlobal.cache.information.password
+			"jsonrpc": "2.0",
+			"method": "workbenchUserWorkingReport",
+			"id": 1763976310742,
+			"params": {
+				"page": {
+					"start": 0,
+					"size": 10,
+					"return_total": 1
+				},
+				"user_id": "",
+				"nick_name": "",
+				"company_name": "",
+				"task_id": "",
+				"task_name": "",
+				"team_id": "",
+				"team_name": "",
+				"template_level": "",
+				"template_scene": "",
+				"stat_type": 1,
+				"begin_date": "2025-11-22 00:00:00",
+				"end_date": "2025-11-23 00:00:00"
+			}
 		};
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("login result: ", result);
+		this.log.log("test result: ", result);
 		if (result.code === 200) {
-			LSGlobal.cache.cookie.token = result.token;
+			this.log.log("test:", result);
 		} else {
-			this.log.error("LS login failed: ", result.message);
+			this.log.error("test login failed: ", result.message);
 		}
 		
 		return result;
