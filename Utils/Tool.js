@@ -915,8 +915,8 @@ class Time {
 	}
 	/**
 	 * 根据今天的日期生成一个偏移后的时间范围
-	 * @param {number} offsetStart - 相对今天的起始偏移天数（负数为过去，正数为未来）
-	 * @param {number} offsetEnd - 相对今天的结束偏移天数（负数为过去，正数为未来）
+	 * @param {number} offsetStart - 相对今天的起始偏移天数(负数为过去, 正数为未来)
+	 * @param {number} offsetEnd - 相对今天的结束偏移天数(负数为过去, 正数为未来)
 	 * @returns {[string, string]} 返回 ["2025-09-15", "2025-10-15"] 这样的数组
 	 */
 	static getDateRangeByToday(offsetStart, offsetEnd) {

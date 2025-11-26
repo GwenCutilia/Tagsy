@@ -377,9 +377,42 @@ class LSGlobal extends Global {
 		daily_report_list_table: "#daily_report_list_table", // 日报列表表格
 	}
 }
+class QLabelGlobal extends Global {
+	static async init() {
+		this.cache = await super.initObject(this.cache, "QLabelGlobal.cache");
+	}
+	static cache = {
+		cookie: {
+			questionType: [], // 题型, 用来记录题包以及对应的绩效指标
+		}
+	}
+	static task = {
+		uiTask: {
+			annotationList: "QLABEL_ANNOTATION_LIST_UI_TASK",
+		}
+	}
+	static setting = {
+		annotationList: {
+			LookupTime: {
+				startTime: 0,
+				endTime: 1,
+			}
+		}
+	}
+	static domMap = {
+		login_status_label: "#login_status_label", // 登录状态标签
+		
+		annotation_list_title: "#annotation_list_title", // 标注列表标题
+		prev_day_btn: "#prev_day_btn", // 前一天按钮
+		next_day_btn: "#next_day_btn", // 后一天按钮
+		homework_load_tatistics_label: "#homework_load_tatistics_label", // 作业量统计标签
+		annotation_list_loading: "#annotation_list_loading", // 标注列表加载图标
+		annotation_list_table: "#annotation_list_table", // 标注列表表格
+	}
+}
 class QLabelLookupGlobal extends Global {
 	static async init() {
-		this.cache = await super.initObject(this.cache, "ApiboxGlobal.cache");
+		this.cache = await super.initObject(this.cache, "QLabelLookupGlobal.cache");
 	}
 	static cache = {
 		cookie: {

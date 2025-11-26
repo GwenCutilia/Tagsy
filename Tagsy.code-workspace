@@ -54,6 +54,7 @@
 			"editor.tabSize": 4
 		},
 		"commentTranslate.targetLanguage": "zh-CN",
-		"commentTranslate.source": "Bing"
+		"commentTranslate.source": "Bing",
+		"commentTranslate.multiLineMerge": true
 	}
 }

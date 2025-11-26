@@ -1,6 +1,6 @@
-class Page {
-	// 静态属性: 日志和路由配置
-	static log = new Logger("Page");
+class Route {
+	static log = new Logger("Route");
+
 	static routes = {
 		"Login.html": () => new Login(),
 		"Index.html": () => new Index(),
@@ -8,50 +8,56 @@ class Page {
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
-		"work-time": () => new QLabelLookup(),
-		// 可添加其他页面路由
+		"work-time": () => Lookup(), // work-time 路由指向 Page
 	};
 
-	// 实例属性: 每个页面实例的日志
+	static async init() {
+		const page = location.pathname.split("/").pop() || location.pathname;
+
+		if (this.routes[page]) {
+			await this.routes[page](); // 调用对应路由逻辑
+		} else {
+			this.log.error("没有为该页面配置逻辑:", page);
+		}
+	}
+}
+
+class Page {
+	static log = new Logger("Page");
+
 	constructor() {
 		this.tooltip = new ToolTip();
 		this.log = new Logger(this.constructor.name);
 	}
 
-	// 静态方法: 初始化页面路由
+	// 初始化页面逻辑
 	static async init() {
-		await Template.init();
-		const page = location.pathname.split("/").pop() || location.pathname; // 如果是 /workbench/work-time 就取 pathname
-		if (this.routes[page]) {
-			this.routes[page]();
+		if (this.isTemplatePage()) {
+			await this.initValue();
+			await this.loadTask();
+			await this.loadFramework();
+			this.log.log('Page初始化完成');
+		} else if (this.isQLabelLookupPage()) {
+			await this.initQLabelLookup();
 		} else {
-			this.log.error("没有为该页面配置逻辑:", page);
+			this.log.warn('非Template页, 也不是QLabelLookup页');
 		}
 	}
 
-	bindEvents() {
-		// 页面事件绑定，具体页面可覆盖
+	// 单独处理 QLabelLookup 初始化
+	static async initQLabelLookup() {
+		await QLabelLookupGlobal.init();
+		this.log.log('QLabelLookup初始化完成');
 	}
-}
-class Template {
-	static log = new Logger("Template");
-	static async init() {
-		if (!this.isTemplatePage()) {
-			await QLabelLookupGlobal.init();
-			return;
-		}
-		await this.initValue();
-		this.loadTask();
-		this.loadFramework();
-		this.log.log('Template初始化完成');
+
+	static isTemplatePage() {
+		return location.pathname.includes('/Template/');
 	}
-	// 初始化框架
-	static async loadFramework() {
-		W2Request.getLoginPage();
-		this.initPage();
-		Message.init();
-		new Framework();
+
+	static isQLabelLookupPage() {
+		return location.hostname === 'qlabel.tencent.com' && location.pathname.includes('/workbench/work-time');
 	}
+
 	static async initValue() {
 		await LoginGlobal.init();
 		await W2Global.init();
@@ -60,14 +66,19 @@ class Template {
 		await FrameworkGlobal.init();
 		await SystemGlobal.init();
 	}
+
 	static async loadTask() {
-		this.W2Task();
-		this.LSTask();
+		await this.W2Task();
+		await this.LSTask();
 	}
-	static isTemplatePage() {
-		return location.pathname.includes('/Template/');
+
+	static async loadFramework() {
+		W2Request.getLoginPage();
+		await this.initPage();
+		await Message.init();
+		new Framework();
 	}
-	// 页面跳转
+
 	static async initPage() {
 		if (location.pathname.endsWith("Login.html")) {
 			if (LoginGlobal.status.login === true) {
@@ -80,12 +91,13 @@ class Template {
 			location.href = "./Login.html";
 		}
 	}
-	// W2任务
+
 	static async W2Task() {
 		await W2.login();
 		await W2.intervalTask();
 		await W2.currentTask();
 	}
+
 	static async LSTask() {
 		await LS.login();
 		await LS.currentTask();
@@ -1217,31 +1229,184 @@ class QLabel extends Page {
 	constructor() {
 		super();
 		this.init();
-		// this.bindEvents();
-		// this.updateUIElement();
+		this.bindEvents();
+		this.updateUIElement();
 	}
 	init() {
+		this.initValue();
+		this.initTask();
+	}
+	// 初始化任务, 先运行一次任务
+	initTask() {
+		this.annotationList();
+	}
+	bindEvents() {
+		this.prev_day_btn.addEventListener("click", async () => {
+			QLabelGlobal.setting.annotationList.LookupTime.startTime--;
+			QLabelGlobal.setting.annotationList.LookupTime.endTime--;
+			this.annotationList();
+		});
+		this.next_day_btn.addEventListener("click", async () => {
+			QLabelGlobal.setting.annotationList.LookupTime.startTime++;
+			QLabelGlobal.setting.annotationList.LookupTime.endTime++;
+			// this.log.debug("QLabelGlobal.setting.annotationList.LookupTime.endTime", QLabelGlobal.setting.annotationList.LookupTime.endTime);
+			this.annotationList();
+		});
+	}
+	updateUIElement() {
+		let task = [
+			{
+				action: async () => {
+					this.annotationList();
+				},
+				intervalMs: 1000 * 60 * 2,
+				name: QLabelGlobal.task.uiTask.annotationList
+			}
+		];
+		task.forEach(cofig => {
+			TimerScheduler.setIntervalTask(
+				cofig.action,
+				cofig.intervalMs,
+				cofig.name
+			);
+		});
+	}
+	initValue() {
+		this.domMap = QLabelGlobal.domMap;
+		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
+			this[key] = DomHelper.bySelector(selectorDomID);
+		});
+	}
+	async annotationList() {
+		const container = DomHelper.bySelector("#annotation_list_table");
+		if (!container) return;
 
+		// 清空容器
+		container.innerHTML = "";
+
+		// 更改列表标题
+		let startTime = QLabelGlobal.setting.annotationList.LookupTime.startTime;
+		let endTime = QLabelGlobal.setting.annotationList.LookupTime.endTime;
+		this.annotation_list_title.innerText = Time.getDateRangeByToday(startTime, endTime)[0];
+
+		// 获取标注和质检数据
+		const result1 = await QLabelRequest.getTotalAnnotationsList();
+		const result2 = await QLabelRequest.getQualityInspectionList();
+
+		// 合并数据并加 _type
+		const mergedData = [];
+		result1.result.data.forEach(item => mergedData.push({ ...item, _type: "annotation" }));
+		result2.result.data.forEach(item => mergedData.push({ ...item, _type: "inspection" }));
+
+		// 遍历数据生成行
+		for (let i = 0; i < mergedData.length; i++) {
+			const item = mergedData[i];
+
+			// 创建行
+			const row = DomHelper.createDom("div");
+			row.setAttribute("id", item._type + "_list_" + i + "_row");
+			row.classList.add("grid");
+			row.classList.add("grid-cols-[60%_10%_10%_10%_10%]");
+			row.classList.add("flex");
+			row.classList.add("justify-between");
+			row.classList.add("items-center");
+			row.classList.add("transition");
+			row.classList.add("shadow-sm");
+			row.classList.add("rounded-xl");
+			row.classList.add("px-4");
+			row.classList.add("py-3");
+			row.classList.add("border");
+			row.classList.add("border-gray-100");
+			row.classList.add("bg-gray-50");
+			row.classList.add("hover:bg-blue-50");
+
+			// 任务名称单元格
+			const taskDiv = document.createElement("div");
+			taskDiv.classList.add("flex", "flex-col");
+			const taskLabel = document.createElement("span");
+			taskLabel.classList.add("text-gray-500", "text-xs");
+			taskLabel.textContent = "任务名称";
+			const taskValue = document.createElement("span");
+			taskValue.classList.add("text-base", "font-semibold", "text-gray-800");
+			taskValue.textContent = item.task_name || "--";
+			taskDiv.appendChild(taskLabel);
+			taskDiv.appendChild(taskValue);
+			row.appendChild(taskDiv);
+
+			// 数量单元格
+			const numDiv = document.createElement("div");
+			numDiv.classList.add("flex", "flex-col");
+			const numLabel = document.createElement("span");
+			numLabel.classList.add("text-gray-500", "text-xs");
+			numLabel.textContent = "数量";
+			const numValue = document.createElement("span");
+			numValue.classList.add("text-base", "font-semibold", "text-gray-800");
+			numValue.textContent = item.total_labeled_num !== undefined ? item.total_labeled_num : "--";
+			numDiv.appendChild(numLabel);
+			numDiv.appendChild(numValue);
+			row.appendChild(numDiv);
+
+			// 标注/质检总时长单元格
+			const durationDiv = document.createElement("div");
+			durationDiv.classList.add("flex", "flex-col");
+			const durationLabel = document.createElement("span");
+			durationLabel.classList.add("text-gray-500", "text-xs");
+			durationLabel.textContent = item._type === "annotation" ? "标注总时长" : "质检总时长";
+			const durationValue = document.createElement("span");
+			durationValue.classList.add("text-base", "font-semibold", "text-gray-800");
+			durationValue.textContent = item.labeled_duration_hour || "--";
+			durationDiv.appendChild(durationLabel);
+			durationDiv.appendChild(durationValue);
+			row.appendChild(durationDiv);
+
+			// 绩效指标单元格
+			const performanceDiv = document.createElement("div");
+			performanceDiv.classList.add("flex", "flex-col");
+			const performanceLabel = document.createElement("span");
+			performanceLabel.classList.add("text-gray-500", "text-xs");
+			performanceLabel.textContent = "绩效指标";
+			const performanceValue = document.createElement("span");
+			performanceValue.classList.add("text-base", "font-semibold", "text-gray-800");
+			performanceValue.textContent = "--";
+			performanceDiv.appendChild(performanceLabel);
+			performanceDiv.appendChild(performanceValue);
+			row.appendChild(performanceDiv);
+
+			// 统计时长单元格
+			const calcDiv = document.createElement("div");
+			calcDiv.classList.add("flex", "flex-col");
+			const calcLabel = document.createElement("span");
+			calcLabel.classList.add("text-gray-500", "text-xs");
+			calcLabel.textContent = "统计时长";
+			const calcValue = document.createElement("span");
+			calcValue.classList.add("text-base", "font-semibold", "text-gray-800");
+			calcValue.textContent = "--";
+			calcDiv.appendChild(calcLabel);
+			calcDiv.appendChild(calcValue);
+			row.appendChild(calcDiv);
+
+			// 添加到容器
+			container.appendChild(row);
+		}
 	}
 }
-class QLabelWorkPage extends Page {
+class WorkPage extends QLabel {
 	constructor() {
 
 	}
 
 }
-class QLabelLookup extends Page {
+class Lookup extends QLabel {
 	constructor() {
-		super();
 		GM.CookieList({}, list => {
 			const session = list.find(c => c.name === "SESSION");
-			QLabelLookupGlobal.cache.cookie.session = session;
-			console.log.log("SESSION:", session?.value);
+			QLabelLookupGlobal.cache.cookie.session = session.value;
+			this.log.log("SESSION:", session?.value);
 		});
 
 		GM.CookieList({}, list => {
 			const route = list.find(c => c.name === "tgw_l7_route");
-			QLabelLookupGlobal.cache.cookie.route = route;
+			QLabelLookupGlobal.cache.cookie.route = route.value;
 			this.log.log("tgw_l7_route:", route?.value);
 		});
 		this.log.log("QLabelLookupPage 逻辑已加载");
@@ -1311,8 +1476,9 @@ class LS extends Page {
 		let result = await LSRequest.fillDailyReport();
 		if (result.code === 200) {
 			this.log.log("填写日报成功, 返回信息: ", result.msg);
+			Message.notify({body: "LS 日报填写成功"});
 		} else {
-			
+			this.log.error("填写日报失败, 返回信息: ", result.msg);
 		}
 	}
 	// 事件绑定
@@ -1476,7 +1642,6 @@ class LS extends Page {
 				end: LSGlobal.setting.time_range_fill_daily_report_end,
 				action: async () => { 
 					await LS.fillDailyReport() ;
-					Message.notify({body: "LS 日报填写成功"});
 				},
 				name: LSGlobal.task.dailyTask.fillDailyReport
 			}
