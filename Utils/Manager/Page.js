@@ -8,7 +8,7 @@ class Route {
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
 		"Setting.html": () => new Setting(),
-		"work-time": () => Lookup(), // work-time 路由指向 Page
+		"work-time": () => new Lookup(), // work-time 路由指向 Page
 	};
 
 	static async init() {
@@ -61,6 +61,7 @@ class Page {
 	static async initValue() {
 		await LoginGlobal.init();
 		await W2Global.init();
+		await QLabelGlobal.init();
 		await LSGlobal.init();
 		await ApiboxGlobal.init();
 		await FrameworkGlobal.init();
@@ -1277,118 +1278,183 @@ class QLabel extends Page {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
 	}
-	async annotationList() {
-		const container = DomHelper.bySelector("#annotation_list_table");
-		if (!container) return;
+async annotationList() {
+	const container = DomHelper.bySelector("#annotation_list_table");
+	if (!container) return;
 
-		// 清空容器
-		container.innerHTML = "";
+	// 清空容器
+	container.innerHTML = "";
 
-		// 更改列表标题
-		let startTime = QLabelGlobal.setting.annotationList.LookupTime.startTime;
-		let endTime = QLabelGlobal.setting.annotationList.LookupTime.endTime;
-		this.annotation_list_title.innerText = Time.getDateRangeByToday(startTime, endTime)[0];
+	// 更改列表标题
+	let startTime = QLabelGlobal.setting.annotationList.LookupTime.startTime;
+	let endTime = QLabelGlobal.setting.annotationList.LookupTime.endTime;
+	this.annotation_list_title.innerText = Time.getDateRangeByToday(startTime, endTime)[0];
 
-		// 获取标注和质检数据
-		const result1 = await QLabelRequest.getTotalAnnotationsList();
-		const result2 = await QLabelRequest.getQualityInspectionList();
+	// 获取标注和质检数据
+	const result1 = await QLabelRequest.getTotalAnnotationsList();
+	const result2 = await QLabelRequest.getQualityInspectionList();
 
-		// 合并数据并加 _type
-		const mergedData = [];
-		result1.result.data.forEach(item => mergedData.push({ ...item, _type: "annotation" }));
-		result2.result.data.forEach(item => mergedData.push({ ...item, _type: "inspection" }));
+	// 合并数据并加 _type
+	const mergedData = [];
+	result1.result.data.forEach(item => mergedData.push({ ...item, _type: "annotation" }));
+	result2.result.data.forEach(item => mergedData.push({ ...item, _type: "inspection" }));
 
-		// 遍历数据生成行
-		for (let i = 0; i < mergedData.length; i++) {
-			const item = mergedData[i];
-
-			// 创建行
-			const row = DomHelper.createDom("div");
-			row.setAttribute("id", item._type + "_list_" + i + "_row");
-			row.classList.add("grid");
-			row.classList.add("grid-cols-[60%_10%_10%_10%_10%]");
-			row.classList.add("flex");
-			row.classList.add("justify-between");
-			row.classList.add("items-center");
-			row.classList.add("transition");
-			row.classList.add("shadow-sm");
-			row.classList.add("rounded-xl");
-			row.classList.add("px-4");
-			row.classList.add("py-3");
-			row.classList.add("border");
-			row.classList.add("border-gray-100");
-			row.classList.add("bg-gray-50");
-			row.classList.add("hover:bg-blue-50");
-
-			// 任务名称单元格
-			const taskDiv = document.createElement("div");
-			taskDiv.classList.add("flex", "flex-col");
-			const taskLabel = document.createElement("span");
-			taskLabel.classList.add("text-gray-500", "text-xs");
-			taskLabel.textContent = "任务名称";
-			const taskValue = document.createElement("span");
-			taskValue.classList.add("text-base", "font-semibold", "text-gray-800");
-			taskValue.textContent = item.task_name || "--";
-			taskDiv.appendChild(taskLabel);
-			taskDiv.appendChild(taskValue);
-			row.appendChild(taskDiv);
-
-			// 数量单元格
-			const numDiv = document.createElement("div");
-			numDiv.classList.add("flex", "flex-col");
-			const numLabel = document.createElement("span");
-			numLabel.classList.add("text-gray-500", "text-xs");
-			numLabel.textContent = "数量";
-			const numValue = document.createElement("span");
-			numValue.classList.add("text-base", "font-semibold", "text-gray-800");
-			numValue.textContent = item.total_labeled_num !== undefined ? item.total_labeled_num : "--";
-			numDiv.appendChild(numLabel);
-			numDiv.appendChild(numValue);
-			row.appendChild(numDiv);
-
-			// 标注/质检总时长单元格
-			const durationDiv = document.createElement("div");
-			durationDiv.classList.add("flex", "flex-col");
-			const durationLabel = document.createElement("span");
-			durationLabel.classList.add("text-gray-500", "text-xs");
-			durationLabel.textContent = item._type === "annotation" ? "标注总时长" : "质检总时长";
-			const durationValue = document.createElement("span");
-			durationValue.classList.add("text-base", "font-semibold", "text-gray-800");
-			durationValue.textContent = item.labeled_duration_hour || "--";
-			durationDiv.appendChild(durationLabel);
-			durationDiv.appendChild(durationValue);
-			row.appendChild(durationDiv);
-
-			// 绩效指标单元格
-			const performanceDiv = document.createElement("div");
-			performanceDiv.classList.add("flex", "flex-col");
-			const performanceLabel = document.createElement("span");
-			performanceLabel.classList.add("text-gray-500", "text-xs");
-			performanceLabel.textContent = "绩效指标";
-			const performanceValue = document.createElement("span");
-			performanceValue.classList.add("text-base", "font-semibold", "text-gray-800");
-			performanceValue.textContent = "--";
-			performanceDiv.appendChild(performanceLabel);
-			performanceDiv.appendChild(performanceValue);
-			row.appendChild(performanceDiv);
-
-			// 统计时长单元格
-			const calcDiv = document.createElement("div");
-			calcDiv.classList.add("flex", "flex-col");
-			const calcLabel = document.createElement("span");
-			calcLabel.classList.add("text-gray-500", "text-xs");
-			calcLabel.textContent = "统计时长";
-			const calcValue = document.createElement("span");
-			calcValue.classList.add("text-base", "font-semibold", "text-gray-800");
-			calcValue.textContent = "--";
-			calcDiv.appendChild(calcLabel);
-			calcDiv.appendChild(calcValue);
-			row.appendChild(calcDiv);
-
-			// 添加到容器
-			container.appendChild(row);
-		}
+	// 初始化 tasknameAndIndicators
+	if (!QLabelGlobal.setting.annotationList.tasknameAndIndicators) {
+		QLabelGlobal.setting.annotationList.tasknameAndIndicators = [];
 	}
+
+	// 临时变量（数组形式）
+	let tempIndicators = [...QLabelGlobal.setting.annotationList.tasknameAndIndicators];
+
+	// 遍历数据生成行
+	for (let i = 0; i < mergedData.length; i++) {
+		const item = mergedData[i];
+
+		// 创建行
+		const row = DomHelper.createDom("div");
+		row.setAttribute("id", item._type + "_list_" + i + "_row");
+		row.classList.add(
+			"grid", "grid-cols-[63%_7%_10%_10%_10%]",
+			"flex", "justify-between", "items-center",
+			"transition", "shadow-sm", "rounded-xl", 
+			"px-4", "py-3", "border", "border-gray-100",
+			"bg-gray-50", "hover:bg-blue-50"
+		);
+
+		// 任务名称
+		const taskDiv = document.createElement("div");
+		taskDiv.classList.add("flex", "flex-col");
+		const taskLabel = document.createElement("span");
+		taskLabel.classList.add("text-gray-500", "text-xs");
+		taskLabel.textContent = "任务名称";
+		const taskValue = document.createElement("span");
+		taskValue.classList.add("text-base", "font-semibold", "text-gray-800");
+		taskValue.textContent = item.task_name || "--";
+		taskDiv.appendChild(taskLabel);
+		taskDiv.appendChild(taskValue);
+		row.appendChild(taskDiv);
+
+		// 数量
+		const numDiv = document.createElement("div");
+		numDiv.classList.add("flex", "flex-col");
+		const numLabel = document.createElement("span");
+		numLabel.classList.add("text-gray-500", "text-xs");
+		numLabel.textContent = "数量";
+		const numValue = document.createElement("span");
+		numValue.classList.add("text-base", "font-semibold", "text-gray-800");
+		numValue.textContent = item.total_labeled_num !== undefined ? item.total_labeled_num : "--";
+		numDiv.appendChild(numLabel);
+		numDiv.appendChild(numValue);
+		row.appendChild(numDiv);
+
+		// 标注/质检总时长
+		const durationDiv = document.createElement("div");
+		durationDiv.classList.add("flex", "flex-col");
+		const durationLabel = document.createElement("span");
+		durationLabel.classList.add("text-gray-500", "text-xs");
+		durationLabel.textContent = item._type === "annotation" ? "标注总时长" : "质检总时长";
+		const durationValue = document.createElement("span");
+		durationValue.classList.add("text-base", "font-semibold", "text-gray-800");
+		durationValue.textContent = item.labeled_duration_hour || "--";
+		durationDiv.appendChild(durationLabel);
+		durationDiv.appendChild(durationValue);
+		row.appendChild(durationDiv);
+
+		// 绩效指标
+		const performanceDiv = document.createElement("div");
+		performanceDiv.classList.add("flex", "flex-col");
+		const performanceLabel = document.createElement("span");
+		performanceLabel.classList.add("text-gray-500", "text-xs");
+		performanceLabel.textContent = "绩效指标";
+		const performanceValue = document.createElement("span");
+		performanceValue.classList.add("text-base", "font-semibold", "text-gray-800", "cursor-pointer");
+
+		// 当前任务时长
+		const calcDiv = document.createElement("div");
+		calcDiv.classList.add("flex", "flex-col");
+		const calcLabel = document.createElement("span");
+		calcLabel.classList.add("text-gray-500", "text-xs");
+		calcLabel.textContent = "当前任务时长";
+		const calcValue = document.createElement("span");
+		calcValue.classList.add("text-base", "font-semibold", "text-gray-800");
+
+		// 根据 taskname 自动填充已有绩效指标
+		let existingIndex = tempIndicators.findIndex(v => v.taskname === item.task_name);
+		let indicatorValue = existingIndex >= 0 ? tempIndicators[existingIndex].indicators : null;
+		performanceValue.textContent = indicatorValue !== null ? indicatorValue : "--";
+
+		// 如果已有指标，立即计算当前任务时长
+		if (indicatorValue !== null && item.total_labeled_num > 0) {
+			calcValue.textContent = (item.total_labeled_num / indicatorValue).toFixed(2);
+		} else {
+			calcValue.textContent = "--";
+		}
+
+		// 点击修改绩效指标
+		performanceValue.addEventListener("click", () => {
+			if (performanceDiv.querySelector("input")) return;
+
+			const input = document.createElement("input");
+			input.type = "number";
+			input.value = performanceValue.textContent === "--" ? "0" : performanceValue.textContent;
+			input.classList.add("text-base", "font-semibold", "text-gray-800");
+			input.style.width = "4rem";
+			input.style.outline = "none";
+			input.style.border = "none";
+			input.style.background = "transparent";
+			input.style.padding = "0";
+			input.style.margin = "0";
+
+			performanceValue.style.display = "none";
+			performanceDiv.appendChild(input);
+			input.focus();
+			input.select();
+
+			input.addEventListener("blur", () => {
+				let val = Number(input.value);
+				if (isNaN(val) || val <= 0) {
+					performanceValue.textContent = "--";
+					calcValue.textContent = "--";
+				} else {
+					performanceValue.textContent = val;
+					// 更新当前任务时长
+					let total = Number(item.total_labeled_num || 0);
+					calcValue.textContent = total > 0 ? (total / val).toFixed(2) : "--";
+
+					// 临时变量更新
+					if (existingIndex >= 0) {
+						tempIndicators[existingIndex].indicators = val;
+					} else {
+						tempIndicators.push({ taskname: item.task_name, indicators: val });
+						existingIndex = tempIndicators.length - 1;
+					}
+
+					// 最终赋值回 Proxy（触发 set）
+					QLabelGlobal.setting.annotationList.tasknameAndIndicators = [...tempIndicators];
+
+					console.log("tasknameAndIndicators updated:", QLabelGlobal.setting.annotationList.tasknameAndIndicators);
+				}
+
+				performanceDiv.removeChild(input);
+				performanceValue.style.display = "";
+			});
+		});
+
+		
+		performanceDiv.appendChild(performanceLabel);
+		performanceDiv.appendChild(performanceValue);
+		row.appendChild(performanceDiv);
+
+		calcDiv.appendChild(calcLabel);
+		calcDiv.appendChild(calcValue);
+		row.appendChild(calcDiv);
+
+		// 添加到容器
+		container.appendChild(row);
+	}
+}
+
 }
 class WorkPage extends QLabel {
 	constructor() {

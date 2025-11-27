@@ -380,6 +380,7 @@ class LSGlobal extends Global {
 class QLabelGlobal extends Global {
 	static async init() {
 		this.cache = await super.initObject(this.cache, "QLabelGlobal.cache");
+		this.setting = await super.initObject(this.setting, "QLabelGlobal.setting");
 	}
 	static cache = {
 		cookie: {
@@ -396,12 +397,17 @@ class QLabelGlobal extends Global {
 			LookupTime: {
 				startTime: 0,
 				endTime: 1,
-			}
+			},
+			tasknameAndIndicators: [
+				{ taskname: "任务1", indicators: 5 },
+				{ taskname: "任务2", indicators: 10 },
+			]
 		}
 	}
+	
 	static domMap = {
 		login_status_label: "#login_status_label", // 登录状态标签
-		
+
 		annotation_list_title: "#annotation_list_title", // 标注列表标题
 		prev_day_btn: "#prev_day_btn", // 前一天按钮
 		next_day_btn: "#next_day_btn", // 后一天按钮
