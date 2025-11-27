@@ -1456,13 +1456,13 @@ async annotationList() {
 }
 
 }
-class WorkPage extends QLabel {
+class WorkPage extends Page {
 	constructor() {
 
 	}
 
 }
-class Lookup extends QLabel {
+class Lookup extends Page {
 	constructor() {
 		GM.CookieList({}, list => {
 			const session = list.find(c => c.name === "SESSION");
