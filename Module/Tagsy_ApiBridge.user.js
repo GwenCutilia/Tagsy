@@ -36,6 +36,7 @@
 // @connect		drive.alittlesnowflake.uk
 // @connect		api.ipify.org
 // @connect		cloud.seatable.cn
+// @connect		qlabel.tencent.com
 // @run-at 		document-start
 // @license		CC
 // ==/UserScript==
