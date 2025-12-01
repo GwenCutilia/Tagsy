@@ -420,6 +420,22 @@ class LSRequest extends HttpRequest {
 		this.log.log("getInfo result: ", result);
 		return result;
 	}
+	static async getFillDailyReportName() {
+		let url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/user/";
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"Authorization": "Bearer " + LSGlobal.cache.cookie.token,
+		}
+		const allUrl = url + "account?taskId=" + LSGlobal.cache.cookie.task_id + "&platform=企鹅标注-在线标注平台";
+		const result = await this._request("GET", allUrl, headers);
+		if (result.status === 0) {
+			LSGlobal.cache.cookie.name = result.data[0].name;
+		} else {
+			this.log.error("getFillDailyReportName failed: ", result);
+		}
+		this.log.log("getFillDailyReportName result: ", result);
+		return result;
+	}
 	// 获取项目工作区信息
 	static async getPersonalInformat() {
 		const url = "http://biaoju.labelvibe.com:8088/prod-api/project/task/sub/list";
@@ -469,7 +485,7 @@ class LSRequest extends HttpRequest {
 					"dataCount": "0"
 				}
 			],
-			"account": LSGlobal.cache.information.name,
+			"account": LSGlobal.cache.cookie.name,
 			"recordTime": Time.generateISOTimestamp(undefined, 16, -1),
 			"subTaskId": LSGlobal.cache.cookie.sub_task_id,
 			"platform": "企鹅标注-在线标注平台",

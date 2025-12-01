@@ -1489,6 +1489,7 @@ class WorkPage extends Page {
 }
 class Lookup extends Page {
 	constructor() {
+		super();
 		GM.CookieList({}, list => {
 			const session = list.find(c => c.name === "SESSION");
 			QLabelLookupGlobal.cache.cookie.session = session.value;
@@ -1551,6 +1552,9 @@ class LS extends Page {
 			} else {
 				this.log.error("LS -> login() -> 获取个人信息失败");
 			}
+		}
+		if (LSGlobal.cache.cookie.name === null) {
+			await LSRequest.getFillDailyReportName();
 		}
 	}
 	// 退出登录

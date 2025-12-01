@@ -314,6 +314,7 @@ class LSGlobal extends Global {
 			id: null, // 用户编号
 			task_id: null, // 工作区编号
 			sub_task_id: null, // 子工作区编号
+			name: null, // 用户日报名称
 		},
 		dailyReport: {
 			list: null, // 日报列表
