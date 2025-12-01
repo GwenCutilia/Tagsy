@@ -2055,6 +2055,7 @@ class Setting extends Page {
 		}
 	}
 	async updateUIElement() {
+		this.log.log("设置页面 UI 更新中...");
 		this.api_box_user_id_account_setting_input.value = ApiboxGlobal.cache.information.id;
 		this.api_box_api_key_account_setting_input.value = ApiboxGlobal.cache.information.key;
 
@@ -2092,7 +2093,7 @@ class Setting extends Page {
 		this.ls_time_range_login_out_end_module_setting_input.value = LSGlobal.setting.time_range_login_out_end;
 		this.ls_time_range_fill_daily_report_start_module_setting_input.value = LSGlobal.setting.time_range_fill_daily_report_start;
 		this.ls_time_range_fill_daily_report_end_module_setting_input.value = LSGlobal.setting.time_range_fill_daily_report_end;
-		
+		this.log.log("设置页面 UI 更新完成");
 	}
 }
 // 界面逻辑
