@@ -101,7 +101,12 @@ class Page {
 	static async loadFramework() {
 		W2Request.getLoginPage();
 		await this.initPage();
-		await Message.init();
+
+		// 如果不是本地路径, 才初始化消息通知
+		if (location.protocol !== "file:") {
+			await Message.init();
+		}
+
 		new Framework();
 	}
 
@@ -1267,19 +1272,32 @@ class QLabel extends Page {
 		this.annotationList();
 	}
 	bindEvents() {
+		// 查看上一天的作业数量
 		this.prev_day_btn.addEventListener("click", async () => {
+			this.setButtonsDisabled(true);
 			QLabelGlobal.setting.annotationList.LookupTime.startTime--;
 			QLabelGlobal.setting.annotationList.LookupTime.endTime--;
-			this.annotationList();
+			await this.annotationList();
+			this.setButtonsDisabled(false);
 		});
+		// 查看下一天的作业数量
 		this.next_day_btn.addEventListener("click", async () => {
+			this.setButtonsDisabled(true);
 			QLabelGlobal.setting.annotationList.LookupTime.startTime++;
 			QLabelGlobal.setting.annotationList.LookupTime.endTime++;
 			// this.log.debug("QLabelGlobal.setting.annotationList.LookupTime.endTime", QLabelGlobal.setting.annotationList.LookupTime.endTime);
-			this.annotationList();
+			await this.annotationList();
+			this.setButtonsDisabled(false);
+		});
+		// 刷新当前的作业数量列表
+		this.reflash_btn.addEventListener("click", async () => {
+			this.setButtonsDisabled(true);
+			await this.annotationList();
+			this.setButtonsDisabled(false);
 		});
 	}
 	updateUIElement() {
+		this.addTooltipMessage();
 		let task = [
 			{
 				action: async () => {
@@ -1297,16 +1315,44 @@ class QLabel extends Page {
 			);
 		});
 	}
+	addTooltipMessage() {
+		// 未建设内容
+		this.tooltip.addTooltip(this.login_status_div, "待建设");
+		this.tooltip.addTooltip(this.homework_load_statistics_div, "待建设");
+		// 标注列表
+		this.tooltip.addTooltip(this.prev_day_btn, "查看前一天的作业数量");
+		this.tooltip.addTooltip(this.next_day_btn, "查看后一天的作业数量");
+		this.tooltip.addTooltip(this.reflash_btn, "刷新作业数量列表");
+
+	}
 	initValue() {
 		this.domMap = QLabelGlobal.domMap;
 		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
 	}
-	async annotationList() {
-		const container = DomHelper.bySelector("#annotation_list_table");
-		if (!container) return;
+	setButtonsDisabled(disabled) {
+		this.prev_day_btn.disabled = disabled;
+		this.next_day_btn.disabled = disabled;
+		this.reflash_btn.disabled = disabled;
 
+		if (disabled) {
+			this.annotation_list_loading.classList.remove("hidden");
+			this.prev_day_btn.classList.add("opacity-50", "pointer-events-none");
+			this.next_day_btn.classList.add("opacity-50", "pointer-events-none");
+			this.reflash_btn.classList.add("opacity-50", "pointer-events-none");
+		} else {
+			this.annotation_list_loading.classList.add("hidden");
+			this.prev_day_btn.classList.remove("opacity-50", "pointer-events-none");
+			this.next_day_btn.classList.remove("opacity-50", "pointer-events-none");
+			this.reflash_btn.classList.remove("opacity-50", "pointer-events-none");
+		}
+	}
+	// 标注和质检列表
+	async annotationList() {
+		const container = this.annotation_list_table;
+		if (!container) return;
+		
 		// 清空容器
 		container.innerHTML = "";
 
@@ -1324,6 +1370,27 @@ class QLabel extends Page {
 		result1.result.data.forEach(item => mergedData.push({ ...item, _type: "annotation" }));
 		result2.result.data.forEach(item => mergedData.push({ ...item, _type: "inspection" }));
 
+		// 当天没有数据时的处理
+		if (mergedData.length === 0) {
+			let emptyBox = DomHelper.createDom("div");
+			emptyBox.id = "annotation_list_empty_label";
+			emptyBox.classList.add(
+				"flex", "flex-col",
+				"items-center", "justify-center",
+				"h-[75px]", "text-gray-400", "select-none"
+			);
+
+			const icon = document.createElement("i");
+			icon.classList.add("fa-regular", "fa-folder-open", "text-4xl", "mb-3");
+			const text = document.createElement("div");
+			text.classList.add("text-sm");
+			text.textContent = "当前没有标注记录喔";
+
+			emptyBox.appendChild(icon);
+			emptyBox.appendChild(text);
+			container.appendChild(emptyBox);
+		}
+		
 		// 初始化 tasknameAndIndicators
 		if (!QLabelGlobal.setting.annotationList.tasknameAndIndicators) {
 			QLabelGlobal.setting.annotationList.tasknameAndIndicators = [];
@@ -1474,10 +1541,32 @@ class QLabel extends Page {
 			calcDiv.appendChild(calcLabel);
 			calcDiv.appendChild(calcValue);
 			row.appendChild(calcDiv);
+			// 为任意元素添加“点击复制 + Tooltip 提示”
+			const addCopySupport = (el, textGetter) => {
+				// 悬停显示“点击复制”
+				this.tooltip.addTooltip(el, "点击复制");
+
+				el.addEventListener("click", () => {
+					const text = textGetter();
+					if (!text || text === "--") return;
+
+					navigator.clipboard.writeText(text)
+						.then(() => {
+							// 点击后立即显示“已复制”
+							this.tooltip.show("复制完成", el);
+						})
+						.catch(err => this.log.error("复制失败:", err));
+				});
+			}
+			addCopySupport(taskValue, () => item.task_name);
+			addCopySupport(numValue, () => String(item.total_labeled_num));
+			addCopySupport(durationValue, () => String(item.labeled_duration_hour));
 
 			// 添加到容器
 			container.appendChild(row);
 		}
+
+		annotation_list_loading.classList.add("hidden");
 	}
 
 }

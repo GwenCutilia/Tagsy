@@ -348,13 +348,7 @@ class QLabelRequest extends HttpRequest {
 		};
 
 		const result = await this._request("POST", url, headers, data);
-		this.log.log("test data: ", data);
-		this.log.log("test result: ", result);
-		// if (result.code === 200) {
-		// 	this.log.log("test:", result);
-		// } else {
-		// 	this.log.error("test login failed: ", result.message);
-		// }
+		this.log.log("_workbenchUserWorkingReport result: ", result);
 		
 		return result;
 	}
