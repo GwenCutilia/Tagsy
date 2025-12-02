@@ -385,17 +385,21 @@ class QLabelGlobal extends Global {
 	}
 	static cache = {
 		cookie: {
-			questionType: [], // 题型, 用来记录题包以及对应的绩效指标
+			
 		}
 	}
 	static task = {
 		uiTask: {
 			annotationList: "QLABEL_ANNOTATION_LIST_UI_TASK",
+			homeworkLoadTatistics: "QLABEL_HOMEWORK_LOAD_TATISTICS_UI_TASK",
 		}
 	}
 	static setting = {
+		homeworkLoadStatistics: {
+			hourList: [],
+		},
 		annotationList: {
-			LookupTime: {
+			lookupTime: {
 				startTime: 0,
 				endTime: 1,
 			},
@@ -409,12 +413,14 @@ class QLabelGlobal extends Global {
 	static domMap = {
 		login_status_div: "#login_status_div", // 登录状态区域
 		homework_load_statistics_div: "#homework_load_statistics_div", // 作业量统计区域
+		homework_load_tatistics_background_bar: "#homework_load_tatistics_background_bar",
+		homework_load_tatistics_bar: "#homework_load_tatistics_bar",
 		login_status_label: "#login_status_label", // 登录状态标签
 		annotation_list_title: "#annotation_list_title", // 标注列表标题
 		prev_day_btn: "#prev_day_btn", // 前一天按钮
 		next_day_btn: "#next_day_btn", // 后一天按钮
 		reflash_btn: "#reflash_btn", // 刷新按钮
-		homework_load_tatistics_label: "#homework_load_tatistics_label", // 作业量统计标签
+		homework_load_tatistics_bar: "#homework_load_tatistics_bar", // 作业量统计标签
 		annotation_list_loading: "#annotation_list_loading", // 标注列表加载图标
 		annotation_list_table: "#annotation_list_table", // 标注列表表格
 	}

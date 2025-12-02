@@ -309,8 +309,8 @@ class QLabelRequest extends HttpRequest {
 		} else if (stat_type == "quality_inspection") {
 			stat_type = 2;
 		}
-		let startTime = QLabelGlobal.setting.annotationList.LookupTime.startTime;
-		let endTime = QLabelGlobal.setting.annotationList.LookupTime.endTime;
+		let startTime = QLabelGlobal.setting.annotationList.lookupTime.startTime;
+		let endTime = QLabelGlobal.setting.annotationList.lookupTime.endTime;
 		const url = "https://qlabel.tencent.com/api/report/workbenchUserWorkingReport";
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",

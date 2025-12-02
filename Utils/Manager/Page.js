@@ -7,6 +7,7 @@ class Route {
 		"W2.html": () => new W2(),
 		"QLabel.html": () => new QLabel(),
 		"LS.html": () => new LS(),
+		"WeCom.html": () => new WeCom(),
 		"Setting.html": () => new Setting(),
 		"work-time": () => new Lookup(),
 		"label-tasks": () => new Lookup(),
@@ -1268,23 +1269,24 @@ class QLabel extends Page {
 		this.initTask();
 	}
 	// 初始化任务, 先运行一次任务
-	initTask() {
-		this.annotationList();
+	async initTask() {
+		await this.annotationList();
+		this.updateHomeworkLoadProgress();
 	}
 	bindEvents() {
 		// 查看上一天的作业数量
 		this.prev_day_btn.addEventListener("click", async () => {
 			this.setButtonsDisabled(true);
-			QLabelGlobal.setting.annotationList.LookupTime.startTime--;
-			QLabelGlobal.setting.annotationList.LookupTime.endTime--;
+			QLabelGlobal.setting.annotationList.lookupTime.startTime--;
+			QLabelGlobal.setting.annotationList.lookupTime.endTime--;
 			await this.annotationList();
 			this.setButtonsDisabled(false);
 		});
 		// 查看下一天的作业数量
 		this.next_day_btn.addEventListener("click", async () => {
 			this.setButtonsDisabled(true);
-			QLabelGlobal.setting.annotationList.LookupTime.startTime++;
-			QLabelGlobal.setting.annotationList.LookupTime.endTime++;
+			QLabelGlobal.setting.annotationList.lookupTime.startTime++;
+			QLabelGlobal.setting.annotationList.lookupTime.endTime++;
 			// this.log.debug("QLabelGlobal.setting.annotationList.LookupTime.endTime", QLabelGlobal.setting.annotationList.LookupTime.endTime);
 			await this.annotationList();
 			this.setButtonsDisabled(false);
@@ -1305,7 +1307,15 @@ class QLabel extends Page {
 				},
 				intervalMs: 1000 * 60 * 2,
 				name: QLabelGlobal.task.uiTask.annotationList
+			}, 
+			{
+				action: async () => {
+					this.updateHomeworkLoadProgress();
+				},
+				intervalMs: 1000 * 1,
+				name: QLabelGlobal.task.uiTask.homeworkLoadTatistics
 			}
+
 		];
 		task.forEach(cofig => {
 			TimerScheduler.setIntervalTask(
@@ -1318,7 +1328,7 @@ class QLabel extends Page {
 	addTooltipMessage() {
 		// 未建设内容
 		this.tooltip.addTooltip(this.login_status_div, "待建设");
-		this.tooltip.addTooltip(this.homework_load_statistics_div, "待建设");
+		// this.tooltip.addTooltip(this.homework_load_statistics_div, "待建设");
 		// 标注列表
 		this.tooltip.addTooltip(this.prev_day_btn, "查看前一天的作业数量");
 		this.tooltip.addTooltip(this.next_day_btn, "查看后一天的作业数量");
@@ -1348,22 +1358,47 @@ class QLabel extends Page {
 			this.reflash_btn.classList.remove("opacity-50", "pointer-events-none");
 		}
 	}
+	updateHomeworkLoadProgress() {
+		// 计算总时长
+		let totalHours = 0;
+		for (let h of QLabelGlobal.setting.homeworkLoadStatistics.hourList) {
+			let v = Number(h);
+			if (!isNaN(v) && v > 0) {
+				totalHours += v;
+			}
+		}
+
+		// 找到进度条
+		const bar = this.homework_load_tatistics_bar;
+		const backgroundBar = this.homework_load_tatistics_background_bar;
+		if (!bar) return;
+
+		// 计算百分比（满额 8 小时）
+		let percent = Math.min((totalHours / 8) * 100, 100);
+
+		// 更新样式
+		bar.style.width = percent.toFixed(0) + "%";
+
+		// 进度条提示
+		this.tooltip.addTooltip(backgroundBar, totalHours.toFixed(2) + " / 8 小时");
+	}
 	// 标注和质检列表
 	async annotationList() {
 		const container = this.annotation_list_table;
 		if (!container) return;
-		
-		// 清空容器
-		container.innerHTML = "";
-
-		// 更改列表标题
-		let startTime = QLabelGlobal.setting.annotationList.LookupTime.startTime;
-		let endTime = QLabelGlobal.setting.annotationList.LookupTime.endTime;
-		this.annotation_list_title.innerText = Time.getDateRangeByToday(startTime, endTime)[0];
 
 		// 获取标注和质检数据
 		const result1 = await QLabelRequest.getTotalAnnotationsList();
 		const result2 = await QLabelRequest.getQualityInspectionList();
+		
+		// 清空容器
+		container.innerHTML = "";
+		QLabelGlobal.setting.homeworkLoadStatistics.hourList = [];
+		
+		// 更改列表标题
+		let startTime = QLabelGlobal.setting.annotationList.lookupTime.startTime;
+		let endTime = QLabelGlobal.setting.annotationList.lookupTime.endTime;
+		this.annotation_list_title.innerText = Time.getDateRangeByToday(startTime, endTime)[0];
 
 		// 合并数据并加 _type
 		const mergedData = [];
@@ -1477,8 +1512,16 @@ class QLabel extends Page {
 			performanceValue.textContent = indicatorValue !== null ? indicatorValue : "--";
 
 			// 如果已有指标，立即计算当前任务时长
+			// if (indicatorValue !== null && item.total_labeled_num > 0) {
+			// 	calcValue.textContent = (item.total_labeled_num / indicatorValue).toFixed(2);
+			// } else {
+			// 	calcValue.textContent = "--";
+			// }
+			// 某一行计算当前任务时长时：
 			if (indicatorValue !== null && item.total_labeled_num > 0) {
-				calcValue.textContent = (item.total_labeled_num / indicatorValue).toFixed(2);
+				let hours = Number((item.total_labeled_num / indicatorValue).toFixed(2));
+				calcValue.textContent = hours;
+				QLabelGlobal.setting.homeworkLoadStatistics.hourList.push(hours);
 			} else {
 				calcValue.textContent = "--";
 			}
@@ -1843,6 +1886,23 @@ class LS extends Page {
 			// LS.stopAllTask();
 		// 	this.log.log("今天是休息日");
 		// }
+	}
+}
+class WeCom extends Page {
+	constructor() {
+		super();
+		this.init();
+		this.bindEvents();
+		this.updateUIElement();
+	}
+	init() {
+
+	}
+	bindEvents() {
+
+	}
+	updateUIElement() {
+
 	}
 }
 class Setting extends Page {
@@ -2274,7 +2334,27 @@ class Framework extends Page {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
 	}
+	static sidebarHighlight() {
+		const menuList = document.querySelectorAll("#sidebar_menu a");
+		if (!menuList || menuList.length === 0) return;
 
+		// 当前访问的文件名
+		let path = location.pathname.split("/").pop(); // 例如 "Index.html"
+
+		menuList.forEach(a => {
+			let href = a.getAttribute("href");
+			if (!href) return;
+
+			// 精确匹配文件名
+			if (href === path) {
+				a.className =
+					"flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100";
+			} else {
+				a.className =
+					"flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700";
+			}
+		});
+	}
 	// 添加框架辅助逻辑
 	static async addFrameworkAuxiliaryLogic() {
 		// 按钮点击效果
@@ -2295,6 +2375,43 @@ class Framework extends Page {
 				el.classList.add("select-none");
 			}
 		});
+
+		// const menuList = DomHelper.allBySelector("#sidebar_menu a");
+		// if (!menuList || menuList.length === 0) return;
+
+		// let path = location.pathname.split("/").pop(); // 例如 "Index.html"
+
+		// menuList.forEach(a => {
+		// 	let href = a.getAttribute("href");
+		// 	if (!href) return;
+
+		// 	// 普通状态
+		// 	const normalClasses = [
+		// 		"text-gray-700"
+		// 	];
+
+		// 	// 高亮状态
+		// 	const activeClasses = [
+		// 		"text-blue-600",
+		// 		"font-semibold",
+		// 		"bg-blue-100"
+		// 	];
+
+		// 	// 先清除所有高亮类
+		// 	activeClasses.forEach(cls => a.classList.remove(cls));
+
+		// 	// 确保普通类存在
+		// 	normalClasses.forEach(cls => a.classList.add(cls));
+
+		// 	if (href === path) {
+		// 		// 高亮
+		// 		activeClasses.forEach(cls => a.classList.add(cls));
+
+		// 		// 去掉普通灰色文字
+		// 		a.classList.remove("text-gray-700");
+		// 	}
+		// });
+
 	}
 	static addAanimationEffect() {
 		this.noticePanelAnimation();
