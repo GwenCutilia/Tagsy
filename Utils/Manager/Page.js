@@ -1297,6 +1297,133 @@ class QLabel extends Page {
 			await this.annotationList();
 			this.setButtonsDisabled(false);
 		});
+		this.initDatePicker();
+	}
+	// 日期选择器
+	initDatePicker() {
+		const titleEl = this.annotation_list_title;
+
+		// 创建面板DOM
+		const picker = document.createElement("div");
+		picker.id = "custom_datepicker";
+		picker.className = "absolute bg-white shadow-lg rounded-xl p-4 mt-2 hidden z-50 w-72 border border-gray-300";
+
+		// 顶部切换月份
+		const headerDiv = document.createElement("div");
+		headerDiv.className = "flex justify-between items-center mb-3";
+
+		const prevBtn = document.createElement("button");
+		prevBtn.id = "prev_month";
+		prevBtn.className = "w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition";
+		prevBtn.textContent = "<";
+
+		const nextBtn = document.createElement("button");
+		nextBtn.id = "next_month";
+		nextBtn.className = "w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition";
+		nextBtn.textContent = ">";
+
+		const monthLabel = document.createElement("div");
+		monthLabel.id = "datepicker_month_label";
+		monthLabel.className = "font-semibold text-gray-700 text-center";
+
+		headerDiv.appendChild(prevBtn);
+		headerDiv.appendChild(monthLabel);
+		headerDiv.appendChild(nextBtn);
+		picker.appendChild(headerDiv);
+
+		// 星期标题
+		const weekDiv = document.createElement("div");
+		weekDiv.className = "grid grid-cols-7 gap-1 text-center text-gray-500 text-sm font-medium";
+		["日","一","二","三","四","五","六"].forEach(w => {
+			const span = document.createElement("span");
+			span.textContent = w;
+			weekDiv.appendChild(span);
+		});
+		picker.appendChild(weekDiv);
+
+		// 日期容器
+		const daysContainer = document.createElement("div");
+		daysContainer.id = "datepicker_days";
+		daysContainer.className = "grid grid-cols-7 gap-1 mt-1";
+		picker.appendChild(daysContainer);
+
+		document.body.appendChild(picker);
+
+		// 日期逻辑
+		const today = new Date();
+		today.setHours(0,0,0,0);
+		let currentYear = today.getFullYear();
+		let currentMonth = today.getMonth();
+		let selectedDate = today;
+
+		const renderCalendar = (year, month) => {
+			monthLabel.textContent = `${year}-${(month+1).toString().padStart(2,'0')}`;
+			daysContainer.innerHTML = ""; // 清空上一月
+
+			const firstDay = new Date(year, month, 1).getDay();
+			const daysInMonth = new Date(year, month+1, 0).getDate();
+
+			for (let i=0;i<firstDay;i++){
+				const empty = document.createElement("div");
+				daysContainer.appendChild(empty);
+			}
+
+			for (let day=1; day<=daysInMonth; day++){
+				const dayBtn = document.createElement("button");
+				dayBtn.innerText = day;
+				dayBtn.className = "w-8 h-8 flex items-center justify-center rounded-full text-center leading-none text-gray-700 font-medium hover:bg-blue-100 transition";
+
+				const dayDate = new Date(year, month, day);
+				const isToday = dayDate.getTime() === today.getTime();
+				const isSelected = dayDate.getTime() === selectedDate.getTime();
+
+				if (isToday) dayBtn.classList.add("bg-blue-300","text-white");
+				if (isSelected) dayBtn.classList.add("bg-blue-500","text-white");
+
+				dayBtn.addEventListener("click", () => {
+					selectedDate = new Date(year, month, day);
+
+					// 计算偏移量
+					const offsetStart = Math.floor((selectedDate - today)/(1000*60*60*24));
+					const offsetEnd = offsetStart + 1;
+					QLabelGlobal.setting.annotationList.lookupTime.startTime = offsetStart;
+					QLabelGlobal.setting.annotationList.lookupTime.endTime = offsetEnd;
+					this.annotationList();
+					if (typeof this.annotationList === "function") this.annotationList();
+					picker.classList.add("hidden");
+				});
+
+				daysContainer.appendChild(dayBtn);
+			}
+		};
+
+		prevBtn.addEventListener("click", () => {
+			currentMonth--;
+			if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+			renderCalendar(currentYear, currentMonth);
+		});
+
+		nextBtn.addEventListener("click", () => {
+			currentMonth++;
+			if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+			renderCalendar(currentYear, currentMonth);
+		});
+
+		// 点击标题显示面板
+		titleEl.addEventListener("click", () => {
+			const rect = titleEl.getBoundingClientRect();
+			picker.style.top = rect.bottom + window.scrollY + "px";
+			picker.style.left = rect.left + window.scrollX + "px";
+			picker.classList.remove("hidden");
+			renderCalendar(currentYear, currentMonth);
+		});
+
+		// 点击外部隐藏
+		document.addEventListener("click", e => {
+			if (!picker.contains(e.target) && e.target !== titleEl){
+				picker.classList.add("hidden");
+			}
+		});
 	}
 	updateUIElement() {
 		this.addTooltipMessage();
@@ -1328,7 +1455,7 @@ class QLabel extends Page {
 	addTooltipMessage() {
 		// 未建设内容
 		this.tooltip.addTooltip(this.login_status_div, "待建设");
-		// this.tooltip.addTooltip(this.homework_load_statistics_div, "待建设");
+		this.tooltip.addTooltip(this.homework_load_statistics_div, "目前仅统计标注题目数量");
 		// 标注列表
 		this.tooltip.addTooltip(this.prev_day_btn, "查看前一天的作业数量");
 		this.tooltip.addTooltip(this.next_day_btn, "查看后一天的作业数量");
@@ -1382,6 +1509,7 @@ class QLabel extends Page {
 		// 进度条提示
 		this.tooltip.addTooltip(backgroundBar, totalHours.toFixed(2) + " / 8 小时");
 	}
+
 	// 标注和质检列表
 	async annotationList() {
 		const container = this.annotation_list_table;
