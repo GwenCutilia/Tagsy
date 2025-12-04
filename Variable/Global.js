@@ -392,6 +392,7 @@ class QLabelGlobal extends Global {
 		uiTask: {
 			annotationList: "QLABEL_ANNOTATION_LIST_UI_TASK",
 			homeworkLoadTatistics: "QLABEL_HOMEWORK_LOAD_TATISTICS_UI_TASK",
+			workHour: "QLABEL_WORK_HOUR_UI_TASK",
 		}
 	}
 	static setting = {
@@ -412,6 +413,9 @@ class QLabelGlobal extends Global {
 	
 	static domMap = {
 		login_status_div: "#login_status_div", // 登录状态区域
+		worked_hours: "#worked_hours", // 已工作时长标签
+		worked_hours_label: "#worked_hours_label", // 已工作时长数值
+		remain_hours_label: "#remain_hours_label", // 剩余工作时长数值
 		homework_load_statistics_div: "#homework_load_statistics_div", // 作业量统计区域
 		homework_load_tatistics_background_bar: "#homework_load_tatistics_background_bar",
 		homework_load_tatistics_bar: "#homework_load_tatistics_bar",

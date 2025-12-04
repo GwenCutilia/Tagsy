@@ -1270,6 +1270,7 @@ class QLabel extends Page {
 	}
 	// 初始化任务, 先运行一次任务
 	async initTask() {
+		this.workHour();
 		await this.annotationList();
 		this.updateHomeworkLoadProgress();
 	}
@@ -1380,17 +1381,18 @@ class QLabel extends Page {
 				if (isToday) dayBtn.classList.add("bg-blue-300","text-white");
 				if (isSelected) dayBtn.classList.add("bg-blue-500","text-white");
 
-				dayBtn.addEventListener("click", () => {
+				dayBtn.addEventListener("click", async () => {
 					selectedDate = new Date(year, month, day);
 
 					// 计算偏移量
 					const offsetStart = Math.floor((selectedDate - today)/(1000*60*60*24));
 					const offsetEnd = offsetStart + 1;
+					this.setButtonsDisabled(true);
 					QLabelGlobal.setting.annotationList.lookupTime.startTime = offsetStart;
 					QLabelGlobal.setting.annotationList.lookupTime.endTime = offsetEnd;
-					this.annotationList();
-					if (typeof this.annotationList === "function") this.annotationList();
 					picker.classList.add("hidden");
+					await this.annotationList();
+					this.setButtonsDisabled(false);
 				});
 
 				daysContainer.appendChild(dayBtn);
@@ -1437,12 +1439,18 @@ class QLabel extends Page {
 			}, 
 			{
 				action: async () => {
+					this.workHour();
+				},
+				intervalMs: 1000 * 60 * 1,
+				name: QLabelGlobal.task.uiTask.workHour
+			},
+			{
+				action: async () => {
 					this.updateHomeworkLoadProgress();
 				},
 				intervalMs: 1000 * 1,
 				name: QLabelGlobal.task.uiTask.homeworkLoadTatistics
 			}
-
 		];
 		task.forEach(cofig => {
 			TimerScheduler.setIntervalTask(
@@ -1451,6 +1459,13 @@ class QLabel extends Page {
 				cofig.name
 			);
 		});
+	}
+	async workHour() {
+		let workedHours = parseFloat(Time.getWorkedHoursToday().toFixed(2));
+		let remainHours = (8 - workedHours).toFixed(2);
+		this.remain_hours_label.classList.remove("hidden");
+		this.worked_hours_label.innerText = workedHours + " 小时";
+		this.remain_hours_label.innerText = ", 距离下班还有 " + remainHours + " 小时";
 	}
 	addTooltipMessage() {
 		// 未建设内容
