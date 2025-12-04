@@ -346,8 +346,9 @@ class QLabelRequest extends HttpRequest {
 				"end_date": Time.getDateRangeByToday(startTime, endTime)[1] + " 00:00:00"
 			}
 		};
-
+		this.log.log("_workbenchUserWorkingReport data", data);
 		const result = await this._request("POST", url, headers, data);
+
 		this.log.log("_workbenchUserWorkingReport result: ", result);
 		
 		return result;

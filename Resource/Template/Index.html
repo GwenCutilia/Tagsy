@@ -50,12 +50,11 @@
 					由 @Gwencutilia 打造
 				</div>
 			</aside>
-			<!-- 主内容区域 -->
 			<div class="flex-1 ml-64 flex flex-col">
 				<!-- 顶部导航栏 -->
 				<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
 					<div class="flex-1 text-lg font-semibold text-gray-600"></div>
-
+					
 					<div class="flex items-center space-x-4 relative">
 						<!-- 通知按钮及面板 -->
 						<div class="relative">
@@ -72,7 +71,7 @@
 										<i class="fas fa-times"></i>
 									</button>
 								</div>
-
+								
 								<div id="notice_list_div" class="max-h-80 overflow-y-auto p-4 space-y-3">
 									<div id="notice_div" class="rounded-lg bg-gray-50 hover:bg-gray-100 transition hidden">
 										<div id="notice_label" class="text-gray-800 font-medium">系统更新完成</div>
@@ -89,7 +88,14 @@
 					</div>
 				</header>
 				<!-- 主内容区域 -->
-				<main id="main_content" class="flex-1 p-6 mt-16 pb-16 overflow-y-auto">
+				<main class="flex-1 p-6 mt-16 pb-16 overflow-y-auto relative">
+					<!-- 主界面加载动画 -->
+					<div id="main_loading"
+						class="bg-white/70 backdrop-blur-sm flex items-center justify-center z-50 absolute inset-0">
+						<div class="flex flex-col items-center">
+							<i class="fa-solid fa-spinner-third fa-spin text-3xl text-indigo-500"></i>
+						</div>
+					</div>
 					<div id="dashboard_columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
 						<!-- 第一列 -->
 						<div class="flex flex-col space-y-6">

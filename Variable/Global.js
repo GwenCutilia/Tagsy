@@ -522,6 +522,9 @@ class FrameworkGlobal extends Global {
 	}
 	// DOM元素映射表
 	static domMap = {
+		// 主页面遮罩loading
+		main_loading: "#main_loading",
+		// 用户头像
 		user_avatar: "#user_avatar",
 		// 消息中心
 		notice_btn: "#notice_btn",

@@ -348,7 +348,9 @@ class Index extends Page {
 	}
 	async init() {
 		this.initValue();
+		this.initTask();
 	}
+
 	bindEvents() {
 		this.load_btn.addEventListener("click", async () => {
 			await ResourceLoader.loadAllResources();
@@ -381,14 +383,21 @@ class Index extends Page {
 			);
 		});
 	}
+	// 初始化变量
 	initValue() {
 		this.domMap = IndexGlobal.domMap;
 		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
 	}
+	// 初始化任务, 先运行一次任务
+	async initTask() {
+		await this.loadingStatusTask();
+		await this.workHourTask();
+		Framework.AllLoadedUIElement();
+	}
+	// 加载状态
 	async loadingStatusTask() {
-		// 加载状态
 		this.loadingStatusValue = this.loading_status_label;
 		if (Resource.AllLoaded()) {
 			this.loadingStatusValue.innerText = "已加载";
@@ -441,16 +450,24 @@ class W2 extends Page {
 	}
 
 	async init() {
-		// 待优化, 将其他h5中的页面的拖动效果取消
-		// 初始化Dom
-		
 		this.initValue();
+		this.initTask();
 	}
 	initValue() {
 		this.domMap = W2Global.domMap;
 		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
+	}
+	async initTask() {
+		await this.loginStatusTask();
+		await this.workingStatusTask();
+		await this.workHourStatusTask();
+		await this.currentTimeLineTask();
+		await this.personalStatusTask();
+		await this.calendarTask();
+		await this.applyActivityTransferList();
+		Framework.AllLoadedUIElement();
 	}
 	// 登录W2
 	static async login() {
@@ -1273,6 +1290,7 @@ class QLabel extends Page {
 		this.workHour();
 		await this.annotationList();
 		this.updateHomeworkLoadProgress();
+		Framework.AllLoadedUIElement();
 	}
 	bindEvents() {
 		// 查看上一天的作业数量
@@ -1789,12 +1807,20 @@ class LS extends Page {
 	}
 	async init() {
 		this.initValue();
+		this.initTask();
 	}
 	initValue() {
 		this.domMap = LSGlobal.domMap;
 		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
+	}
+	async initTask() {
+		await this.loginStatus();
+		await this.getDailyReportList();
+		await this.fillDailyReportStatus();
+		await this.dailyReportList();
+		Framework.AllLoadedUIElement();
 	}
 	// 登录
 	static async login() {
@@ -1866,14 +1892,51 @@ class LS extends Page {
 	}
 	// 刷新UI
 	async updateUIElement() {
-		// 登录状态UI
-		TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 1000, LSGlobal.task.uiTask.login);
-		// 刷新日报列表的任务
-		TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 1000, LSGlobal.task.uiTask.getDailyReportList);
-		// 打卡任务UI
-		TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 1000, LSGlobal.task.uiTask.fillDailyReportStatus);
-		// 日报列表UI
-		TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 1500, LSGlobal.task.uiTask.dailyReportList);
+		let task = [
+			{
+				action: async () => {
+					this.loginStatus();
+				},
+				intervalMs: 1000,
+				name: LSGlobal.task.uiTask.login
+			},
+			{
+				action: async () => {
+					this.getDailyReportList();
+				},
+				intervalMs: 1000,
+				name: LSGlobal.task.uiTask.getDailyReportList
+			},
+			{
+				action: async () => {
+					this.fillDailyReportStatus();
+				},
+				intervalMs: 1000,
+				name: LSGlobal.task.uiTask.fillDailyReportStatus
+			},
+			{
+				action: async () => {
+					this.dailyReportList();
+				},
+				intervalMs: 1500,
+				name: LSGlobal.task.uiTask.dailyReportList
+			},
+		];
+		task.forEach(cofig => {
+			TimerScheduler.setIntervalTask(
+				cofig.action,
+				cofig.intervalMs,
+				cofig.name
+			);
+		});
+		// // 登录状态UI
+		// TimerScheduler.setIntervalTask(async () => { this.loginStatus() }, 1000, LSGlobal.task.uiTask.login);
+		// // 刷新日报列表的任务
+		// TimerScheduler.setIntervalTask(async () => { this.getDailyReportList() }, 1000, LSGlobal.task.uiTask.getDailyReportList);
+		// // 打卡任务UI
+		// TimerScheduler.setIntervalTask(async () => { this.fillDailyReportStatus() }, 1000, LSGlobal.task.uiTask.fillDailyReportStatus);
+		// // 日报列表UI
+		// TimerScheduler.setIntervalTask(async () => { this.dailyReportList() }, 1500, LSGlobal.task.uiTask.dailyReportList);
 	}
 	// 登录状态刷新
 	async loginStatus() {
@@ -2053,16 +2116,21 @@ class Setting extends Page {
 		super();
 		this.init();
 		this.bindEvents();
-		this.updateUIElement();
+		// this.updateUIElement();
 	}
 	init() {
 		this.initValue();
+		this.initTask();
 	}
 	initValue() {
 		this.domMap = SettingGlobal.domMap;
 		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
+	}
+	initTask() {
+		this.updateUIElement();
+		Framework.AllLoadedUIElement();
 	}
 	/**
 	 * 通用 UI 更新方法
@@ -2431,10 +2499,14 @@ class Framework extends Page {
 	}
 	static async init() {
 		await this.initValue();
+		await this.initTask();
 	}
-	static updateUIElement() {
+	static async initTask() {
 		this.avatarImg();
 		this.getNotice();
+		this.modelStatus();
+	}
+	static updateUIElement() {
 		let task = [
 			{
 				action: async () => {
@@ -2477,26 +2549,30 @@ class Framework extends Page {
 			this[key] = DomHelper.bySelector(selectorDomID);
 		});
 	}
-	static sidebarHighlight() {
-		const menuList = document.querySelectorAll("#sidebar_menu a");
-		if (!menuList || menuList.length === 0) return;
+	// static sidebarHighlight() {
+	// 	const menuList = document.querySelectorAll("#sidebar_menu a");
+	// 	if (!menuList || menuList.length === 0) return;
 
-		// 当前访问的文件名
-		let path = location.pathname.split("/").pop(); // 例如 "Index.html"
+	// 	// 当前访问的文件名
+	// 	let path = location.pathname.split("/").pop(); // 例如 "Index.html"
 
-		menuList.forEach(a => {
-			let href = a.getAttribute("href");
-			if (!href) return;
+	// 	menuList.forEach(a => {
+	// 		let href = a.getAttribute("href");
+	// 		if (!href) return;
 
-			// 精确匹配文件名
-			if (href === path) {
-				a.className =
-					"flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100";
-			} else {
-				a.className =
-					"flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700";
-			}
-		});
+	// 		// 精确匹配文件名
+	// 		if (href === path) {
+	// 			a.className =
+	// 				"flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100";
+	// 		} else {
+	// 			a.className =
+	// 				"flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700";
+	// 		}
+	// 	});
+	// }
+	// 页面加载后取消遮罩
+	static async AllLoadedUIElement() {
+		this.main_loading.classList.add("hidden");
 	}
 	// 添加框架辅助逻辑
 	static async addFrameworkAuxiliaryLogic() {
@@ -2518,43 +2594,6 @@ class Framework extends Page {
 				el.classList.add("select-none");
 			}
 		});
-
-		// const menuList = DomHelper.allBySelector("#sidebar_menu a");
-		// if (!menuList || menuList.length === 0) return;
-
-		// let path = location.pathname.split("/").pop(); // 例如 "Index.html"
-
-		// menuList.forEach(a => {
-		// 	let href = a.getAttribute("href");
-		// 	if (!href) return;
-
-		// 	// 普通状态
-		// 	const normalClasses = [
-		// 		"text-gray-700"
-		// 	];
-
-		// 	// 高亮状态
-		// 	const activeClasses = [
-		// 		"text-blue-600",
-		// 		"font-semibold",
-		// 		"bg-blue-100"
-		// 	];
-
-		// 	// 先清除所有高亮类
-		// 	activeClasses.forEach(cls => a.classList.remove(cls));
-
-		// 	// 确保普通类存在
-		// 	normalClasses.forEach(cls => a.classList.add(cls));
-
-		// 	if (href === path) {
-		// 		// 高亮
-		// 		activeClasses.forEach(cls => a.classList.add(cls));
-
-		// 		// 去掉普通灰色文字
-		// 		a.classList.remove("text-gray-700");
-		// 	}
-		// });
-
 	}
 	static addAanimationEffect() {
 		this.noticePanelAnimation();

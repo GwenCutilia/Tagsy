@@ -1,232 +1,402 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Tagsy 仪表盘</title>
-	<script src="../Lib/Tail_Wind/Tail_Wind.js"></script>
-	<link rel="stylesheet" href="../Lib/Font_Awesome/All.css">
-</head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Tagsy 仪表盘</title>
+		<script src="../Lib/Tail_Wind/Tail_Wind.js"></script>
+		<link rel="stylesheet" href="../Lib/Font_Awesome/All.css">
+	</head>
+	<body class="bg-gray-100 text-gray-800 font-sans">
 
-	<div id="app" class="flex min-h-screen">
-		<!-- 侧边栏 -->
-		<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
-			<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 h-16 flex items-center justify-center border-b border-gray-200">
-				Tagsy_V2.0.0
-			</div>
-			<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
-				<li id="menu_overview">
-					<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
-					</a>
-				</li>
-				<li id="menu_w2">
-					<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
-					</a>
-				</li>
-				<li id="menu_qlabel">
-					<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
-					</a>
-				</li>
-				<li id="menu_ls">
-					<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
-					</a>
-				</li>
-				<li id="menu_wecom">
-					<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-						<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
-					</a>
-				</li>
-				<li id="menu_setting">
-					<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
-						<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
-					</a>
-				</li>
-			</ul>
-			<div id="sidebar_footer" class="h-16 mt-auto px-4 py-4 flex items-center justify-center text-xs text-gray-400">
-				由 @Gwencutilia 打造
-			</div>
-		</aside>
-
-		<!-- 主内容区域 -->
-		<div class="flex-1 ml-64 flex flex-col">
-			<!-- 顶部导航栏 -->
-			<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
-				<div class="flex-1 text-lg font-semibold text-gray-600"></div>
-
-				<div class="flex items-center space-x-4 relative">
-					<!-- 通知按钮及面板 -->
-					<div class="relative">
-						<button id="notice_btn" class="w-7 h-7 rounded text-gray-700 hover:bg-gray-100 flex items-center justify-center">
-							<i id="notice_i" class="fas fa-bell"></i>
-						</button>
-
-						<!-- 面板相对于按钮弹出 -->
-						<div id="notice_panel_div"
-							class="notice-panel hidden absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-xl border border-gray-200 z-40 transform scale-95 opacity-0 transition-all duration-200">
-							<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-								<div class="font-semibold text-gray-700">通知中心</div>
-								<button id="notice_close" class="text-gray-400 hover:text-gray-600">
-									<i class="fas fa-times"></i>
-								</button>
-							</div>
-
-							<div id="notice_list_div" class="max-h-80 overflow-y-auto p-4 space-y-3">
-								<div id="notice_div" class="rounded-lg bg-gray-50 hover:bg-gray-100 transition hidden">
-									<div id="notice_label" class="text-gray-800 font-medium">系统更新完成</div>
-									<div id="notice_time_label" class="text-gray-500 text-xs mt-1">5 分钟前</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- 用户头像 -->
-					<button id="user_avatar" class="w-7 h-7 rounded-full overflow-hidden hover:bg-gray-100 flex items-center justify-center">
-						<i class="fas fa-user-circle"></i>
-					</button>
+		<div id="app" class="flex min-h-screen">
+			<!-- 侧边栏 -->
+			<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
+				<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 h-16 flex items-center justify-center border-b border-gray-200">
+					Tagsy_V2.0.0
 				</div>
-			</header>
+				<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
+					<li id="menu_overview">
+						<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+							<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
+						</a>
+					</li>
+					<li id="menu_w2">
+						<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+							<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
+						</a>
+					</li>
+					<li id="menu_qlabel">
+						<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+							<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
+						</a>
+					</li>
+					<li id="menu_ls">
+						<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+							<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
+						</a>
+					</li>
+					<li id="menu_wecom">
+						<a id="link_wecom" href="WeCom.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+							<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
+						</a>
+					</li>
+					<li id="menu_setting">
+						<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+							<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
+						</a>
+					</li>
+				</ul>
+				<div id="sidebar_footer" class="h-16 mt-auto px-4 py-4 flex items-center justify-center text-xs text-gray-400">
+					由 @Gwencutilia 打造
+				</div>
+			</aside>
+
 			<!-- 主内容区域 -->
-			<main class="flex-1 p-6 mt-16 mb-16 overflow-y-auto">
+			<div class="flex-1 ml-64 flex flex-col">
+				<!-- 顶部导航栏 -->
+				<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
+					<div class="flex-1 text-lg font-semibold text-gray-600"></div>
 
-				<!-- 设置内容区域 -->
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-					<!-- 左侧: 系统设置 -->
-					<div class="space-y-6">
-						<!-- 基本设置 -->
-						<div class="bg-white shadow rounded-xl p-5">
-							<h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-								<i class="fas fa-user mr-2 text-blue-500"></i>账号设置
-							</h2>
-							<div class="space-y-4">
-								<div class="p-5">
-									<!-- API盒子账号设置 -->
-									<div class="mb-6">
-										<div class="flex items-center justify-between mb-3">
-											<div class="flex items-center">
-												<i class="fa-solid fa-box-taped text-blue-500 mr-2"></i>
-												<h3 class="font-medium text-gray-700"> Apibox账号设置</h3>
+					<div class="flex items-center space-x-4 relative">
+						<!-- 通知按钮及面板 -->
+						<div class="relative">
+							<button id="notice_btn" class="w-7 h-7 rounded text-gray-700 hover:bg-gray-100 flex items-center justify-center">
+								<i id="notice_i" class="fas fa-bell"></i>
+							</button>
+
+							<!-- 面板相对于按钮弹出 -->
+							<div id="notice_panel_div"
+								class="notice-panel hidden absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-xl border border-gray-200 z-40 transform scale-95 opacity-0 transition-all duration-200">
+								<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+									<div class="font-semibold text-gray-700">通知中心</div>
+									<button id="notice_close" class="text-gray-400 hover:text-gray-600">
+										<i class="fas fa-times"></i>
+									</button>
+								</div>
+
+								<div id="notice_list_div" class="max-h-80 overflow-y-auto p-4 space-y-3">
+									<div id="notice_div" class="rounded-lg bg-gray-50 hover:bg-gray-100 transition hidden">
+										<div id="notice_label" class="text-gray-800 font-medium">系统更新完成</div>
+										<div id="notice_time_label" class="text-gray-500 text-xs mt-1">5 分钟前</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- 用户头像 -->
+						<button id="user_avatar" class="w-7 h-7 rounded-full overflow-hidden hover:bg-gray-100 flex items-center justify-center">
+							<i class="fas fa-user-circle"></i>
+						</button>
+					</div>
+				</header>
+				<!-- 主内容区域 -->
+				<main class="flex-1 p-6 mt-16 mb-16 overflow-y-auto relative">
+					<!-- 主界面加载动画 -->
+					<div id="main_loading"
+						class="bg-white/70 backdrop-blur-sm flex items-center justify-center z-50 absolute inset-0">
+						<div class="flex flex-col items-center">
+							<i class="fa-solid fa-spinner-third fa-spin text-3xl text-indigo-500"></i>
+						</div>
+					</div>
+					<!-- 设置内容区域 -->
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+						<!-- 左侧: 系统设置 -->
+						<div class="space-y-6">
+							<!-- 基本设置 -->
+							<div class="bg-white shadow rounded-xl p-5">
+								<h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+									<i class="fas fa-user mr-2 text-blue-500"></i>账号设置
+								</h2>
+								<div class="space-y-4">
+									<div class="p-5">
+										<!-- API盒子账号设置 -->
+										<div class="mb-6">
+											<div class="flex items-center justify-between mb-3">
+												<div class="flex items-center">
+													<i class="fa-solid fa-box-taped text-blue-500 mr-2"></i>
+													<h3 class="font-medium text-gray-700"> Apibox账号设置</h3>
+												</div>
+												<div class="flex space-x-2">
+													<button id="api_box_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
+														<i class="fas fa-play mr-1.5 text-xs"></i>测试接口连通性
+													</button>
+												</div>
 											</div>
-											<div class="flex space-x-2">
-												<button id="api_box_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
-													<i class="fas fa-play mr-1.5 text-xs"></i>测试接口连通性
-												</button>
+											<div class="space-y-4">
+												<div>
+													<label for="api_box_user_id_account_setting_input" class="block text-sm text-gray-600 mb-1">通讯ID</label>
+													<input type="text" id="api_box_user_id_account_setting_input" placeholder="八位数字" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												
+												<div>
+													<label for="api_box_api_key_account_setting_input" class="block text-sm text-gray-600 mb-1">通讯密钥</label>
+													<input type="text" id="api_box_api_key_account_setting_input" placeholder="数字小写英文混合" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												<!-- 提示框 -->
+												<div id="api_box_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+													<div class="flex items-center">
+														<i class="fas fa-info-circle mr-2"></i>
+														<span class="text-sm">--</span>
+													</div>
+												</div>
 											</div>
 										</div>
-										<div class="space-y-4">
-											<div>
-												<label for="api_box_user_id_account_setting_input" class="block text-sm text-gray-600 mb-1">通讯ID</label>
-												<input type="text" id="api_box_user_id_account_setting_input" placeholder="八位数字" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											
-											<div>
-												<label for="api_box_api_key_account_setting_input" class="block text-sm text-gray-600 mb-1">通讯密钥</label>
-												<input type="text" id="api_box_api_key_account_setting_input" placeholder="数字小写英文混合" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											<!-- 提示框 -->
-											<div id="api_box_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+									</div>
+									<!-- W2设置分组 -->
+									<div class="p-5">
+										<!-- 第一个板块: 万维平台(W2)账号设置 -->
+										<div class="mb-6">
+											<div class="flex items-center justify-between mb-3">
 												<div class="flex items-center">
-													<i class="fas fa-info-circle mr-2"></i>
-													<span class="text-sm">--</span>
+													<i class="fas fa-server text-blue-500 mr-2"></i>
+													<h3 class="font-medium text-gray-700">万维平台(W2)账号设置</h3>
+												</div>
+												<div class="flex space-x-2">
+													<button id="w2_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
+														<i class="fas fa-play mr-1.5 text-xs"></i>测试W2连通性
+													</button>
+												</div>
+											</div>
+											<div class="space-y-4">
+												<div>
+													<label for="w2_user_name_account_setting_input" class="block text-sm text-gray-600 mb-1">用户名</label>
+													<input type="text" id="w2_user_name_account_setting_input" placeholder="lingboweibu(beijing)kejiyouxiangongsi_" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												<div>
+													<label for="w2_user_password_account_setting_input" class="block text-sm text-gray-600 mb-1">密码</label>
+													<input type="password" id="w2_user_password_account_setting_input" placeholder="输入W2密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+											</div>
+										</div>
+
+										<!-- 第二个板块: 万维平台(W2)邮箱验证码设置 -->
+										<div class="mb-6">
+											<div class="flex items-center justify-between mb-3">
+												<div class="flex items-center">
+													<i class="fas fa-server text-blue-500 mr-2"></i>
+													<h3 class="font-medium text-gray-700">万维平台(W2)邮箱验证码设置</h3>
+												</div>
+												<div class="flex space-x-2">
+													<button id="w2_email_api_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center text-sm">
+														<i class="fas fa-play mr-1.5 text-xs"></i>测试API连通性
+													</button>
+												</div>
+											</div>
+											<div class="space-y-4">
+												<div>
+													<label for="w2_email_api_address_account_setting_input" class="block text-sm text-gray-600 mb-1">邮箱地址</label>
+													<input type="text" id="w2_email_api_address_account_setting_input" placeholder="输入万维邮箱地址" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												
+												<div>
+													<label for="w2_email_api_pop3_auth_code_account_setting_input" class="block text-sm text-gray-600 mb-1">POP3授权码</label>
+													<input type="text" id="w2_email_api_pop3_auth_code_account_setting_input" placeholder="输入邮箱的POP3授权码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												<!-- 提示框 -->
+												<div id="w2_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+													<div class="flex items-center">
+														<i class="fas fa-info-circle mr-2"></i>
+														<span class="text-sm">--</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- W2设置分组结束 -->
+									<!-- LS设置分组 -->
+									<div class="p-5">
+									<!-- 第一个板块: 灵波微步(LS)账号设置 -->
+										<div class="mb-6">
+											<div class="flex items-center justify-between mb-3">
+												<div class="flex items-center">
+													<i class="fas fa-file-alt text-blue-500 mr-2"></i>
+													<h3 class="font-medium text-gray-700">灵波微步(LS)账号设置</h3>
+												</div>
+												<div class="flex space-x-2">
+													<button id="ls_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
+														<i class="fas fa-play mr-1.5 text-xs"></i>测试LS连通性
+													</button>
+												</div>
+											</div>
+											<div class="space-y-4">
+												<div>
+													<label for="ls_user_name_account_setting_input" class="block text-sm text-gray-600 mb-1">用户名</label>
+													<input type="text" id="ls_user_name_account_setting_input" placeholder="dt" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												<div>
+													<label for="ls_user_password_account_setting_input" class="block text-sm text-gray-600 mb-1">密码</label>
+													<input type="password" id="ls_user_password_account_setting_input" placeholder="输入LS密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+												</div>
+												<!-- 提示框 -->
+												<div id="ls_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+													<div class="flex items-center">
+														<i class="fas fa-info-circle mr-2"></i>
+														<span class="text-sm">--</span>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
-								<!-- W2设置分组 -->
-								<div class="p-5">
-									<!-- 第一个板块: 万维平台(W2)账号设置 -->
-									<div class="mb-6">
-										<div class="flex items-center justify-between mb-3">
-											<div class="flex items-center">
-												<i class="fas fa-server text-blue-500 mr-2"></i>
-												<h3 class="font-medium text-gray-700">万维平台(W2)账号设置</h3>
-											</div>
-											<div class="flex space-x-2">
-												<button id="w2_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
-													<i class="fas fa-play mr-1.5 text-xs"></i>测试W2连通性
-												</button>
-											</div>
-										</div>
-										<div class="space-y-4">
-											<div>
-												<label for="w2_user_name_account_setting_input" class="block text-sm text-gray-600 mb-1">用户名</label>
-												<input type="text" id="w2_user_name_account_setting_input" placeholder="lingboweibu(beijing)kejiyouxiangongsi_" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											<div>
-												<label for="w2_user_password_account_setting_input" class="block text-sm text-gray-600 mb-1">密码</label>
-												<input type="password" id="w2_user_password_account_setting_input" placeholder="输入W2密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-										</div>
-									</div>
+							</div>
+						</div>
 
-									<!-- 第二个板块: 万维平台(W2)邮箱验证码设置 -->
-									<div class="mb-6">
-										<div class="flex items-center justify-between mb-3">
-											<div class="flex items-center">
-												<i class="fas fa-server text-blue-500 mr-2"></i>
-												<h3 class="font-medium text-gray-700">万维平台(W2)邮箱验证码设置</h3>
-											</div>
-											<div class="flex space-x-2">
-												<button id="w2_email_api_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center text-sm">
-													<i class="fas fa-play mr-1.5 text-xs"></i>测试API连通性
-												</button>
-											</div>
-										</div>
-										<div class="space-y-4">
-											<div>
-												<label for="w2_email_api_address_account_setting_input" class="block text-sm text-gray-600 mb-1">邮箱地址</label>
-												<input type="text" id="w2_email_api_address_account_setting_input" placeholder="输入万维邮箱地址" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											
-											<div>
-												<label for="w2_email_api_pop3_auth_code_account_setting_input" class="block text-sm text-gray-600 mb-1">POP3授权码</label>
-												<input type="text" id="w2_email_api_pop3_auth_code_account_setting_input" placeholder="输入邮箱的POP3授权码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											<!-- 提示框 -->
-											<div id="w2_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+						<!-- 右侧: 高级设置 -->
+						<div class="space-y-6">
+							<div class="bg-white shadow rounded-xl p-5">
+								<h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+									<i class="fas fa-user mr-2 text-blue-500"></i>模块设置
+								</h2>
+								<div class="space-y-4">
+									<div class="p-5">
+									<!-- 第一个板块: 万维平台(W2)模块设置 -->
+										<div id="w2_module_settings" class="mb-6">
+											<div class="flex items-center justify-between mb-3">
 												<div class="flex items-center">
-													<i class="fas fa-info-circle mr-2"></i>
-													<span class="text-sm">--</span>
+													<i class="fas fa-server text-blue-500 mr-2"></i>
+													<h3 class="font-medium text-gray-700">万维平台(W2)时间区间设置</h3>
+												</div>
+												<div class="flex space-x-2">
+													<button id="w2_time_range_validate_format_module_setting_button" class="px-3.5 py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition flex items-center text-sm">
+														<i class="fas fa-refresh mr-1.5 text-xs"></i>校验格式
+													</button>
+												</div>
+											</div>
+											<div class="space-y-4">
+												<div class="flex flex-wrap gap-4 items-start">
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">登录</label>
+														<div class="flex gap-2">
+															<input type="text" id="w2_time_range_login_start_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="w2_time_range_login_end_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">退出登录</label>
+														<div class="flex gap-2">
+															<input type="text" id="w2_time_range_login_out_start_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="w2_time_range_login_out_end_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+												</div>
+												<div class="flex flex-wrap gap-4 items-start">
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">上班打卡</label>
+														<div class="flex gap-2">
+															<input type="text" id="w2_time_range_check_in_start_module_setting_input" placeholder="08:55" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="w2_time_range_check_in_end_module_setting_input" placeholder="08:55" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">下班打卡</label>
+														<div class="flex gap-2">
+															<input type="text" id="w2_time_range_check_out_start_module_setting_input" placeholder="18:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="w2_time_range_check_out_end_module_setting_input" placeholder="18:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+												</div>
+												<div class="flex flex-wrap gap-4 items-start">
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">前往用餐</label>
+														<div class="flex gap-2">
+															<input type="text" id="w2_time_range_meal_start_module_setting_input" placeholder="12:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="w2_time_range_meal_end_module_setting_input" placeholder="12:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">切换标注</label>
+														<div class="flex gap-2">
+															<input type="text" id="w2_time_range_working_start_module_setting_input" placeholder="13:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="w2_time_range_working_end_module_setting_input" placeholder="13:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+												</div>
+												<!-- 提示框 -->
+												<div id="w2_module_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+													<div class="flex items-center">
+														<i class="fas fa-info-circle mr-2"></i>
+														<span class="text-sm">--</span>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-								<!-- W2设置分组结束 -->
-								<!-- LS设置分组 -->
-								<div class="p-5">
-								<!-- 第一个板块: 灵波微步(LS)账号设置 -->
-									<div class="mb-6">
-										<div class="flex items-center justify-between mb-3">
-											<div class="flex items-center">
-												<i class="fas fa-file-alt text-blue-500 mr-2"></i>
-												<h3 class="font-medium text-gray-700">灵波微步(LS)账号设置</h3>
-											</div>
-											<div class="flex space-x-2">
-												<button id="ls_user_test_account_setting_button" class="px-3.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition flex items-center text-sm">
-													<i class="fas fa-play mr-1.5 text-xs"></i>测试LS连通性
-												</button>
-											</div>
-										</div>
-										<div class="space-y-4">
-											<div>
-												<label for="ls_user_name_account_setting_input" class="block text-sm text-gray-600 mb-1">用户名</label>
-												<input type="text" id="ls_user_name_account_setting_input" placeholder="dt" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											<div>
-												<label for="ls_user_password_account_setting_input" class="block text-sm text-gray-600 mb-1">密码</label>
-												<input type="password" id="ls_user_password_account_setting_input" placeholder="输入LS密码" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-											</div>
-											<!-- 提示框 -->
-											<div id="ls_account_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+									<div class="p-5">
+									<!-- 第二个板块: 灵波微步(LS)模块设置 -->
+										<div id="ls_module_setting" class="mb-6">
+											<div class="flex items-center justify-between mb-3">
 												<div class="flex items-center">
-													<i class="fas fa-info-circle mr-2"></i>
-													<span class="text-sm">--</span>
+													<i class="fas fa-file-alt text-blue-500 mr-2"></i>
+													<h3 class="font-medium text-gray-700">灵波微步(LS)时间区间设置</h3>
+												</div>
+												<div class="flex space-x-2">
+													<button id="ls_time_range_validate_format_module_setting_button" class="px-3.5 py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition flex items-center text-sm">
+														<i class="fas fa-refresh mr-1.5 text-xs"></i>校验格式
+													</button>
+												</div>
+											</div>
+											<div class="space-y-4">
+												<div class="flex flex-wrap gap-4 items-start">
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">登录</label>
+														<div class="flex gap-2">
+															<input type="text" id="ls_time_range_login_start_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="ls_time_range_login_end_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">退出登录</label>
+														<div class="flex gap-2">
+															<input type="text" id="ls_time_range_login_out_start_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="ls_time_range_login_out_end_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+												</div>
+												<div class="flex flex-wrap gap-4 items-start">
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+														<label class="block text-sm text-gray-600 mb-1">填写日报</label>
+														<div class="flex gap-2">
+															<input type="text" id="ls_time_range_fill_daily_report_start_module_setting_input" placeholder="17:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+															<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
+																<i class="fas fa-right-left text-xs"></i>
+															</div>
+															<input type="text" id="ls_time_range_fill_daily_report_end_module_setting_input" placeholder="17:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+														</div>
+													</div>
+													<div class="flex-1 min-w-[280px] max-w-[500px]">
+													</div>
+												</div>
+												<!-- 提示框 -->
+												<div id="ls_module_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
+													<div class="flex items-center">
+														<i class="fas fa-info-circle mr-2"></i>
+														<span class="text-sm">--</span>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -235,215 +405,51 @@
 							</div>
 						</div>
 					</div>
+				</main>
+				<!-- 底部导航栏 -->
+				<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-between fixed bottom-0 left-64 right-0 z-30 px-6">
 
-					<!-- 右侧: 高级设置 -->
-					<div class="space-y-6">
-						<div class="bg-white shadow rounded-xl p-5">
-							<h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-								<i class="fas fa-user mr-2 text-blue-500"></i>模块设置
-							</h2>
-							<div class="space-y-4">
-								<div class="p-5">
-								<!-- 第一个板块: 万维平台(W2)模块设置 -->
-									<div id="w2_module_settings" class="mb-6">
-										<div class="flex items-center justify-between mb-3">
-											<div class="flex items-center">
-												<i class="fas fa-server text-blue-500 mr-2"></i>
-												<h3 class="font-medium text-gray-700">万维平台(W2)时间区间设置</h3>
-											</div>
-											<div class="flex space-x-2">
-												<button id="w2_time_range_validate_format_module_setting_button" class="px-3.5 py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition flex items-center text-sm">
-													<i class="fas fa-refresh mr-1.5 text-xs"></i>校验格式
-												</button>
-											</div>
-										</div>
-										<div class="space-y-4">
-											<div class="flex flex-wrap gap-4 items-start">
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">登录</label>
-													<div class="flex gap-2">
-														<input type="text" id="w2_time_range_login_start_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="w2_time_range_login_end_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">退出登录</label>
-													<div class="flex gap-2">
-														<input type="text" id="w2_time_range_login_out_start_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="w2_time_range_login_out_end_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-											</div>
-											<div class="flex flex-wrap gap-4 items-start">
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">上班打卡</label>
-													<div class="flex gap-2">
-														<input type="text" id="w2_time_range_check_in_start_module_setting_input" placeholder="08:55" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="w2_time_range_check_in_end_module_setting_input" placeholder="08:55" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">下班打卡</label>
-													<div class="flex gap-2">
-														<input type="text" id="w2_time_range_check_out_start_module_setting_input" placeholder="18:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="w2_time_range_check_out_end_module_setting_input" placeholder="18:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-											</div>
-											<div class="flex flex-wrap gap-4 items-start">
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">前往用餐</label>
-													<div class="flex gap-2">
-														<input type="text" id="w2_time_range_meal_start_module_setting_input" placeholder="12:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="w2_time_range_meal_end_module_setting_input" placeholder="12:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">切换标注</label>
-													<div class="flex gap-2">
-														<input type="text" id="w2_time_range_working_start_module_setting_input" placeholder="13:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="w2_time_range_working_end_module_setting_input" placeholder="13:30" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-											</div>
-											<!-- 提示框 -->
-											<div id="w2_module_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-info-circle mr-2"></i>
-													<span class="text-sm">--</span>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="p-5">
-								<!-- 第二个板块: 灵波微步(LS)模块设置 -->
-									<div id="ls_module_setting" class="mb-6">
-										<div class="flex items-center justify-between mb-3">
-											<div class="flex items-center">
-												<i class="fas fa-file-alt text-blue-500 mr-2"></i>
-												<h3 class="font-medium text-gray-700">灵波微步(LS)时间区间设置</h3>
-											</div>
-											<div class="flex space-x-2">
-												<button id="ls_time_range_validate_format_module_setting_button" class="px-3.5 py-1.5 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition flex items-center text-sm">
-													<i class="fas fa-refresh mr-1.5 text-xs"></i>校验格式
-												</button>
-											</div>
-										</div>
-										<div class="space-y-4">
-											<div class="flex flex-wrap gap-4 items-start">
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">登录</label>
-													<div class="flex gap-2">
-														<input type="text" id="ls_time_range_login_start_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="ls_time_range_login_end_module_setting_input" placeholder="08:50" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">退出登录</label>
-													<div class="flex gap-2">
-														<input type="text" id="ls_time_range_login_out_start_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="ls_time_range_login_out_end_module_setting_input" placeholder="18:35" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-											</div>
-											<div class="flex flex-wrap gap-4 items-start">
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-													<label class="block text-sm text-gray-600 mb-1">填写日报</label>
-													<div class="flex gap-2">
-														<input type="text" id="ls_time_range_fill_daily_report_start_module_setting_input" placeholder="17:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-														<div class="flex items-center justify-center w-6 text-gray-400 shrink-0">
-															<i class="fas fa-right-left text-xs"></i>
-														</div>
-														<input type="text" id="ls_time_range_fill_daily_report_end_module_setting_input" placeholder="17:00" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-													</div>
-												</div>
-												<div class="flex-1 min-w-[280px] max-w-[500px]">
-												</div>
-											</div>
-											<!-- 提示框 -->
-											<div id="ls_module_setting_message_box" class="hidden bg-blue-50 text-blue-500 border border-blue-200 rounded-lg p-3">
-												<div class="flex items-center">
-													<i class="fas fa-info-circle mr-2"></i>
-													<span class="text-sm">--</span>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
+					<div id="model_status" class="flex space-x-3">
+						<!-- W2 状态 -->
+						<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
+							<i id="model_status_w2_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
+							<span class="text-gray-600 text-sm mr-1">W2状态:</span>
+
+							<!-- 占位区: loading和文字都在这里, 宽度固定 -->
+							<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
+								<i id="model_status_w2_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
+								<span id="model_status_w2_label" class="hidden"></span>
+							</span>
+						</div>
+
+						<!-- LS 状态 -->
+						<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
+							<i id="model_status_ls_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
+							<span class="text-gray-600 text-sm mr-1">LS状态:</span>
+
+							<!-- 占位区 -->
+							<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
+								<i id="model_status_ls_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
+								<span id="model_status_ls_label" class="hidden"></span>
+							</span>
 						</div>
 					</div>
-				</div>
-			</main>
-			<!-- 底部导航栏 -->
-			<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-between fixed bottom-0 left-64 right-0 z-30 px-6">
 
-				<div id="model_status" class="flex space-x-3">
-					<!-- W2 状态 -->
-					<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
-						<i id="model_status_w2_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
-						<span class="text-gray-600 text-sm mr-1">W2状态:</span>
-
-						<!-- 占位区: loading和文字都在这里, 宽度固定 -->
-						<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
-							<i id="model_status_w2_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
-							<span id="model_status_w2_label" class="hidden"></span>
-						</span>
+					<!-- 天气信息区域 -->
+					<div id="weather" class="flex items-center text-sm text-gray-600">
+						<div id="weather_message_box">
+							<i class="fa-solid fa-spinner-third fa-spin"></i>
+						</div>
+						<div id="weather_div" class="hidden">
+							<i id="weather_icon" class="fa-solid fa-sun text-yellow-500 mr-2"></i>
+							<span id="weather_temp_label" class="mr-2"></span>
+							<span id="weather_city_label" class="mr-2"></span>
+							<i class="fa-solid fa-wind mr-1"></i>
+							<span id="weather_wind_label"></span>
+						</div>
 					</div>
-
-					<!-- LS 状态 -->
-					<div class="flex items-center bg-white px-3 py-1.5 rounded-lg hover:transition">
-						<i id="model_status_ls_i" class="fa-solid fa-circle text-gray-500 text-[8px] mr-2"></i>
-						<span class="text-gray-600 text-sm mr-1">LS状态:</span>
-
-						<!-- 占位区 -->
-						<span class="text-green-600 font-medium text-sm min-w-[4rem] inline-flex items-center">
-							<i id="model_status_ls_loading" class="fa-solid fa-spinner-third fa-spin text-gray-600"></i>
-							<span id="model_status_ls_label" class="hidden"></span>
-						</span>
-					</div>
-				</div>
-
-				<!-- 天气信息区域 -->
-				<div id="weather" class="flex items-center text-sm text-gray-600">
-					<div id="weather_message_box">
-						<i class="fa-solid fa-spinner-third fa-spin"></i>
-					</div>
-					<div id="weather_div" class="hidden">
-						<i id="weather_icon" class="fa-solid fa-sun text-yellow-500 mr-2"></i>
-						<span id="weather_temp_label" class="mr-2"></span>
-						<span id="weather_city_label" class="mr-2"></span>
-						<i class="fa-solid fa-wind mr-1"></i>
-						<span id="weather_wind_label"></span>
-					</div>
-				</div>
-			</footer>
+				</footer>
+			</div>
 		</div>
-	</div>
-</body>
+	</body>
 </html>
