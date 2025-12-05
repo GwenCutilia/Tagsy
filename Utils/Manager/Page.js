@@ -1566,7 +1566,7 @@ class QLabel extends Page {
 		result1.result.data.forEach(item => mergedData.push({ ...item, _type: "annotation" }));
 		result2.result.data.forEach(item => mergedData.push({ ...item, _type: "inspection" }));
 
-		// 当天没有数据时的处理
+		// 当天没有数据
 		if (mergedData.length === 0) {
 			let emptyBox = DomHelper.createDom("div");
 			emptyBox.id = "annotation_list_empty_label";
@@ -1578,6 +1578,7 @@ class QLabel extends Page {
 
 			const icon = document.createElement("i");
 			icon.classList.add("fa-regular", "fa-folder-open", "text-4xl", "mb-3");
+
 			const text = document.createElement("div");
 			text.classList.add("text-sm");
 			text.textContent = "当前没有标注记录喔";
@@ -1586,16 +1587,15 @@ class QLabel extends Page {
 			emptyBox.appendChild(text);
 			container.appendChild(emptyBox);
 		}
-		
+
 		// 初始化 tasknameAndIndicators
 		if (!QLabelGlobal.setting.annotationList.tasknameAndIndicators) {
 			QLabelGlobal.setting.annotationList.tasknameAndIndicators = [];
 		}
 
-		// 临时变量（数组形式）
 		let tempIndicators = [...QLabelGlobal.setting.annotationList.tasknameAndIndicators];
 
-		// 遍历数据生成行
+		// 遍历生成行
 		for (let i = 0; i < mergedData.length; i++) {
 			const item = mergedData[i];
 
@@ -1603,7 +1603,7 @@ class QLabel extends Page {
 			const row = DomHelper.createDom("div");
 			row.setAttribute("id", item._type + "_list_" + i + "_row");
 			row.classList.add(
-				"grid", "grid-cols-[63%_7%_10%_10%_10%]",
+				"grid", "grid-cols-[63%_5%_8.5%_7.5%_8.5%_8.5%]",
 				"flex", "justify-between", "items-center",
 				"transition", "shadow-sm", "rounded-xl", 
 				"px-4", "py-3", "border", "border-gray-100",
@@ -1667,18 +1667,12 @@ class QLabel extends Page {
 			const calcValue = document.createElement("span");
 			calcValue.classList.add("text-base", "font-semibold", "text-gray-800");
 
-			// 根据 taskname 自动填充已有绩效指标
+			// 查找已有绩效指标
 			let existingIndex = tempIndicators.findIndex(v => v.taskname === item.task_name);
 			let indicatorValue = existingIndex >= 0 ? tempIndicators[existingIndex].indicators : null;
 			performanceValue.textContent = indicatorValue !== null ? indicatorValue : "--";
 
-			// 如果已有指标，立即计算当前任务时长
-			// if (indicatorValue !== null && item.total_labeled_num > 0) {
-			// 	calcValue.textContent = (item.total_labeled_num / indicatorValue).toFixed(2);
-			// } else {
-			// 	calcValue.textContent = "--";
-			// }
-			// 某一行计算当前任务时长时：
+			// 计算当前任务时长
 			if (indicatorValue !== null && item.total_labeled_num > 0) {
 				let hours = Number((item.total_labeled_num / indicatorValue).toFixed(2));
 				calcValue.textContent = hours;
@@ -1714,22 +1708,32 @@ class QLabel extends Page {
 						calcValue.textContent = "--";
 					} else {
 						performanceValue.textContent = val;
+
 						// 更新当前任务时长
 						let total = Number(item.total_labeled_num || 0);
-						calcValue.textContent = total > 0 ? (total / val).toFixed(2) : "--";
+						let newHour = total > 0 ? Number((total / val).toFixed(2)) : null;
+						calcValue.textContent = newHour !== null ? newHour : "--";
 
-						// 临时变量更新
+						// 更新 hourList（重新计算全部）
+						let newHourList = [];
+						document.querySelectorAll("[id$='_row']").forEach((row, idx) => {
+							if (idx === i) {
+								if (newHour !== null) newHourList.push(newHour);
+							} else {
+								let h = QLabelGlobal.setting.homeworkLoadStatistics.hourList[idx];
+								if (h !== undefined) newHourList.push(h);
+							}
+						});
+						QLabelGlobal.setting.homeworkLoadStatistics.hourList = newHourList;
+
+						// 更新指标
 						if (existingIndex >= 0) {
 							tempIndicators[existingIndex].indicators = val;
 						} else {
 							tempIndicators.push({ taskname: item.task_name, indicators: val });
 							existingIndex = tempIndicators.length - 1;
 						}
-
-						// 最终赋值回 Proxy（触发 set）
 						QLabelGlobal.setting.annotationList.tasknameAndIndicators = [...tempIndicators];
-
-						console.log("tasknameAndIndicators updated:", QLabelGlobal.setting.annotationList.tasknameAndIndicators);
 					}
 
 					performanceDiv.removeChild(input);
@@ -1737,36 +1741,66 @@ class QLabel extends Page {
 				});
 			});
 
-			
+			// 填充绩效指标
 			performanceDiv.appendChild(performanceLabel);
 			performanceDiv.appendChild(performanceValue);
 			row.appendChild(performanceDiv);
 
+			// 填充当前任务时长
 			calcDiv.appendChild(calcLabel);
 			calcDiv.appendChild(calcValue);
 			row.appendChild(calcDiv);
-			// 为任意元素添加“点击复制 + Tooltip 提示”
-			const addCopySupport = (el, textGetter) => {
-				// 悬停显示“点击复制”
-				this.tooltip.addTooltip(el, "点击复制");
 
+			const expectDiv = document.createElement("div");
+			expectDiv.classList.add("flex", "flex-col");
+
+			const expectLabel = document.createElement("span");
+			expectLabel.classList.add("text-gray-500", "text-xs");
+			expectLabel.textContent = "期望完成数量";
+
+			const expectValue = document.createElement("span");
+			expectValue.classList.add("text-base", "font-semibold", "text-gray-800");
+
+			const calcExpect = () => {
+				let kpi = Number(performanceValue.textContent);
+				let usedHours = 0;
+				QLabelGlobal.setting.homeworkLoadStatistics.hourList.forEach(v => { usedHours += Number(v); });
+				if (isNaN(kpi) || kpi <= 0) return "--";
+				let result = (8 - usedHours) * kpi;
+				if (isNaN(result)) return "--";
+				return Math.max(0, Math.floor(result));
+			};
+
+			expectValue.textContent = calcExpect();
+
+			performanceValue.addEventListener("DOMSubtreeModified", () => {
+				expectValue.textContent = calcExpect();
+			});
+
+			calcValue.addEventListener("DOMSubtreeModified", () => {
+				expectValue.textContent = calcExpect();
+			});
+
+			expectDiv.appendChild(expectLabel);
+			expectDiv.appendChild(expectValue);
+			row.appendChild(expectDiv);
+
+			// 点击复制支持
+			const addCopySupport = (el, textGetter) => {
+				this.tooltip.addTooltip(el, "点击复制");
 				el.addEventListener("click", () => {
 					const text = textGetter();
 					if (!text || text === "--") return;
-
 					navigator.clipboard.writeText(text)
-						.then(() => {
-							// 点击后立即显示“已复制”
-							this.tooltip.show("复制完成", el);
-						})
+						.then(() => this.tooltip.show("复制完成", el))
 						.catch(err => this.log.error("复制失败:", err));
 				});
-			}
+			};
+
 			addCopySupport(taskValue, () => item.task_name);
 			addCopySupport(numValue, () => String(item.total_labeled_num));
 			addCopySupport(durationValue, () => String(item.labeled_duration_hour));
 
-			// 添加到容器
 			container.appendChild(row);
 		}
 
