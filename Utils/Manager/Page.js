@@ -2,33 +2,38 @@ class Route {
 	static log = new Logger("Route");
 
 	static routes = {
-		"Login.html": () => new Login(),
-		"Index.html": () => new Index(),
-		"W2.html": () => new W2(),
-		"QLabel.html": () => new QLabel(),
-		"LS.html": () => new LS(),
-		"WeCom.html": () => new WeCom(),
-		"Setting.html": () => new Setting(),
-		"work-time": () => new Lookup(),
-		"label-tasks": () => new Lookup(),
-		"review-tasks": () => new Lookup(),
+		"Login.html": () => new Login().init(),
+		"Index.html": () => new Index().init(),
+		"W2.html": () => new W2().init(),
+		"QLabel.html": () => new QLabel().init(),
+		"LS.html": () => new LS().init(),
+		"WeCom.html": () => new WeCom().init(),
+		"Setting.html": () => new Setting().init(),
 	};
 
-	// static async init() {
-	// 	const page = location.pathname.split("/").pop() || location.pathname;
-
-	// 	if (this.routes[page]) {
-	// 		await this.routes[page](); // 调用对应路由逻辑
-	// 	} else {
-	// 		this.log.error("没有为该页面配置逻辑:", page);
-	// 	}
-	// }
 	static async init() {
 		const path = location.pathname;
+		const host = location.hostname;
 
-		for (let key in this.routes) {
-			if (path.includes(key)) {
-				await this.routes[key]();
+		// Template 页面逻辑
+		if (path.includes("Template")) {
+			for (let key in this.routes) {
+				if (path.endsWith(key)) {
+					await this.routes[key]();
+					return;
+				}
+			}
+			this.log.warn("Template页面未匹配到具体逻辑:", path);
+			return;
+		}
+
+		// qlabel.tencent.com 域名逻辑
+		if (host === "qlabel.tencent.com") {
+			if (path.includes("label-tasks")) {
+				new Lookup().init();
+				return;
+			} else if (path.includes("tasks")) {
+				new WorkPage().init();
 				return;
 			}
 		}
@@ -36,6 +41,7 @@ class Route {
 		this.log.error("没有为该页面配置逻辑:", path);
 	}
 }
+
 
 class Page {
 	static log = new Logger("Page");
@@ -138,13 +144,12 @@ class Page {
 class Login extends Page {
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		this.updateUIElement();
-		this.addAanimationEffect();
 	}
 	init() {
 		this.initValue();
+		this.bindEvents();
+		this.updateUIElement();
+		this.addAanimationEffect();
 	}
 	initValue() {
 		this.domMap = LoginGlobal.domMap;
@@ -342,13 +347,12 @@ class Login extends Page {
 class Index extends Page {
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		this.updateUIElement();
 	}
 	async init() {
 		this.initValue();
 		this.initTask();
+		this.bindEvents();
+		this.updateUIElement();
 	}
 
 	bindEvents() {
@@ -443,15 +447,14 @@ class W2 extends Page {
 
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		this.updateUIElement();
-		this.addAanimationEffect(); // 添加动画效果
 	}
 
 	async init() {
 		this.initValue();
 		this.initTask();
+		this.bindEvents();
+		this.updateUIElement();
+		this.addAanimationEffect(); // 添加动画效果
 	}
 	initValue() {
 		this.domMap = W2Global.domMap;
@@ -1277,13 +1280,12 @@ class W2 extends Page {
 class QLabel extends Page {
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		this.updateUIElement();
 	}
 	init() {
 		this.initValue();
 		this.initTask();
+		this.bindEvents();
+		this.updateUIElement();
 	}
 	// 初始化任务, 先运行一次任务
 	async initTask() {
@@ -1808,13 +1810,13 @@ class QLabel extends Page {
 	}
 
 }
-class WorkPage extends Page {
+class WorkPage extends QLabel {
 	constructor() {
 
 	}
 
 }
-class Lookup extends Page {
+class Lookup extends QLabel {
 	constructor() {
 		super();
 		GM.CookieList({}, list => {
@@ -1835,13 +1837,12 @@ class LS extends Page {
 
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		this.updateUIElement();
 	}
 	async init() {
 		this.initValue();
 		this.initTask();
+		this.bindEvents();
+		this.updateUIElement();
 	}
 	initValue() {
 		this.domMap = LSGlobal.domMap;
@@ -2131,12 +2132,10 @@ class LS extends Page {
 class WeCom extends Page {
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		this.updateUIElement();
 	}
 	init() {
-
+		this.bindEvents();
+		this.updateUIElement();
 	}
 	bindEvents() {
 
@@ -2148,13 +2147,11 @@ class WeCom extends Page {
 class Setting extends Page {
 	constructor() {
 		super();
-		this.init();
-		this.bindEvents();
-		// this.updateUIElement();
 	}
 	init() {
 		this.initValue();
 		this.initTask();
+		this.bindEvents();
 	}
 	initValue() {
 		this.domMap = SettingGlobal.domMap;

@@ -1,10 +1,3 @@
-// /*
-// *********************
-// 	***动态资源加载器***
-// 	支持 JS 和 CSS 文件
-// *********************
-// */
-
 if (!window.ResourceLoader) {
 	class ResourceLoader {
 		static resourcesAdded = 0;
@@ -14,10 +7,8 @@ if (!window.ResourceLoader) {
 
 		static getRealUrl() {
 			try {
-				// 强制获取真实浏览器上下文
 				return unsafeWindow.location.href;
 			} catch (e) {
-				// 退而求其次
 				try {
 					return document.currentScript.ownerDocument.URL;
 				} catch (err) {
@@ -84,17 +75,32 @@ if (!window.ResourceLoader) {
 			return totalSuccess;
 		}
 
+		static async testUrl(url) {
+			// 尝试 fetch 本地资源，看是否可用
+			try {
+				const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+				return response.ok;
+			} catch (e) {
+				return false;
+			}
+		}
+
 		static async loadAllResources() {
 			const href = ResourceLoader.getRealUrl();
+			let Url = "";
 
-			let Url;
-
-			if (href.startsWith("file:///D:")) {
-                Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/";
+			// 判断 @match 地址
+			if (href.startsWith("https://qlabel.tencent.com/workbench/tasks/")) {
+				const localUrl = "http://127.0.0.1:5500/";
+				const testFile = localUrl + "Utils/Tool.js";
+				const localAvailable = await ResourceLoader.testUrl(testFile);
+				Url = localAvailable ? localUrl : "https://weavefate.asia/";
+			} else if (href.startsWith("file:///D:")) {
+				Url = "file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/";
 			} else if (href.startsWith("file:///C:")) {
-                Url = "file:///C:/ProgramData/Tagsy/";
+				Url = "file:///C:/ProgramData/Tagsy/";
 			} else {
-                Url = "https://weavefate.asia/";
+				Url = "https://weavefate.asia/";
 			}
 
 			const resourceGroups = [

@@ -14,6 +14,7 @@
 // @require			https://weavefate.asia/Module/Tagsy_Import.js
 // @match			file:///C:/ProgramData/Tagsy/Resource/Template/*
 // @require			file:///C:/ProgramData/Tagsy/Module/Tagsy_Import.js
+// @match			https://qlabel.tencent.com/workbench/tasks/*
 // @license			CC
 // ==/UserScript==
 
