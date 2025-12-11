@@ -1,47 +1,62 @@
 class Route {
 	static log = new Logger("Route");
 
-	static routes = {
-		"Login.html": () => new Login().init(),
-		"Index.html": () => new Index().init(),
-		"W2.html": () => new W2().init(),
-		"QLabel.html": () => new QLabel().init(),
-		"LS.html": () => new LS().init(),
-		"WeCom.html": () => new WeCom().init(),
-		"Setting.html": () => new Setting().init(),
+	static routes = { 
+		template: {
+			"Login.html": () => new Login().init(),
+			"Index.html": () => new Index().init(),
+			"W2.html": () => new W2().init(),
+			"QLabel.html": () => new QLabel().init(),
+			"LS.html": () => new LS().init(),
+			"WeCom.html": () => new WeCom().init(),
+			"Setting.html": () => new Setting().init(),
+		},
+		qlabel: {
+			"tasks": () => new WorkPage().init(),
+			"label-tasks": () => new Lookup().init(),
+		}
 	};
 
 	static async init() {
 		const path = location.pathname;
 		const host = location.hostname;
 
-		// Template 页面逻辑
-		if (path.includes("Template")) {
-			for (let key in this.routes) {
-				if (path.endsWith(key)) {
-					await this.routes[key]();
+		for (const groupKey in this.routes) {
+			const group = this.routes[groupKey];
+
+			// template 组匹配 Template 页面
+			if (groupKey === "template" && path.includes("Template")) {
+				const matchedKey = Object.keys(group).find(key => path.endsWith(key));
+				if (matchedKey) {
+					// 先初始化 Page 的变量和任务
+					await Page.initValue();
+					await Page.loadTask();
+					await Page.loadFramework();
+
+					// 执行页面逻辑
+					await group[matchedKey]();
 					return;
 				}
+				this.log.warn("Template页面未匹配到具体逻辑:", path);
 			}
-			this.log.warn("Template页面未匹配到具体逻辑:", path);
-			return;
-		}
 
-		// qlabel.tencent.com 域名逻辑
-		if (host === "qlabel.tencent.com") {
-			if (path.includes("label-tasks")) {
-				new Lookup().init();
-				return;
-			} else if (path.includes("tasks")) {
-				new WorkPage().init();
-				return;
+			// qlabel 组匹配 qlabel.tencent.com 域名
+			if (groupKey === "qlabel" && host === "qlabel.tencent.com") {
+				const matchedKey = Object.keys(group).find(key => path.includes(key));
+				if (matchedKey) {
+					// 先初始化 QLabelLookup
+					await QLabelLookupGlobal.init();
+
+					// 执行页面逻辑
+					await group[matchedKey]();
+					return;
+				}
 			}
 		}
 
 		this.log.error("没有为该页面配置逻辑:", path);
 	}
 }
-
 
 class Page {
 	static log = new Logger("Page");
@@ -51,45 +66,20 @@ class Page {
 		this.log = new Logger(this.constructor.name);
 	}
 
-	// 初始化页面逻辑
+	// 原来的 init 方法可以保留给页面自己调用（如果需要）
 	static async init() {
-		if (this.isTemplatePage()) {
-			await this.initValue();
-			await this.loadTask();
-			await this.loadFramework();
-			this.log.log('Page初始化完成');
-		} else if (this.isQLabelLookupPage()) {
-			await this.initQLabelLookup();
-		} else {
-			this.log.warn('非Template页, 也不是QLabelLookup页');
-		}
+		this.log.log('页面 init 方法调用');
 	}
 
-	// 单独处理 QLabelLookup 初始化
-	static async initQLabelLookup() {
-		await QLabelLookupGlobal.init();
-		this.log.log('QLabelLookup初始化完成');
+	// 单独的初始化变量、任务和框架的方法，用于 Route 调用
+	static async initAll() {
+		await this.initValue();
+		await this.loadTask();
+		await this.loadFramework();
+		this.log.log('Page初始化完成');
 	}
 
-	static isTemplatePage() {
-		return location.pathname.includes('/Template/');
-	}
-
-	static isQLabelLookupPage() {
-		const path = location.pathname;
-		const host = location.hostname === 'qlabel.tencent.com';
-
-		if (!host) return false;
-
-		const lookupPaths = [
-			'/workbench/label-tasks',
-			'/workbench/work-time',
-			'/workbench/review-tasks'
-		];
-
-		return lookupPaths.some(p => path.includes(p));
-	}
-
+	// 初始化全局变量
 	static async initValue() {
 		await LoginGlobal.init();
 		await W2Global.init();
@@ -100,11 +90,13 @@ class Page {
 		await SystemGlobal.init();
 	}
 
+	// 初始化任务
 	static async loadTask() {
 		await this.W2Task();
 		await this.LSTask();
 	}
 
+	// 初始化框架
 	static async loadFramework() {
 		W2Request.getLoginPage();
 		await this.initPage();
@@ -117,6 +109,7 @@ class Page {
 		new Framework();
 	}
 
+	// 页面跳转逻辑
 	static async initPage() {
 		if (location.pathname.endsWith("Login.html")) {
 			if (LoginGlobal.status.login === true) {
@@ -130,12 +123,14 @@ class Page {
 		}
 	}
 
+	// W2任务
 	static async W2Task() {
 		await W2.login();
 		await W2.intervalTask();
 		await W2.currentTask();
 	}
 
+	// LS任务
 	static async LSTask() {
 		await LS.login();
 		await LS.currentTask();
@@ -1812,13 +1807,17 @@ class QLabel extends Page {
 }
 class WorkPage extends QLabel {
 	constructor() {
-
+		super();
 	}
-
+	init() {
+		this.log.log("QLabelWorkPage 逻辑已加载");
+	}
 }
 class Lookup extends QLabel {
 	constructor() {
 		super();
+	}
+	init() {
 		GM.CookieList({}, list => {
 			const session = list.find(c => c.name === "SESSION");
 			QLabelLookupGlobal.cache.cookie.session = session.value;

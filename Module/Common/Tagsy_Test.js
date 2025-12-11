@@ -131,195 +131,8 @@ if (!window.ResourceLoader) {
 async function test() {
 	// 初始化设置
 	log = new Logger("Test");
-	// // =======================================
-	// // 可视化状态面板
-	// // =======================================
-	// const panel = document.createElement("div");
-	// panel.style.position = "fixed";
-	// panel.style.top = "20px";
-	// panel.style.right = "20px";
-	// panel.style.zIndex = "999999";
-	// panel.style.background = "rgba(0,0,0,0.7)";
-	// panel.style.color = "#fff";
-	// panel.style.padding = "10px 14px";
-	// panel.style.borderRadius = "6px";
-	// panel.style.fontSize = "12px";
-	// panel.style.fontFamily = "Consolas, monospace";
-	// panel.style.whiteSpace = "pre-line";
-	// panel.style.pointerEvents = "none";
-	// panel.textContent = "ready...";
-	// document.body.appendChild(panel);
-
-
-	// // =======================================
-	// // 数据结构
-	// // =======================================
-	// const groupedData = [];
-
-
-	// // =======================================
-	// // 状态显示
-	// // =======================================
-	// let fillIndex = 0;
-
-	// function updatePanel() {
-	// 	const current = fillIndex - 1;
-	// 	const next = fillIndex;
-
-	// 	panel.textContent =
-	// 		"Filled index: " + current +
-	// 		"\nCurrent: " + (current >= 0 ? JSON.stringify(groupedData[current]) : "none") +
-	// 		"\n\nNext index: " + next +
-	// 		"\nNext: " + (next < groupedData.length ? JSON.stringify(groupedData[next]) : "no more data");
-	// }
-
-	// updatePanel();
-
-
-	// // =======================================
-	// // 自动填充监听器
-	// // =======================================
-	// const observer = new MutationObserver(() => {
-	// 	const elements = document.querySelectorAll(".customInput.horizontalLtr");
-
-	// 	elements.forEach(el => {
-	// 		if (el.dataset.filled === "1") return;
-	// 		if (fillIndex >= groupedData.length) return;
-
-	// 		const json = JSON.stringify(groupedData[fillIndex].tag);
-
-	// 		el.textContent = json;
-	// 		el.dataset.filled = "1";
-
-	// 		el.dispatchEvent(new Event("input", { bubbles: true }));
-	// 		el.dispatchEvent(new Event("change", { bubbles: true }));
-
-	// 		fillIndex++;
-	// 		updatePanel();
-	// 	});
-	// });
-
-	// observer.observe(document.body, { childList: true, subtree: true });
-
-	// // =======================================
-	// // 需要在拉框后自动点击的按钮
-	// // =======================================
-	// var add = 0;
-	// function afterDrawClick() {
-	// 	const btn = document.querySelectorAll(".ivu-btn.ivu-btn-default")[add + 4];
-	// 	if (btn) btn.click();
-	// 	add += 4;
-	// }
-
-	// // =======================================
-	// // 模拟拉框
-	// // =======================================
-	// function simulateDraw(canvasEl, startX, startY, endX, endY, steps = 20, onFinish) {
-	// 	const rect = canvasEl.getBoundingClientRect();
-
-	// 	let x = rect.left + startX;
-	// 	let y = rect.top + startY;
-
-	// 	let targetX = rect.left + endX;
-	// 	let targetY = rect.top + endY;
-
-	// 	const fireEvent = (type, cx, cy) => {
-	// 		canvasEl.dispatchEvent(new MouseEvent(type, {
-	// 			bubbles: true,
-	// 			cancelable: true,
-	// 			clientX: cx,
-	// 			clientY: cy
-	// 		}));
-	// 	};
-
-	// 	fireEvent("mousedown", x, y);
-
-	// 	let dx = (targetX - x) / steps;
-	// 	let dy = (targetY - y) / steps;
-
-	// 	let i = 0;
-	// 	function stepMove() {
-	// 		if (i >= steps) {
-	// 			fireEvent("mouseup", targetX, targetY);
-	// 			if (typeof onFinish === "function") onFinish();  // ⭐ 回调：拉框结束
-	// 			return;
-	// 		}
-	// 		x += dx;
-	// 		y += dy;
-	// 		fireEvent("mousemove", x, y);
-	// 		i++;
-	// 		requestAnimationFrame(stepMove);
-	// 	}
-	// 	requestAnimationFrame(stepMove);
-	// }
-
-
-
-	// // =======================================
-	// // 原图 → 画布坐标映射
-	// // =======================================
-	// function mapImageToCanvas(imgX, imgY, imgWidth, imgHeight, canvasWidth, canvasHeight) {
-	// 	const scale = canvasWidth / imgWidth;
-	// 	const offsetY = (canvasHeight - imgHeight * scale) / 2;
-
-	// 	return {
-	// 		canvasX: imgX * scale,
-	// 		canvasY: imgY * scale + offsetY
-	// 	};
-	// }
-
-
-
-	// // =======================================
-	// // 批量拉框 + 拉完自动点击
-	// // =======================================
-	// async function drawAllRect() {
-	// 	const imgWidth = 2880;
-	// 	const imgHeight = 1880;
-	// 	const canvasWidth = 708.0625;
-	// 	const canvasHeight = 692;
-
-	// 	const canvasEl = document.querySelector(".upper-canvas");
-
-	// 	for (let obj of groupedData) {
-	// 		const p1 = mapImageToCanvas(obj.firstXY.x, obj.firstXY.y, imgWidth, imgHeight, canvasWidth, canvasHeight);
-	// 		const p2 = mapImageToCanvas(obj.thirdXY.x, obj.thirdXY.y, imgWidth, imgHeight, canvasWidth, canvasHeight);
-
-	// 		await new Promise(resolve => {
-	// 			simulateDraw(
-	// 				canvasEl,
-	// 				p1.canvasX,
-	// 				p1.canvasY + 11,
-	// 				p2.canvasX,
-	// 				p2.canvasY + 11,
-	// 				20,
-	// 				async () => {
-
-	// 					// ⭐ 拉框完成后等待
-	// 					await new Promise(r => setTimeout(r, 1000));
-
-	// 					// ⭐ 自动点击按钮
-	// 					afterDrawClick();
-
-	// 					resolve();
-	// 				}
-	// 			);
-	// 		});
-
-	// 		// 让每个框之间再慢一点
-	// 		await new Promise(r => setTimeout(r, 1500));
-	// 	}
-	// }
-
-
-
-	// // 调用： drawAllRect();
-	// drawAllRect();
 // =======================================
 // 消灭 ivu-modal 动画
-// =======================================
-// =======================================
-// 消灭 ivu-modal 所有动画（完全瞬间出现）
 // =======================================
 (() => {
 	const style = document.createElement("style");
@@ -335,6 +148,8 @@ async function test() {
 		transition: none !important;
 		animation: none !important;
 	}
+
+	/* 强制禁止拖拽 transform */
 	.ivu-modal-content-drag {
 		transform: none !important;
 	}
@@ -344,7 +159,7 @@ async function test() {
 
 
 // =======================================
-// 可视化面板
+// 可视化状态面板
 // =======================================
 const panel = document.createElement("div");
 panel.style.position = "fixed";
@@ -362,7 +177,52 @@ panel.style.pointerEvents = "none";
 panel.textContent = "ready...";
 document.body.appendChild(panel);
 
-const groupedData = [];
+const groupedData = [
+  {
+    "firstXY": {
+      "x": 601.09,
+      "y": 173.35
+    },
+    "thirdXY": {
+      "x": 625.46,
+      "y": 199.87
+    },
+    "tag": {
+      "class_id": -1,
+      "description": "访问下一级页面的按钮，当前不可点击"
+    }
+  },
+  {
+    "firstXY": {
+      "x": 7.06,
+      "y": 45.41
+    },
+    "thirdXY": {
+      "x": 59.56,
+      "y": 90.11
+    },
+    "tag": {
+      "class_id": 1,
+      "description": "打开火狐浏览器"
+    }
+  },
+  {
+    "firstXY": {
+      "x": 7.82,
+      "y": 107.57
+    },
+    "thirdXY": {
+      "x": 59.2,
+      "y": 153.39
+    },
+    "tag": {
+      "class_id": 1,
+      "description": "打开当前应用"
+    }
+  },
+]
+;
+
 let fillIndex = 0;
 
 function updatePanel() {
@@ -380,7 +240,7 @@ updatePanel();
 
 
 // =======================================
-// 自动填充
+// 自动填充监听器
 // =======================================
 const observer = new MutationObserver(() => {
 	const elements = document.querySelectorAll(".customInput.horizontalLtr");
@@ -418,31 +278,46 @@ function afterDrawClick() {
 
 
 // =======================================
-// 极限版本：无动画拉框（直接点起点→终点→鼠标松开）
+// 模拟拉框（已加速）
 // =======================================
-function superFastDraw(canvasEl, startX, startY, endX, endY, onFinish) {
+function simulateDraw(canvasEl, startX, startY, endX, endY, steps = 8, onFinish) {
+	// steps 从 20 降到 8，大幅加速
 	const rect = canvasEl.getBoundingClientRect();
 
-	const x1 = rect.left + startX;
-	const y1 = rect.top + startY;
-	const x2 = rect.left + endX;
-	const y2 = rect.top + endY;
+	let x = rect.left + startX;
+	let y = rect.top + startY;
 
-	const fire = (type, x, y) => {
+	let targetX = rect.left + endX;
+	let targetY = rect.top + endY;
+
+	const fireEvent = (type, cx, cy) => {
 		canvasEl.dispatchEvent(new MouseEvent(type, {
 			bubbles: true,
 			cancelable: true,
-			clientX: x,
-			clientY: y
+			clientX: cx,
+			clientY: cy
 		}));
 	};
 
-	// 直接三连：mousedown -> mousemove -> mouseup
-	fire("mousedown", x1, y1);
-	fire("mousemove", x2, y2);
-	fire("mouseup", x2, y2);
+	fireEvent("mousedown", x, y);
 
-	if (onFinish) onFinish();
+	let dx = (targetX - x) / steps;
+	let dy = (targetY - y) / steps;
+
+	let i = 0;
+	function stepMove() {
+		if (i >= steps) {
+			fireEvent("mouseup", targetX, targetY);
+			if (typeof onFinish === "function") onFinish();
+			return;
+		}
+		x += dx;
+		y += dy;
+		fireEvent("mousemove", x, y);
+		i++;
+		requestAnimationFrame(stepMove);
+	}
+	requestAnimationFrame(stepMove);
 }
 
 
@@ -461,11 +336,11 @@ function mapImageToCanvas(imgX, imgY, imgWidth, imgHeight, canvasWidth, canvasHe
 
 
 // =======================================
-// 极致快：无等待批量绘制
+// 批量拉框（大幅加速）
 // =======================================
 async function drawAllRect() {
-	const imgWidth = 2880;
-	const imgHeight = 1880;
+	const imgWidth = 1920;
+	const imgHeight = 1220;
 	const canvasWidth = 708.0625;
 	const canvasHeight = 692;
 
@@ -475,21 +350,186 @@ async function drawAllRect() {
 		const p1 = mapImageToCanvas(obj.firstXY.x, obj.firstXY.y, imgWidth, imgHeight, canvasWidth, canvasHeight);
 		const p2 = mapImageToCanvas(obj.thirdXY.x, obj.thirdXY.y, imgWidth, imgHeight, canvasWidth, canvasHeight);
 
-		superFastDraw(
-			canvasEl,
-			p1.canvasX,
-			p1.canvasY + 11,
-			p2.canvasX,
-			p2.canvasY + 11,
-			() => {
-				afterDrawClick(); // 无等待立即点击
-			}
-		);
+		await new Promise(resolve => {
+			simulateDraw(
+				canvasEl,
+				p1.canvasX + 1,
+				p1.canvasY + 10,
+				p2.canvasX + 1,
+				p2.canvasY + 10,
+				8, // ⭐ steps = 8，拉框加速
+				async () => {
 
-		// 完全不等待，完全连续快速执行
+					// ⭐ 将等待从 1000ms → 150ms
+					await new Promise(r => setTimeout(r, 150));
+
+					afterDrawClick();
+
+					resolve();
+				}
+			);
+		});
+
+		// ⭐ 每个框之间等待从 1500ms → 200ms
+		await new Promise(r => setTimeout(r, 200));
 	}
 }
 
-drawAllRect();
 
+// 调用
+drawAllRect();
+}
+{
+	const canvasEl = document.querySelector(".upper-canvas");
+const ctx = canvasEl.getContext("2d");
+
+// =======================================
+//  真实图片尺寸
+// =======================================
+const realImgW = 1920;
+const realImgH = 1220;
+
+// =======================================
+//  虚拟宽度（用于内部映射体系）
+// =======================================
+const virtualImgW = 1960;
+
+// =======================================
+//  canvas 内部尺寸（内部像素）
+// =======================================
+const canvasW = canvasEl.width;
+const canvasH = canvasEl.height;
+
+// =======================================
+//  偏差补偿 Y 固定值（单位像素）
+// =======================================
+const COMP_START_Y = -0.46;  // 起点 Y 偏差
+const COMP_END_Y = -4.03;    // 终点 Y 偏差
+
+// =======================================
+//  根据给定 imgWidth 计算 scale 和 vertical offset
+// =======================================
+function computeParamsFor(imgWidth) {
+	const scale = canvasW / imgWidth;
+	const displayHeight = realImgH * scale;
+	const offsetY = (canvasH - displayHeight) / 2;
+	return { scale, displayHeight, offsetY };
+}
+
+// =======================================
+//  绘制红框，框住图片可见区域
+// =======================================
+function drawRedBoxUsingVirtualWidth(virtualWidth = virtualImgW) {
+	const { displayHeight, offsetY } = computeParamsFor(virtualWidth);
+
+	const canvasX = 0;
+	const canvasY = offsetY;
+	const w = canvasW;
+	const h = displayHeight;
+
+	ctx.clearRect(0, 0, canvasW, canvasH);
+	ctx.strokeStyle = "red";
+	ctx.lineWidth = 2;
+	ctx.strokeRect(canvasX, canvasY, w, h);
+}
+
+// =======================================
+//  真实图片坐标 → 虚拟宽度体系 → canvas 坐标
+// =======================================
+function mapRealImageCoordToCanvasUsingVirtual(imgX, imgY, virtualWidth = virtualImgW) {
+	const xVirtual = imgX * (virtualWidth / realImgW);
+	const { scale, offsetY } = computeParamsFor(virtualWidth);
+	const canvasX = xVirtual * scale;
+	const canvasY = imgY * scale + offsetY;
+	return { canvasX, canvasY };
+}
+
+// =======================================
+//  原始 simulateDraw，不变
+// =======================================
+function simulateDraw(canvasEl, startX, startY, endX, endY, steps = 8, onFinish) {
+	const rect = canvasEl.getBoundingClientRect();
+
+	let x = rect.left + startX;
+	let y = rect.top + startY;
+
+	let targetX = rect.left + endX;
+	let targetY = rect.top + endY;
+
+	const fireEvent = (type, cx, cy) => {
+		canvasEl.dispatchEvent(new MouseEvent(type, {
+			bubbles: true,
+			cancelable: true,
+			clientX: cx,
+			clientY: cy
+		}));
+	};
+
+	fireEvent("mousedown", x, y);
+
+	let dx = (targetX - x) / steps;
+	let dy = (targetY - y) / steps;
+
+	let i = 0;
+	function stepMove() {
+		if (i >= steps) {
+			fireEvent("mouseup", targetX, targetY);
+			if (typeof onFinish === "function") onFinish();
+			return;
+		}
+		x += dx;
+		y += dy;
+		fireEvent("mousemove", x, y);
+		i++;
+		requestAnimationFrame(stepMove);
+	}
+	requestAnimationFrame(stepMove);
+}
+
+// =======================================
+//  动态 X 轴补偿函数（根据 X 位置自动计算右下角偏差）
+// =======================================
+function computeDynamicXCompensation(xReal) {
+	// 左上角固定基础偏差
+	const base = 1.53;
+
+	// 按比例增加右侧偏差
+	const ratio = xReal / realImgW;
+
+	// 最大额外补偿（右下角测得的偏差）
+	const extra = 3.04;
+
+	return base + ratio * extra;
+}
+
+// =======================================
+//  对外接口：模拟绘制（输入真实图片坐标，内部按虚拟宽度 + 动态补偿）
+// =======================================
+function simulateDrawByRealImageCoordsUsingVirtual(
+	imgX1, imgY1, imgX2, imgY2,
+	virtualWidth = virtualImgW,
+	steps = 8,
+	onFinish
+) {
+	// 先映射到 canvas 坐标
+	const p1 = mapRealImageCoordToCanvasUsingVirtual(imgX1, imgY1, virtualWidth);
+	const p2 = mapRealImageCoordToCanvasUsingVirtual(imgX2, imgY2, virtualWidth);
+
+	// 获取 scale
+	const { scale } = computeParamsFor(virtualWidth);
+
+	// 动态 X 补偿
+	const dynamicCompStartX = computeDynamicXCompensation(imgX1);
+	const dynamicCompEndX = computeDynamicXCompensation(imgX2);
+
+	// 应用补偿（Y 轴使用固定值）
+	const c1x = p1.canvasX - dynamicCompStartX * scale;
+	const c1y = p1.canvasY - COMP_START_Y * scale;
+
+	const c2x = p2.canvasX - dynamicCompEndX * scale;
+	const c2y = p2.canvasY - COMP_END_Y * scale;
+
+	// 执行模拟绘制
+	simulateDraw(canvasEl, c1x, c1y, c2x, c2y, steps, onFinish);
+}
 }
