@@ -1226,3 +1226,46 @@ class FormatValidation {
 		return momoRegex.test(momoText);
 	}
 }
+/**
+ * Message 类 - 管理应用程序的通知功能(桌面通知)
+ */
+class Message {
+	static log = new Logger("Resource");
+	static async init() {
+		if (!("Notification" in window)) {
+			this.log.warn("当前浏览器不支持桌面通知");
+			return;
+		}
+		if (Notification.permission === "default") {
+			await Notification.requestPermission();
+		}
+	}
+
+	static notify(options = {}) {
+		const {
+			title = "Tagsy",
+			body = "",
+			duration = 10000
+		} = options;
+
+		if (Notification.permission !== "granted") {
+			this.log.warn("通知未授权");
+			return;
+		}
+
+		const n = new Notification(title, {
+			body,
+		});
+
+		// 点击通知后回到当前网页
+		n.onclick = () => {
+			window.focus();
+		};
+
+		if (duration > 0) {
+			setTimeout(() => n.close(), duration);
+		}
+
+		return n;
+	}
+}

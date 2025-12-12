@@ -108,9 +108,19 @@ if (!window.ResourceLoader) {
 					Url + "Utils/Tool.js",
 				],
 				[
-					Url + "Utils/Manager/Request.js",
-					Url + "Utils/Manager/Page.js",
-					Url + "Utils/Unit.js",
+					Url + "Manager/Base/Route.js",
+					Url + "Manager/Requset/Request.js",
+				],
+				[
+					Url + "Manager/Base/System.js",
+					Url + "Manager/Web/Framework.js",
+					Url + "Manager/Web/Index.js",
+					Url + "Manager/Web/Login.js",
+					Url + "Manager/Web/W2.js",
+					Url + "Manager/Web/LS.js",
+					Url + "Manager/Web/QLabel.js",
+					Url + "Manager/Web/Setting.js",
+					Url + "Manager/Web/Wecom.js",
 				],
 				[
 					Url + "Variable/Global.js",

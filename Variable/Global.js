@@ -243,7 +243,28 @@ class W2Global extends Global {
 		}
 	}
 	static statusMap = {
-
+		loginStatus: {
+			not_login: "未登录",
+			logining: "登录中",
+			login_success: "已登录",
+			login_failed: "登录失败",
+		},
+		currentTaskStatus: {
+			workIn: "上班打卡",
+			meal: "前往用餐", 
+			working: "切换标注",
+			workOut: "下班打卡",
+		},
+		workHourStatus: {
+			working: "正在标注",
+			meal: "前往用餐"
+		},
+		workingStatus: {
+			not_check_in: "未打卡",
+			already_check_in: "已打卡",
+			already_check_out: "已下班"
+		},
+		unknown: "--"
 	}
 	static domMap = {
 		login_status_label: "#login_status_label", // 登录状态
@@ -396,21 +417,22 @@ class QLabelGlobal extends Global {
 		}
 	}
 	static setting = {
+		// 作业量统计
 		homeworkLoadStatistics: {
 			hourList: [],
 		},
+		// 标注列表
 		annotationList: {
 			lookupTime: {
 				startTime: 0,
 				endTime: 1,
 			},
 			tasknameAndIndicators: [
-				{ taskname: "任务1", indicators: 5 },
+				{ taskname: "任务1", indicators: 5 }, // 这个变量是示例
 				{ taskname: "任务2", indicators: 10 },
 			]
 		}
 	}
-	
 	static domMap = {
 		login_status_div: "#login_status_div", // 登录状态区域
 		worked_hours: "#worked_hours", // 已工作时长标签
@@ -429,7 +451,28 @@ class QLabelGlobal extends Global {
 		annotation_list_table: "#annotation_list_table", // 标注列表表格
 	}
 }
-class QLabelLookupGlobal extends Global {
+class QLabelWorkGlobal extends Global {
+	static async init() {
+		this.cache = await super.initObject(this.cache, "QLabelWorkGlobal.cache");
+	}
+	// 缓存, 不通过 GM 存储
+	static cache = {
+		task: {
+			id: null,
+			taskName: null,
+			start: null, // 从第几题开始查询
+
+		}
+	}
+	// 
+	static cookie = {
+
+	}
+	static setting = {
+
+	}
+}
+class QLabelWorkLookupGlobal extends Global {
 	static async init() {
 		this.cache = await super.initObject(this.cache, "QLabelLookupGlobal.cache");
 	}
