@@ -535,35 +535,18 @@ class QLabelWeb extends QLabel {
 		annotation_list_loading.classList.add("hidden");
 	}
 }
-class QLabelWork extends QLabel {
-	constructor() {
-		super();
-	}
-	init() {
-		this.log.log("QLabelWork 逻辑已加载");
-	}
 
-}
-class QLabelWorkLookup extends QLabel {
-	constructor() {
-		super();
-	}
-	init() {
-		GM.CookieList({}, list => {
-			const session = list.find(c => c.name === "SESSION");
-			QLabelWorkLookupGlobal.cache.cookie.session = session.value;
-			this.log.log("SESSION:", session?.value);
-		});
-
-		GM.CookieList({}, list => {
-			const route = list.find(c => c.name === "tgw_l7_route");
-			QLabelWorkLookupGlobal.cache.cookie.route = route.value;
-			this.log.log("tgw_l7_route:", route?.value);
-		});
-		this.log.log("QLabelLookupPage 逻辑已加载");
-	}
-}
 class QLabelRequest extends QLabel {
+	// 分成两部分, 一部分是QLabelAPI一部分是QLabelRequest, API只管发送, Request管逻辑
+	static config = {
+		baseUrl: "https://qlabel.tencent.com/api/",
+		defaultHeader: {
+			"Content-Type": "application/json;charset=UTF-8",
+			"X-Requested-With": "XMLHttpRequest",
+			"sw8": "1-ZjE3NGEzMTMtN2EwYS00MzE5LTgxNDEtNWQ3NjRkNDM4YmZk-YmZkODkxZDYtOTg5OC00OWFhLWExMzUtYTFlNzkyNTdlNTk1-1-YWVnaXM=-MS40My43-L3dvcmtiZW5jaC93b3JrLXRpbWU=-cWxhYmVsLnRlbmNlbnQuY29t",
+		}
+	}
+
 	constructor() {
 		super();
 	}
@@ -586,13 +569,11 @@ class QLabelRequest extends QLabel {
 		let endTime = QLabelGlobal.setting.annotationList.lookupTime.endTime;
 		const url = "https://qlabel.tencent.com/api/report/workbenchUserWorkingReport";
 		const headers = {
-			"Content-Type": "application/json;charset=UTF-8",
-			"X-Requested-With": "XMLHttpRequest",
-			"sw8": "1-ZjE3NGEzMTMtN2EwYS00MzE5LTgxNDEtNWQ3NjRkNDM4YmZk-YmZkODkxZDYtOTg5OC00OWFhLWExMzUtYTFlNzkyNTdlNTk1-1-YWVnaXM=-MS40My43-L3dvcmtiZW5jaC93b3JrLXRpbWU=-cWxhYmVsLnRlbmNlbnQuY29t",
+			...this.config.defaultHeader,
 			"Cookie": "SESSION=" + 
-				QLabelWorkLookupGlobal.cache.cookie.session +
+				QLabelWorkGlobal.cache.cookie.local.session +
 				"; tgw_l7_route=" + 
-				QLabelWorkLookupGlobal.cache.cookie.route
+				QLabelWorkGlobal.cache.cookie.local.route
 		};
 		const data = {
 			"jsonrpc": "2.0",
@@ -626,102 +607,6 @@ class QLabelRequest extends QLabel {
 		
 		return result;
 	}
-	// ***************************
-	// * 
-	// * QLabelWorkRequest
-	// * 
-	// ***************************
-	// 获取当前题目信息
-	static async listMyDetail() {
-		const url = "https://qlabel.tencent.com/api/workbench/listMyDetail";
-
-		const headers = {
-			"Content-Type": "application/json;charset=UTF-8",
-			"X-Requested-With": "XMLHttpRequest",
-			"sw8": "1-ZjE3NGEzMTMtN2EwYS00MzE5LTgxNDEtNWQ3NjRkNDM4YmZk-YmZkODkxZDYtOTg5OC00OWFhLWExMzUtYTFlNzkyNTdlNTk1-1-YWVnaXM=-MS40My43-L3dvcmtiZW5jaC93b3JrLXRpbWU=-cWxhYmVsLnRlbmNlbnQuY29t",
-			"Cookie": "SESSION=" + 
-				QLabelWorkLookupGlobal.cache.cookie.session +
-				"; tgw_l7_route=" + 
-				QLabelWorkLookupGlobal.cache.cookie.route
-		};
-
-		const data = {
-			"jsonrpc": "2.0",
-			"method": "listMyDetail",
-			"id": 1765529342497,
-			"params": {
-				"task_id": "1191472240708845568",
-				"pack_keys": [
-					"cf5fc4df4189100a0ad0b718174f9713"
-				],
-				"need_check_info": 1,
-				"cycle_step": 0,
-				"need_deliver_info": true,
-				"need_template_info": 0,
-				"source": 7
-			}
-		};
-
-		this.log.log("listMyDetail data", data);
-		const result = await this._request("POST", url, headers, data);
-
-		this.log.log("listMyDetail result: ", result);
-		
-		return result;
-	}
-	// 获取所有标注任务列表
-	static async getListLabelTasks() {
-		const url = "https://qlabel.tencent.com/api/workbench/listLabelTasks";
-
-		const headers = {
-			"Content-Type": "application/json;charset=UTF-8",
-			"X-Requested-With": "XMLHttpRequest",
-			"sw8": "1-ZjE3NGEzMTMtN2EwYS00MzE5LTgxNDEtNWQ3NjRkNDM4YmZk-YmZkODkxZDYtOTg5OC00OWFhLWExMzUtYTFlNzkyNTdlNTk1-1-YWVnaXM=-MS40My43-L3dvcmtiZW5jaC93b3JrLXRpbWU=-cWxhYmVsLnRlbmNlbnQuY29t",
-			"Cookie": "SESSION=" + 
-				QLabelWorkLookupGlobal.cache.cookie.session +
-				"; tgw_l7_route=" + 
-				QLabelWorkLookupGlobal.cache.cookie.route
-		};
-
-		const data = {
-			"jsonrpc": "2.0",
-			"method": "listLabelTasks",
-			"id": 1765531865477,
-			"params": {
-				"page": {
-					"start": 0,
-					"size": 10,
-					"return_total": 1
-				},
-				"sort": [
-					[
-						"a.created_at",
-						"desc"
-					]
-				]
-			}
-		};
-
-		this.log.log("getListLabelTasks data", data);
-		const result = await this._request("POST", url, headers, data);
-
-		this.log.log("getListLabelTasks result: ", result);
-
-		const targetName = "图+视频生文-SFT-GUI-屏幕可交互组件-检测模型1126_macapp-凌波微步-251127";
-		let targetTaskId = null;
-
-		result.result.data.forEach(item => {
-			if (item.task_name === targetName) {
-				targetTaskId = item.task_id;
-			}
-		});
-
-		this.log.debug("task_id:", targetTaskId);
-
-		return result;
-	}
-
-
 	static async _request(method, url, headers, data) {
 		return await HttpRequest.fetch({
 			method,

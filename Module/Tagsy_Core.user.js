@@ -8,11 +8,11 @@
 // @match			https://qlabel.tencent.com/workbench/label-tasks
 // @match			https://qlabel.tencent.com/workbench/work-time
 // @match			https://qlabel.tencent.com/workbench/review-tasks
-// @match			file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/Resource/Template/*
+// @match			file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/Resource/WebSite/*
 // @require			file:///D:/Creat/VSCode/Tagsy_V2.0/Tagsy/Module/Tagsy_Import.js
-// @match			https://weavefate.asia/Resource/Template/*
+// @match			https://weavefate.asia/Resource/WebSite/*
 // @require			https://weavefate.asia/Module/Tagsy_Import.js
-// @match			file:///C:/ProgramData/Tagsy/Resource/Template/*
+// @match			file:///C:/ProgramData/Tagsy/Resource/WebSite/*
 // @require			file:///C:/ProgramData/Tagsy/Module/Tagsy_Import.js
 // @match			https://qlabel.tencent.com/workbench/tasks/*
 // @license			CC

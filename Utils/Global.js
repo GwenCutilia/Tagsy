@@ -454,33 +454,36 @@ class QLabelGlobal extends Global {
 class QLabelWorkGlobal extends Global {
 	static async init() {
 		this.cache = await super.initObject(this.cache, "QLabelWorkGlobal.cache");
+		this.setting = await super.initObject(this.setting, "QLabelWorkGlobal.setting");
 	}
-	// 缓存, 不通过 GM 存储
+	// 缓存
 	static cache = {
-		task: {
-			id: null,
-			taskName: null,
-			start: null, // 从第几题开始查询
+		api: {
+			listLabelTasks: {
+				start: 0, // 从第几题开始查询
+			},
+		},
+		cookie: {
+			task: {
+				taskId: null,
+				packKey: null,
+				taskName: null,
+				detailId: null,
+			},
+			local: {
+				session: null,
+				route: null,
+			}
+		},
+		resultData: [
+			{
 
-		}
+			}
+		],
 	}
-	// 
-	static cookie = {
-
-	}
+	
 	static setting = {
 
-	}
-}
-class QLabelWorkLookupGlobal extends Global {
-	static async init() {
-		this.cache = await super.initObject(this.cache, "QLabelLookupGlobal.cache");
-	}
-	static cache = {
-		cookie: {
-			session: null,
-			route: null,
-		}
 	}
 }
 class ApiboxGlobal extends Global {
