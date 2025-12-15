@@ -111,19 +111,19 @@ if (!window.ResourceLoader) {
 					Url + "Utils/Global.js",
 				],
 				[
-					Url + "Utils/Route.js",
+					Url + "Page/Route.js",
 					Url + "Page/Page.js",
 					Url + "Page/Requset/Request.js",
 				],
 				[
-					Url + "Page/WebSite/Framework.js",
-					Url + "Page/WebSite/Index.js",
-					Url + "Page/WebSite/Login.js",
-					Url + "Page/WebSite/W2.js",
-					Url + "Page/WebSite/LS.js",
-					Url + "Page/WebSite/QLabel.js",
-					Url + "Page/WebSite/Setting.js",
-					Url + "Page/WebSite/Wecom.js",
+					Url + "Page/Web/Framework.js",
+					Url + "Page/Web/Index.js",
+					Url + "Page/Web/Login.js",
+					Url + "Page/Web/W2.js",
+					Url + "Page/Web/LS.js",
+					Url + "Page/Web/QLabel.js",
+					Url + "Page/Web/Setting.js",
+					Url + "Page/Web/Wecom.js",
 					Url + "Page/Extension/QLabel.js"
 				],
 				[

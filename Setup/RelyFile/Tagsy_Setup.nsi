@@ -27,6 +27,6 @@ Section "PostInstall"
 
 	ExecShell "open" "https://weavefate.asia/Module/Tagsy_ApiBridge.user.js"
 	ExecShell "open" "https://weavefate.asia/Module/Tagsy_Core.user.js"
-	ExecShell "open" "https://weavefate.asia/Resource/Template/Login.html"
+	ExecShell "open" "https://weavefate.asia/Resource/Web/Login.html"
 
 SectionEnd
