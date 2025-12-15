@@ -12,7 +12,7 @@ class Route {
 			"Setting.html": () => new SettingWeb().init(),
 		},
 		qlabel: {
-			"tasks": () => new QLabelWork().init(),
+			"/workbench/tasks": () => new QLabelWork().init(),
 		}
 	};
 
@@ -41,11 +41,12 @@ class Route {
 
 			// qlabel 组匹配 qlabel.tencent.com 域名
 			if (groupKey === "qlabel" && host === "qlabel.tencent.com") {
-				const matchedKey = Object.keys(group).find(key => path.includes(key));
+				const matchedKey = Object.keys(group).find(key =>
+					path === key || path.startsWith(key + "/")
+				);
+
 				if (matchedKey) {
-					// 先初始化全局变量
 					await Page.initQLabelValue();
-					// 执行页面逻辑
 					await group[matchedKey]();
 					return;
 				}
