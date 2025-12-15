@@ -175,7 +175,7 @@ class QLabelWorkApi extends HttpRequest {
 			"method": "listMyLabelDetail",
 			"id": 1765620593053,
 			"params": {
-				"task_id": taskId,
+				"task_id": "1191472240708845568",
 				"page": {
 					"start": 0,
 					"size": 10,
@@ -186,7 +186,7 @@ class QLabelWorkApi extends HttpRequest {
 					25
 				]
 			}
-		}
+		};
 
 		this.log.log("listMyLabelDetail data", data);
 
@@ -239,6 +239,7 @@ class QLabelWorkApi extends HttpRequest {
 		const session = QLabelWorkGlobal.cache.cookie.local.session;
 		const route = QLabelWorkGlobal.cache.cookie.local.route;
 		const taskId = QLabelWorkGlobal.cache.cookie.task.taskId;
+		const detailId = QLabelWorkGlobal.cache.cookie.task.detailId;
 		// const packkey = QLabelWorkGlobal.cache.cookie.task.packKey;
 
 		const url = "https://qlabel.tencent.com/api/workbench/saveLabel";
@@ -255,7 +256,7 @@ class QLabelWorkApi extends HttpRequest {
 			"params": {
 				"list": [
 					{
-						"detail_id": QLabelWorkGlobal.cache.cookie.task.detailId,
+						"detail_id": detailId,
 						"detail_label": "{\"tags\":[{\"name\":\"imgMask\",\"label\":\"imgMask\"}],\"extData\":null,\"objects\":[]}",
 						"detail_is_valid": 1
 					}
@@ -360,14 +361,14 @@ class QLabelWorkRequest extends Page {
 		return packKey;
 	}
 
-	// 通过题包key获取任务明细Id
-	static async getDetailIdByPackKey() {
+	// 通过任务Id获取任务明细Id
+	static async getDetailIdByTaskId() {
 		let detailId;
 		const result = await QLabelWorkApi.listMyLabelDetail();
 		if (result == null) {
 			this.log.error("未获取到任务明细Id");
 		}
-		detailId = result.data.detail_id;
+		detailId = result.result.data[0].detail_id;
 		QLabelWorkGlobal.cache.cookie.task.detailId = detailId;
 		this.log.log("获取到的detailId: ", detailId);
 		return detailId

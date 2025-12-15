@@ -388,31 +388,49 @@ class HttpRequest {
 	static async fetch(options) {
 		return new Promise((resolve, reject) => {
 			let data = options.data;
+			const headers = options.headers || {};
+			const contentType = headers["Content-Type"] || headers["content-type"] || "";
 
-			// 如果是对象且 Content-Type 是表单格式, 转换为 URL 编码字符串
+			// 处理 request body
 			if (data && typeof data === "object" && !(data instanceof FormData)) {
-				const contentType = options.headers?.["Content-Type"] || options.headers?.["content-type"];
-				
-				if (contentType && contentType.includes("application/x-www-form-urlencoded")) {
+				// 表单提交
+				if (contentType.includes("application/x-www-form-urlencoded")) {
 					data = new URLSearchParams(data).toString();
-				} else if (contentType && contentType.includes("application/json")) {
+				}
+				// JSON 提交
+				else if (contentType.includes("application/json")) {
 					data = JSON.stringify(data);
-					if (!options.headers) options.headers = {};
-					options.headers["Content-Type"] = "application/json;charset=UTF-8";
+					headers["Content-Type"] = "application/json;charset=UTF-8";
 				}
 			}
 
 			GM.XmlhttpRequest({
 				method: options.method || "GET",
 				url: options.url,
-				headers: options.headers || {},
+				headers,
 				data: data || null,
-				responseType: options.responseType || "json",
-				onload(response) {
-					resolve(response.response);
+				responseType: "text",
+				onload(resp) {
+					try {
+						let text = resp.responseText;
+
+						// 只对 JSON 做处理
+						if (text && (text.startsWith("{") || text.startsWith("["))) {
+							// 把 16 位以上数字包成字符串，防止精度丢失
+							text = text.replace(
+								/(:\s*)(\d{16,})(?=[,\}])/g,
+								'$1"$2"'
+							);
+							resolve(JSON.parse(text));
+						} else {
+							resolve(text);
+						}
+					} catch (e) {
+						reject(e);
+					}
 				},
-				onerror(error) {
-					reject(error);
+				onerror(err) {
+					reject(err);
 				}
 			});
 		});

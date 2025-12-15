@@ -124,6 +124,8 @@ if (!window.ResourceLoader) {
 					Url + "Page/Web/QLabel.js",
 					Url + "Page/Web/Setting.js",
 					Url + "Page/Web/Wecom.js",
+				],
+				[
 					Url + "Page/Extension/QLabel.js"
 				],
 				[
