@@ -468,6 +468,18 @@ class QLabelWorkGlobal extends Global {
 				taskName: null,
 				detailId: null,
 			},
+			pack: {
+				detailLabel: {
+					"tags": [
+						{
+							"name": "imgMask",
+							"label":"imgMask"
+						}
+					],
+					"extData":null,
+					"objects":[]
+				},
+			},
 			local: {
 				session: null,
 				route: null,

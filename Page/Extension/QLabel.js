@@ -9,11 +9,8 @@ class QLabelWork extends QLabel {
 	static async QLabelCookieInit() {
 		await getLocalCookie();
 	}
-	static async saveResult() {
-		QLabelWorkGlobal.cache.resultData = [];
-		QLabelWorkRequest.getTaskIdByName();
-		QLabelWorkRequest.getPackKey();
-		QLabelWorkRequest.saveLabel();
+	static async updateDetailLabel() {
+		await QLabelWorkRequest.updateDetailLabel();
 	}
 	// const taskId = QLabelWorkGlobal.cache.cookie.task.taskId;
 	// const packkey = QLabelWorkGlobal.cache.cookie.task.packKey;
@@ -48,6 +45,62 @@ class QLabelWork extends QLabel {
 
 		return objects;
 	}
+	// 获取当前页面的DetailLabel
+	static getDetailLabelCurrentPage() {
+		// 获取页面中所有 info-tooltip-content 元素
+		const tooltips = document.querySelectorAll('.info-tooltip-content');
+
+		const currentDetailLabel = {
+			"tags": [
+				{
+					"name": "imgMask",
+					"label": "imgMask"
+				}
+			],
+			"extData": {
+				"drawnObjects": []
+			},
+			"objects": []
+		};
+
+		// 遍历每个 tooltip
+		tooltips.forEach(el => {
+			try {
+				// 获取文本内容
+				const text = el.textContent.trim();
+				if (!text) return;
+
+				// 解析 JSON
+				const obj = JSON.parse(text);
+
+				// 处理 tags 中的 value，如果是字符串 JSON，需要解析
+				if (obj.tags && Array.isArray(obj.tags)) {
+					obj.tags = obj.tags.map(tag => {
+						if (typeof tag.value === 'string') {
+							try {
+								tag.value = JSON.parse(tag.value);
+							} catch (e) {
+								// 解析失败保持原字符串
+							}
+						}
+						return tag;
+					});
+				}
+
+				// 添加到 objects
+				currentDetailLabel.objects.push(obj);
+			} catch (e) {
+				console.warn('解析失败:', el, e);
+			}
+		});
+
+		// QLabelWorkGlobal.cache.cookie.pack.detailLabel = {...currentDetailLabel};
+		const target = QLabelWorkGlobal.cache.cookie.pack.detailLabel;
+		for (const key in currentDetailLabel) {
+			target[key] = currentDetailLabel[key];
+		}
+	}
+
 }
 class QLabelWorkApi extends HttpRequest {
 	static log = new Logger("QLabelWorkApi");
@@ -249,6 +302,82 @@ class QLabelWorkApi extends HttpRequest {
 			"sw8": "1-ZjE3NGEzMTMtN2EwYS00MzE5LTgxNDEtNWQ3NjRkNDM4YmZk-YmZkODkxZDYtOTg5OC00OWFhLWExMzUtYTFlNzkyNTdlNTk1-1-YWVnaXM=-MS40My43-L3dvcmtiZW5jaC93b3JrLXRpbWU=-cWxhYmVsLnRlbmNlbnQuY29t",
 			"Cookie": "SESSION=" + session + "; tgw_l7_route=" + route
 		};
+		// QLabelWorkGlobal.cache.cookie.pack.savaDetailLabel = {
+		// 	"tags": [{
+		// 		"name":"imgMask","label":"imgMask"
+		// 	}],
+		// 	"extData":{
+		// 		"drawnObjects":[]
+		// 	},
+		// 	"objects":[{
+		// 		"type": "image/rect",
+		// 		"data": [
+		// 			{
+		// 				"x":1374.63,"y":373.23
+		// 			},
+		// 			{
+		// 				"x":1571.98,"y":373.23
+		// 			},
+		// 			{
+		// 				"x":1571.98,"y":453.21
+		// 			},
+		// 			{
+		// 				"x":1374.63,"y":453.21
+		// 			}
+		// 		],
+		// 		"tags": [
+		// 			{
+		// 				"name": "input_1763695207054",
+		// 				"label":"操作类型&描述",
+		// 				"value": {
+		// 					"class_id": 0,
+		// 					"description": "用于输入用户名的文本框"
+		// 				}
+		// 			}
+		// 		],
+		// 		"featureId": "feature-08VUjqDC",
+		// 		"color":"#8BC34A",
+		// 		"name":"image/rect_1644927786890",
+		// 		"label":"方框",
+		// 		"group":""
+		// 	},
+		// 	{
+		// 		"type":"image/rect",
+		// 		"data":[
+		// 			{
+		// 				"x":782.59,
+		// 				"y":429.39
+		// 			},
+		// 			{
+		// 				"x":1177.29,
+		// 				"y":429.39
+		// 			},
+		// 			{
+		// 				"x":1177.29,
+		// 				"y":609.77
+		// 			},
+		// 			{
+		// 				"x":782.59,
+		// 				"y":609.77
+		// 			}
+		// 		],
+		// 		"tags":[
+		// 			{
+		// 				"name":"input_1763695207054",
+		// 				"label":"操作类型&描述",
+		// 				"value":{
+		// 					"class_id": 0,
+		// 					"description": "用于输入用户名的文本框"
+		// 				}
+		// 			}
+		// 		],
+		// 		"featureId":"feature-eLCyVoqX",
+		// 		"color":"#8BC34A",
+		// 		"name":"image/rect_1644927786890",
+		// 		"label":"方框",
+		// 		"group":""
+		// 	}
+		// ]}
 		const data = {
 			"jsonrpc": "2.0",
 			"method": "saveLabel",
@@ -257,9 +386,9 @@ class QLabelWorkApi extends HttpRequest {
 				"list": [
 					{
 						"detail_id": detailId,
-						"detail_label": "{\"tags\":[{\"name\":\"imgMask\",\"label\":\"imgMask\"}],\"extData\":null,\"objects\":[]}",
+						"detail_label": JSON.stringify(QLabelWorkGlobal.cache.cookie.pack.detailLabel),
 						"detail_is_valid": 1
-					}
+					},
 				],
 				"task_id": taskId,
 				"auto": false
@@ -371,9 +500,10 @@ class QLabelWorkRequest extends Page {
 		detailId = result.result.data[0].detail_id;
 		QLabelWorkGlobal.cache.cookie.task.detailId = detailId;
 		this.log.log("获取到的detailId: ", detailId);
-		return detailId
+		return detailId;
 	}
-	static async updateResult() {
-		const result = await QLabelWorkApi.saveLabel();
+	static async updateDetailLabel() {
+		await this.getDetailIdByTaskId();
+		await QLabelWorkApi.saveLabel();
 	}
 }

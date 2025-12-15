@@ -275,7 +275,7 @@ class LSWeb extends LS {
 				start: LSGlobal.setting.time_range_fill_daily_report_start,
 				end: LSGlobal.setting.time_range_fill_daily_report_end,
 				action: async () => { 
-					await LS.fillDailyReport() ;
+					await LSWeb.fillDailyReport() ;
 				},
 				name: LSGlobal.task.dailyTask.fillDailyReport
 			}
