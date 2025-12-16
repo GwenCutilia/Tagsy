@@ -249,11 +249,12 @@ class QLabelWeb extends QLabel {
 	updateHomeworkLoadProgress() {
 		const backgroundBar = this.homework_load_tatistics_background_bar;
 		if (!backgroundBar) return;
-		// 获取小时列表
+
 		const hourList = QLabelGlobal.setting.homeworkLoadStatistics.hourList || [];
-		// 分离标注和质检时长
+
 		let annotationHours = 0;
 		let inspectionHours = 0;
+
 		if (hourList.length > 0) {
 			hourList.forEach((h, idx) => {
 				const rowId = document.getElementById(`annotation_list_${idx}_row`)?.id || "";
@@ -261,33 +262,50 @@ class QLabelWeb extends QLabel {
 				else inspectionHours += Number(h) || 0;
 			});
 		}
+
 		const totalHours = annotationHours + inspectionHours;
-		// 清空原有条
+		const maxHours = 8;
+
 		backgroundBar.innerHTML = "";
 		backgroundBar.style.position = "relative";
+		backgroundBar.style.overflow = "hidden";
 
-		// 计算百分比（满额 8 小时）
-		const annotationPercent = Math.min((annotationHours / 8) * 100, 100);
-		const inspectionPercent = Math.min((inspectionHours / 8) * 100, 100);
+		// 总显示比例, 超过 8 小时则整体压缩
+		const displayTotal = Math.min(totalHours, maxHours);
 
-		// 创建标注条（紫色，左侧）
+		// 各自所占比例
+		const annotationPercent = totalHours === 0
+			? 0
+			: (annotationHours / totalHours) * (displayTotal / maxHours) * 100;
+
+		const inspectionPercent = totalHours === 0
+			? 0
+			: (inspectionHours / totalHours) * (displayTotal / maxHours) * 100;
+
+		// 标注条
 		const annotationBar = document.createElement("div");
-		annotationBar.className = "h-4 rounded-l-full bg-purple-600 transition-all";
+		annotationBar.className = "h-4 bg-purple-600 transition-all";
 		annotationBar.style.width = annotationPercent + "%";
 		annotationBar.style.float = "left";
 
-		// 创建质检条（蓝色，右侧接在标注后面）
+		// 质检条
 		const inspectionBar = document.createElement("div");
-		inspectionBar.className = "h-4 rounded-r-full bg-blue-600 transition-all";
+		inspectionBar.className = "h-4 bg-blue-600 transition-all";
 		inspectionBar.style.width = inspectionPercent + "%";
 		inspectionBar.style.float = "left";
 
-		// 添加到容器
+		// 圆角只给最外侧
+		if (annotationPercent > 0) annotationBar.classList.add("rounded-l-full");
+		if (inspectionPercent > 0) inspectionBar.classList.add("rounded-r-full");
+
 		backgroundBar.appendChild(annotationBar);
 		backgroundBar.appendChild(inspectionBar);
 
-		// 进度条提示
-		this.tooltip.addTooltip(backgroundBar, totalHours.toFixed(2) + " / 8 小时");
+		// tooltip 仍然显示真实工时
+		this.tooltip.addTooltip(
+			backgroundBar,
+			totalHours.toFixed(2) + " / 8 小时"
+		);
 	}
 	// 标注和质检列表
 	async annotationList() {

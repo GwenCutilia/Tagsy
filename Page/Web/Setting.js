@@ -14,9 +14,19 @@ class SettingWeb extends Setting {
 	}
 	initValue() {
 		this.domMap = SettingGlobal.domMap;
-		Object.entries(this.domMap).forEach(([key, selectorDomID]) => {
-			this[key] = DomHelper.bySelector(selectorDomID);
-		});
+
+		const initDom = (obj, target) => {
+			Object.entries(obj).forEach(([key, value]) => {
+				if (typeof value === "string") {
+					target[key] = DomHelper.bySelector(value);
+				} else if (typeof value === "object") {
+					target[key] = {};
+					initDom(value, target[key]);
+				}
+			});
+		};
+
+		initDom(this.domMap, this);
 	}
 	initTask() {
 		this.updateUIElement();
@@ -244,7 +254,7 @@ class SettingWeb extends Setting {
 					W2Global.setting[field.configEnd] = field.endInput.value;
 				}
 				// 重新开始任务
-				await W2.currentTask();
+				await W2Web.currentTask();
 			}
 		});
 

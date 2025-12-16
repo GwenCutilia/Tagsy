@@ -449,53 +449,7 @@ class QLabelGlobal extends Global {
 		annotation_list_table: "#annotation_list_table", // 标注列表表格
 	}
 }
-class QLabelWorkGlobal extends Global {
-	static async init() {
-		this.cache = await super.initObject(this.cache, "QLabelWorkGlobal.cache");
-		this.setting = await super.initObject(this.setting, "QLabelWorkGlobal.setting");
-	}
-	// 缓存
-	static cache = {
-		api: {
-			listLabelTasks: {
-				start: 0, // 从第几题开始查询
-			},
-		},
-		cookie: {
-			task: {
-				taskId: null,
-				packKey: null,
-				taskName: null,
-				detailId: null,
-			},
-			pack: {
-				detailLabel: {
-					"tags": [
-						{
-							"name": "imgMask",
-							"label":"imgMask"
-						}
-					],
-					"extData":null,
-					"objects":[]
-				},
-			},
-			local: {
-				session: null,
-				route: null,
-			}
-		},
-		resultData: [
-			{
 
-			}
-		],
-	}
-	
-	static setting = {
-
-	}
-}
 class ApiboxGlobal extends Global {
 	static async init() {
 		this.cache = await super.initObject(this.cache, "ApiboxGlobal.cache");
@@ -507,7 +461,20 @@ class ApiboxGlobal extends Global {
 		}
 	}
 }
+
 class SettingGlobal extends Global {
+	static async init() {
+
+	}
+	static cache = {
+		
+	}
+	static setting = {
+		// QLabel内嵌模块
+		qlabelWorkModule: {
+			turnOnOrOff: true, // 是否开启QLabel内嵌模块
+		}
+	}
 	static domMap = {
 		// API盒子账号设置
 		api_box_user_test_account_setting_button: "#api_box_user_test_account_setting_button",	// API盒子账号测试按钮
@@ -539,6 +506,11 @@ class SettingGlobal extends Global {
 		w2_time_range_working_start_module_setting_input: "#w2_time_range_working_start_module_setting_input",	// W2工作时间段开始输入框
 		w2_time_range_working_end_module_setting_input: "#w2_time_range_working_end_module_setting_input",	// W2工作时间段结束输入框
 		w2_module_setting_message_box: "#w2_module_setting_message_box",	// W2高级设置提示信息
+		
+		// QL内嵌模块设置
+		qlabelWork: {
+			ql_turn_on_off_module_setting_checkbox: "#ql_turn_on_off_module_setting_checkbox", // 是否开启QL内嵌模块
+		},
 
 		// LS账号设置
 		ls_user_test_account_setting_button: "#ls_user_test_account_setting_button",	// LS账号测试按钮
@@ -561,9 +533,7 @@ class SettingGlobal extends Global {
 		
 	];
 
-	static async init() {
 
-	}
 }
 class FrameworkGlobal extends Global {
 	static async init() {

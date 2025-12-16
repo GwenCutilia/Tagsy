@@ -45,9 +45,8 @@ class QLabelWork extends QLabel {
 
 		return objects;
 	}
-	// 获取当前页面的DetailLabel
+	// 获取当前页面的 DetailLabel
 	static getDetailLabelCurrentPage() {
-		// 获取页面中所有 info-tooltip-content 元素
 		const tooltips = document.querySelectorAll('.info-tooltip-content');
 
 		const currentDetailLabel = {
@@ -63,44 +62,47 @@ class QLabelWork extends QLabel {
 			"objects": []
 		};
 
-		// 遍历每个 tooltip
 		tooltips.forEach(el => {
 			try {
-				// 获取文本内容
 				const text = el.textContent.trim();
 				if (!text) return;
 
-				// 解析 JSON
 				const obj = JSON.parse(text);
 
-				// 处理 tags 中的 value，如果是字符串 JSON，需要解析
+				// tags.value: 解析 -> 使用 -> 再 stringify 回字符串
 				if (obj.tags && Array.isArray(obj.tags)) {
 					obj.tags = obj.tags.map(tag => {
-						if (typeof tag.value === 'string') {
+						if (typeof tag.value === "string") {
 							try {
-								tag.value = JSON.parse(tag.value);
+								const parsed = JSON.parse(tag.value);
+								// 确保最终写回的是字符串
+								tag.value = JSON.stringify(parsed);
 							} catch (e) {
-								// 解析失败保持原字符串
+								// 非 JSON 字符串，原样保留
 							}
 						}
 						return tag;
 					});
 				}
 
-				// 添加到 objects
 				currentDetailLabel.objects.push(obj);
 			} catch (e) {
-				console.warn('解析失败:', el, e);
+				console.warn("解析失败:", el, e);
 			}
 		});
 
-		// QLabelWorkGlobal.cache.cookie.pack.detailLabel = {...currentDetailLabel};
+		// 使用 Proxy 内部更新方式
 		const target = QLabelWorkGlobal.cache.cookie.pack.detailLabel;
 		for (const key in currentDetailLabel) {
 			target[key] = currentDetailLabel[key];
 		}
-	}
 
+		this.log.log("currentDetailLabel:", currentDetailLabel);
+		this.log.debug(
+			"QLabelWorkGlobal.cache.cookie.pack.detailLabel:",
+			QLabelWorkGlobal.cache.cookie.pack.detailLabel
+		);
+	}
 }
 class QLabelWorkApi extends HttpRequest {
 	static log = new Logger("QLabelWorkApi");
@@ -469,7 +471,6 @@ class QLabelWorkRequest extends Page {
 				this.log.debug("else触发");
 				break;
 			}
-			
 		} while (start <= total);
 		this.log.debug("最终 task_id:", targetTaskId);
 		QLabelWorkGlobal.cache.cookie.task.taskId = saveTaskId;
@@ -505,5 +506,54 @@ class QLabelWorkRequest extends Page {
 	static async updateDetailLabel() {
 		await this.getDetailIdByTaskId();
 		await QLabelWorkApi.saveLabel();
+	}
+}
+class QLabelWorkGlobal extends Global {
+	static async init() {
+		this.cache = await super.initObject(this.cache, "QLabelWorkGlobal.cache");
+		this.setting = await super.initObject(this.setting, "QLabelWorkGlobal.setting");
+	}
+	// 缓存
+	static cache = {
+		api: {
+			listLabelTasks: {
+				start: 0, // 从第几题开始查询
+			},
+		},
+		cookie: {
+			task: {
+				taskId: null,
+				packKey: null,
+				taskName: null,
+				detailId: null,
+			},
+			pack: {
+				detailLabel: {
+					"tags": [
+						{
+							"name": "imgMask",
+							"label":"imgMask"
+						}
+					],
+					"extData":null,
+					"objects":[]
+				},
+			},
+			local: {
+				session: null,
+				route: null,
+			}
+		},
+		resultData: [
+			{
+
+			}
+		],
+	}
+	static setting = {
+		
+	}
+	static domMap = {
+
 	}
 }
