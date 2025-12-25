@@ -27,7 +27,12 @@
 					</li>
 					<li id="menu_qlabel">
 						<a id="link_qlabel" href="QLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
-							<i class="fas fa-tags mr-3 w-5 text-center"></i>QLabel标注
+							<i class="fas fa-tags mr-3 w-5 text-center"></i>企鹅标注
+						</a>
+					</li>
+					<li id="menu_qLabel_engine">
+						<a id="link_qlabel" href="QLabelEngine.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+							<i class="fa-solid fa-desktop mr-3 w-5 text-center"></i>企鹅引擎
 						</a>
 					</li>
 					<li id="menu_ls">
@@ -88,8 +93,8 @@
                         </button>
                     </div>
                 </header>
-                <main class="flex-1 p-6 mt-16 pb-16 overflow-y-auto">
-                    <div id="dashboard-columns" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <main class="flex-1 p-6 mt-16 mb-16 relative">
+                    <div id="main_area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
 						<!-- 第一列 -->
 						<div class="flex flex-col space-y-6">
 							<div class="rounded-xl bg-white shadow p-6 flex flex-col items-center justify-center h-48 select-none">
@@ -137,7 +142,7 @@
 							<i id="weather_icon" class="fa-solid fa-sun text-yellow-500 mr-2"></i>
 							<span id="weather_temp_label" class="mr-2"></span>
 							<span id="weather_city_label" class="mr-2"></span>
-							<i class="fa-solid fa-wind mr-1"></i>
+							<i id="weather_wind_icon" class="fa-solid fa-wind mr-1"></i>
 							<span id="weather_wind_label"></span>
 						</div>
 					</div>

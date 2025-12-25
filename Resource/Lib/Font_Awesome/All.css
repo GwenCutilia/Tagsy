@@ -9337,7 +9337,7 @@
 .fa-dog:before{
     content:"\f6d3"
 }
-.fa-pen-line:before{
+.fa-desktop:before{
     content:"\e212"
 }
 .fa-atom-alt:before,.fa-atom-simple:before{
@@ -20762,7 +20762,7 @@
 .fa-duotone.fa-dog:after,.fad.fa-dog:after{
     content:"\f6d3\f6d3"
 }
-.fa-duotone.fa-pen-line:after,.fad.fa-pen-line:after{
+.fa-duotone.fa-desktop:after,.fad.fa-desktop:after{
     content:"\e212\e212"
 }
 .fa-duotone.fa-atom-alt:after,.fa-duotone.fa-atom-simple:after,.fad.fa-atom-alt:after,.fad.fa-atom-simple:after{
