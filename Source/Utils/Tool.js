@@ -374,7 +374,7 @@ class DomHelper {
 	}
 }
 
-class System {
+class Delay {
 	// 休眠函数
 	/**
 	 * 休眠指定毫秒数, 返回一个Promise, 方便await调用. 

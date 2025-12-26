@@ -29,7 +29,7 @@ class Framework {
 		await FrameworkTask.initValue(); // 加载变量
 		await W2Request.getLoginPage(); // 获取W2页面
 		await FrameworkAddAuxiliaryLogic.jumpPage(); // 如果没登录的逻辑
-		await FrameworkTask.loadTask(); // 加载任务
+		FrameworkTask.loadTask(); // 加载任务
 		this.log.log("Page初始化完成");
 	}
 	async _updateUIElement() {

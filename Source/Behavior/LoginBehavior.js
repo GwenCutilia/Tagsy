@@ -93,7 +93,7 @@ class LoginAddAuxiliaryLogic extends LoginBehavior {
 			qr_url_img.src = result.logqrcode;
 			LoginGlobal.cache.cookie.query_id = result.cxid;
 		}
-		await System.sleepSeconds(5);
+		await Delay.sleepSeconds(5);
 		let i = 0;
 		let loginStatusFlag = true;
 		while(loginStatusFlag && i <= 5) {
@@ -126,7 +126,7 @@ class LoginAddAuxiliaryLogic extends LoginBehavior {
 				location.href = "./Index.html";
 				this.log.log("登录成功");
 			}
-			await System.sleepSeconds(10);
+			await Delay.sleepSeconds(10);
 			i++;
 		}
 		if (i == 6) {

@@ -134,7 +134,8 @@ class ResourceLoader {
 				Url + "Source/Request/QLabelEngineRequest.js",
 			],
 			[
-				Url + "Source/Behavior/FrameworkBehavior.js",
+				Url + "Source/Behavior/FrameworkBehavior.js", // 网站框架函数类
+				Url + "Source/Behavior/SystemBehavior.js", // 系统函数类
 			],
 			[
 				Url + "Source/Task/FrameworkTask.js",

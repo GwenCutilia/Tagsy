@@ -31,7 +31,7 @@ class LSBehaviorTask extends LSBehavior {
 				} else {
 					count++;
 					this.log.error("LS登录失败, 第" + count + "次重试");
-					await System.sleepSeconds(1);
+					await Delay.sleepSeconds(1);
 				}
 			}
 			if (count === 3) {

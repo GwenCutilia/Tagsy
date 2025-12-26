@@ -6,6 +6,9 @@ class SystemGlobal extends Global {
 		// 开发者模式
 		developer: {
 			mode: false,
+		},
+		guide: {
+			isFirstRun: true,
 		}
 	}
 	static status = {

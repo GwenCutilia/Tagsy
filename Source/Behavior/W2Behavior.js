@@ -149,7 +149,7 @@ class W2BehaviorBindEvents extends W2Behavior {
 
 			await W2BehaviorUpdateUIElement.applyActivityTransferList();
 			// 等待五秒后隐藏提示框
-			await System.sleepSeconds(5);
+			await Delay.sleepSeconds(5);
 			this.apply_activity_transfer_message_box.classList.add("hidden");
 		});
 	}
