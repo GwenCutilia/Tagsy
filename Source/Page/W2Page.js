@@ -15,14 +15,21 @@ class W2Web extends Framework {
 		Behavior.initDomMap(W2Global.domMap);
 	}
 	async initTask() {
-		await W2BehaviorUpdateUIElement.loginStatusTask();
-		await W2BehaviorUpdateUIElement.getPersonalInformat();
-		await W2BehaviorUpdateUIElement.workingStatusTask();
-		await W2BehaviorUpdateUIElement.workHourStatusTask();
-		await W2BehaviorUpdateUIElement.currentTimeLineTask();
-		await W2BehaviorUpdateUIElement.calendarTask();
-		await W2BehaviorUpdateUIElement.applyActivityTransferList();
-		await FrameworkAddAuxiliaryLogic.AllLoadedUIElement();
+		this.log.debug("initTask 运行开始");
+		this.log.debug("initTask 运行完毕");
+		this.waitTask();
+	}
+	async waitTask() {
+		this.log.debug("waitTask 运行开始");
+		W2BehaviorUpdateUIElement.loginStatusTask();
+		W2BehaviorUpdateUIElement.getPersonalInformat();
+		W2BehaviorUpdateUIElement.workingStatusTask();
+		W2BehaviorUpdateUIElement.workHourStatusTask();
+		W2BehaviorUpdateUIElement.currentTimeLineTask();
+		W2BehaviorUpdateUIElement.calendarTask();
+		W2BehaviorUpdateUIElement.applyActivityTransferList();
+		FrameworkAddAuxiliaryLogic.AllLoadedUIElement();
+		this.log.debug("waitTask 运行完毕");
 	}
 	async bindEvents() {
 		await W2BehaviorBindEvents.loginClick();
