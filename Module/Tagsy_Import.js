@@ -130,72 +130,11 @@ class ResourceLoader {
 	static async loadAllResources() {
 		const Url = await ResourceLoader.resolveBaseUrl();
 
-		// const resourceGroups = [
-		// 	[
-		// 		Url + "Source/Utils/Tool.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Core/Behavior.js",
-		// 		Url + "Source/Core/Global.js",
-		// 		Url + "Source/Core/HttpRequest.js",
-		// 		Url + "Source/Core/Route.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Global/QLabelGlobal.js",
-		// 		Url + "Source/Global/LoginGlobal.js",
-		// 		Url + "Source/Global/W2Global.js",
-		// 		Url + "Source/Global/LSGlobal.js",
-		// 		Url + "Source/Global/ApiboxGlobal.js",
-		// 		Url + "Source/Global/SystemGlobal.js",
-		// 		Url + "Source/Global/SettingGlobal.js",
-		// 		Url + "Source/Global/QLabelEngineGlobal.js",
-		// 		Url + "Source/Global/QLabelEngineEmbeddeGlobal.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Global/FrameworkGlobal.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Request/QLabelRequest.js",
-		// 		Url + "Source/Request/JsonBinRequest.js",
-		// 		Url + "Source/Request/W2Request.js",
-		// 		Url + "Source/Request/LSRequest.js",
-		// 		Url + "Source/Request/ApiboxRequest.js",
-		// 		Url + "Source/Request/QLabelEngineRequest.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Behavior/FrameworkBehavior.js", // 网站框架函数类
-		// 		Url + "Source/Behavior/SystemBehavior.js", // 系统函数类
-		// 	],
-		// 	[
-		// 		Url + "Source/Task/FrameworkTask.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Behavior/QLabelBehavior.js",
-		// 		Url + "Source/Behavior/LoginBehavior.js",
-		// 		Url + "Source/Behavior/W2Behavior.js",
-		// 		Url + "Source/Behavior/LSBehavior.js",
-		// 		Url + "Source/Behavior/SettingBehavior.js",
-		// 		Url + "Source/Behavior/QLabelEngineBehavior.js",
-		// 		Url + "Source/Behavior/QLabelEngineEmbeddeBehavior.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Page/FrameworkPage.js",
-		// 	],
-		// 	[
-		// 		Url + "Source/Page/QLabelPage.js",
-		// 		Url + "Source/Page/LoginPage.js",
-		// 		Url + "Source/Page/W2Page.js",
-		// 		Url + "Source/Page/LSPage.js",
-		// 		Url + "Source/Page/SettingPage.js",
-		// 		Url + "Source/Page/QLabelEnginePage.js",
-		// 	],
-		// 	[
-		// 		Url + "Module/Common/Tagsy_Core.js",
-		// 	],
-		// ];
 		const resourceGroups = [
 			[
 				Url + "Source/Utils/Tool.js",
+			],
+			[
 				Url + "Source/Core/Behavior.js",
 				Url + "Source/Core/Global.js",
 				Url + "Source/Core/HttpRequest.js",
@@ -211,16 +150,26 @@ class ResourceLoader {
 				Url + "Source/Global/SettingGlobal.js",
 				Url + "Source/Global/QLabelEngineGlobal.js",
 				Url + "Source/Global/QLabelEngineEmbeddeGlobal.js",
+			],
+			[
 				Url + "Source/Global/FrameworkGlobal.js",
+			],
+			[
 				Url + "Source/Request/QLabelRequest.js",
 				Url + "Source/Request/JsonBinRequest.js",
 				Url + "Source/Request/W2Request.js",
 				Url + "Source/Request/LSRequest.js",
 				Url + "Source/Request/ApiboxRequest.js",
 				Url + "Source/Request/QLabelEngineRequest.js",
+			],
+			[
 				Url + "Source/Behavior/FrameworkBehavior.js", // 网站框架函数类
 				Url + "Source/Behavior/SystemBehavior.js", // 系统函数类
+			],
+			[
 				Url + "Source/Task/FrameworkTask.js",
+			],
+			[
 				Url + "Source/Behavior/QLabelBehavior.js",
 				Url + "Source/Behavior/LoginBehavior.js",
 				Url + "Source/Behavior/W2Behavior.js",
@@ -228,13 +177,19 @@ class ResourceLoader {
 				Url + "Source/Behavior/SettingBehavior.js",
 				Url + "Source/Behavior/QLabelEngineBehavior.js",
 				Url + "Source/Behavior/QLabelEngineEmbeddeBehavior.js",
+			],
+			[
 				Url + "Source/Page/FrameworkPage.js",
+			],
+			[
 				Url + "Source/Page/QLabelPage.js",
 				Url + "Source/Page/LoginPage.js",
 				Url + "Source/Page/W2Page.js",
 				Url + "Source/Page/LSPage.js",
 				Url + "Source/Page/SettingPage.js",
 				Url + "Source/Page/QLabelEnginePage.js",
+			],
+			[
 				Url + "Module/Common/Tagsy_Core.js",
 			],
 		];
