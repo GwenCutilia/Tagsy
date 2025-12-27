@@ -79,14 +79,11 @@ class ResourceLoader {
 	static async testUrl(url) {
 		try {
 			const response = await fetch(url, {
-				method: "GET",
-				headers: {
-					Range: "bytes=0-0",
-				},
+				method: "HEAD",
 				cache: "no-store",
 			});
-			return response.ok || response.status === 206;
-		} catch {
+			return response.ok;
+		} catch (e) {
 			return false;
 		}
 	}
