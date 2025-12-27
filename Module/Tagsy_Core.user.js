@@ -13,11 +13,7 @@
 // ==/UserScript==
 
 (async function () {
-	const baseUrl = await Promise.race([
-		ResourceLoader.fastDetectLocal(300),
-		Promise.resolve(ResourceLoader.ONLINE_BASE),
-	]);
-
-	await ResourceLoader.loadAllResources(baseUrl);
+	await ResourceLoader.loadAllResources(ResourceLoader.ONLINE_BASE);
+	ResourceLoader.detectLocalAndSwitch();
 	await core();
 })();
