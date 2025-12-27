@@ -89,43 +89,43 @@ class ResourceLoader {
 		}
 	}
 
-	// static async resolveBaseUrl() {
-	// 	const localBaseUrl = "http://127.0.0.1:5500/";
-	// 	const remoteBaseUrl = "https://weavefate.asia/";
-
-	// 	const testFile = localBaseUrl + "Source/Utils/Tool.js";
-	// 	const localAvailable = await ResourceLoader.testUrl(testFile);
-
-	// 	return localAvailable ? localBaseUrl : remoteBaseUrl;
-	// }
 	static async resolveBaseUrl() {
 		const localBaseUrl = "http://127.0.0.1:5500/";
 		const remoteBaseUrl = "https://weavefate.asia/";
 
-		const currentUrl = ResourceLoader.getRealUrl();
-
-		// 1. 当前就在本地
-		if (currentUrl.startsWith(localBaseUrl)) {
-			return localBaseUrl;
-		}
-
-		// 2. 当前就在远端
-		if (currentUrl.startsWith(remoteBaseUrl)) {
-			return remoteBaseUrl;
-		}
-
-		// 3. qlabel.tencent.com
-		if (currentUrl.startsWith("https://qlabel.tencent.com")) {
-			const testFile = localBaseUrl + "Source/Utils/Tool.js";
-			const localAvailable = await ResourceLoader.testUrl(testFile);
-			return localAvailable ? localBaseUrl : remoteBaseUrl;
-		}
-
-		// 4. 兜底策略, 优先本地
 		const testFile = localBaseUrl + "Source/Utils/Tool.js";
 		const localAvailable = await ResourceLoader.testUrl(testFile);
+
 		return localAvailable ? localBaseUrl : remoteBaseUrl;
 	}
+	// static async resolveBaseUrl() {
+	// 	const localBaseUrl = "http://127.0.0.1:5500/";
+	// 	const remoteBaseUrl = "https://weavefate.asia/";
+
+	// 	const currentUrl = ResourceLoader.getRealUrl();
+
+	// 	// 1. 当前就在本地
+	// 	if (currentUrl.startsWith(localBaseUrl)) {
+	// 		return localBaseUrl;
+	// 	}
+
+	// 	// 2. 当前就在远端
+	// 	if (currentUrl.startsWith(remoteBaseUrl)) {
+	// 		return remoteBaseUrl;
+	// 	}
+
+	// 	// 3. qlabel.tencent.com
+	// 	if (currentUrl.startsWith("https://qlabel.tencent.com")) {
+	// 		const testFile = localBaseUrl + "Source/Utils/Tool.js";
+	// 		const localAvailable = await ResourceLoader.testUrl(testFile);
+	// 		return localAvailable ? localBaseUrl : remoteBaseUrl;
+	// 	}
+
+	// 	// 4. 兜底策略, 优先本地
+	// 	const testFile = localBaseUrl + "Source/Utils/Tool.js";
+	// 	const localAvailable = await ResourceLoader.testUrl(testFile);
+	// 	return localAvailable ? localBaseUrl : remoteBaseUrl;
+	// }
 
 	static async loadAllResources() {
 		const Url = await ResourceLoader.resolveBaseUrl();
