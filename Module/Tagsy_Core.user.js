@@ -13,7 +13,6 @@
 // ==/UserScript==
 
 (async function () {
-	await ResourceLoader.loadAllResources(ResourceLoader.ONLINE_BASE);
-	ResourceLoader.detectLocalAndSwitch();
+	await ResourceLoader.loadAllResources();
 	await core();
 })();
