@@ -76,19 +76,40 @@ class ResourceLoader {
 		return totalSuccess;
 	}
 
-	static async testUrl(url) {
-		try {
-			const response = await fetch(url, {
-				method: "GET",
-				headers: {
-					Range: "bytes=0-0",
+	static testUrl(url, timeout = 300) {
+		return new Promise(resolve => {
+			let done = false;
+
+			const timer = setTimeout(() => {
+				if (done) return;
+				done = true;
+				resolve(false);
+			}, timeout);
+
+			GM_xmlhttpRequest({
+				method: "HEAD",
+				url,
+				timeout,
+				onload: res => {
+					if (done) return;
+					done = true;
+					clearTimeout(timer);
+					resolve(res.status >= 200 && res.status < 400);
 				},
-				cache: "no-store",
+				onerror: () => {
+					if (done) return;
+					done = true;
+					clearTimeout(timer);
+					resolve(false);
+				},
+				ontimeout: () => {
+					if (done) return;
+					done = true;
+					clearTimeout(timer);
+					resolve(false);
+				},
 			});
-			return response.ok || response.status === 206;
-		} catch {
-			return false;
-		}
+		});
 	}
 
 	static async resolveBaseUrl() {
