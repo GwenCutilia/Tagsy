@@ -200,8 +200,9 @@ class FrameworkUpdateUIElement extends FrameworkBehavior {
 
 		// LS status
 		if (LSGlobal.status.login === LSGlobal.statusMap.loginStatus.success) {
-			await LSRequest.getDailyReportList();
-
+			if (await LSRequest.getDailyReportList() === false) {
+				this.log.error("LSRequest.getDailyReportList() 请求失败");
+			}
 			let isToday = Time.isSameDay(LSGlobal.cache.dailyReport.list.rows[0].recordTime, Time.getCurrentDate());
 			let text = isToday
 				? LSGlobal.statusMap.dailyReportStatus.already
