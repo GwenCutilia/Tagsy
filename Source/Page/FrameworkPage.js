@@ -6,12 +6,19 @@ class Framework {
 		this.log = new Logger(this.constructor.name);
 	}
 	async init() {
+		this._initValue();
 		await this._initGlobalTask();
-		await this._initValue();
 		await this._initTask();
 		await this._updateUIElement();
-		await this._addAuxiliaryLogic();
-		await this._addAanimationEffect();
+		this._addAuxiliaryLogic();
+		this._addAanimationEffect();
+	}
+	async _initGlobalTask() {
+		await FrameworkTask.initValue(); // 加载变量
+		await W2Request.getLoginPage(); // 获取W2页面
+		await FrameworkAddAuxiliaryLogic.jumpPage(); // 如果没登录的逻辑
+		FrameworkTask.loadTask(); // 加载任务
+		this.log.log("Page初始化完成");
 	}
 	async _initValue() {
 		// 初始化 FrameworkGlobal dom
@@ -24,13 +31,6 @@ class Framework {
 		FrameworkUpdateUIElement.getNotice();
 		FrameworkUpdateUIElement.modelStatus();
 		FrameworkUpdateUIElement.weatherComponent();
-	}
-	async _initGlobalTask() {
-		await FrameworkTask.initValue(); // 加载变量
-		await W2Request.getLoginPage(); // 获取W2页面
-		await FrameworkAddAuxiliaryLogic.jumpPage(); // 如果没登录的逻辑
-		FrameworkTask.loadTask(); // 加载任务
-		this.log.log("Page初始化完成");
 	}
 	async _updateUIElement() {
 		let task = [
