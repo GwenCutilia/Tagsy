@@ -17,19 +17,14 @@ class W2Web extends Framework {
 	async initTask() {
 		this.log.debug("initTask 运行开始");
 		this.log.debug("initTask 运行完毕");
-		this.waitTask();
-	}
-	async waitTask() {
-		this.log.debug("waitTask 运行开始");
-		W2BehaviorUpdateUIElement.loginStatusTask();
-		W2BehaviorUpdateUIElement.getPersonalInformat();
+		await W2BehaviorUpdateUIElement.loginStatusTask();
+		await W2BehaviorUpdateUIElement.getPersonalInformat();
 		W2BehaviorUpdateUIElement.workingStatusTask();
 		W2BehaviorUpdateUIElement.workHourStatusTask();
 		W2BehaviorUpdateUIElement.currentTimeLineTask();
 		W2BehaviorUpdateUIElement.calendarTask();
 		W2BehaviorUpdateUIElement.applyActivityTransferList();
-		FrameworkAddAuxiliaryLogic.AllLoadedUIElement();
-		this.log.debug("waitTask 运行完毕");
+		await FrameworkAddAuxiliaryLogic.AllLoadedUIElement();
 	}
 	async bindEvents() {
 		await W2BehaviorBindEvents.loginClick();
