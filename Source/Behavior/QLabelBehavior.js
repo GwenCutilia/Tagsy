@@ -89,12 +89,12 @@ class QLabelBehaviorAddAanimationEffect extends QLabelBehavior {
 					// 计算偏移量
 					const offsetStart = Math.floor((selectedDate - today)/(1000*60*60*24));
 					const offsetEnd = offsetStart + 1;
-					QLabelBehaviorHelperUtils.setButtonsDisabled(true);
+					QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(true);
 					QLabelGlobal.setting.annotationList.lookupTime.startTime = offsetStart;
 					QLabelGlobal.setting.annotationList.lookupTime.endTime = offsetEnd;
 					picker.classList.add("hidden");
 					await QLabelBehaviorUpdateUIElement.annotationList();
-					QLabelBehaviorHelperUtils.setButtonsDisabled(false);
+					QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(false);
 				});
 
 				daysContainer.appendChild(dayBtn);
@@ -142,7 +142,7 @@ class QLabelBehaviorHelperUtils extends QLabelBehavior {
 		this.tooltip.addTooltip(this.reflash_btn, "刷新作业数量列表");
 
 	}
-	static async setButtonsDisabled(disabled) {
+	static async setAnnotationListButtonsDisabled(disabled) {
 		this.prev_day_btn.disabled = disabled;
 		this.next_day_btn.disabled = disabled;
 		this.reflash_btn.disabled = disabled;
@@ -163,29 +163,29 @@ class QLabelBehaviorHelperUtils extends QLabelBehavior {
 class QLabelBehaviorBindEvents extends QLabelBehavior {
 	static async checkPreviousDay() {
 		this.prev_day_btn.addEventListener("click", async () => {
-			QLabelBehaviorHelperUtils.setButtonsDisabled(true);
+			QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(true);
 			QLabelGlobal.setting.annotationList.lookupTime.startTime--;
 			QLabelGlobal.setting.annotationList.lookupTime.endTime--;
 			await QLabelBehaviorUpdateUIElement.annotationList();
-			QLabelBehaviorHelperUtils.setButtonsDisabled(false);
+			QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(false);
 		});
 	}
 	static async checkNextDay() {
 		this.next_day_btn.addEventListener("click", async () => {
-			QLabelBehaviorHelperUtils.setButtonsDisabled(true);
+			QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(true);
 			QLabelGlobal.setting.annotationList.lookupTime.startTime++;
 			QLabelGlobal.setting.annotationList.lookupTime.endTime++;
 			// this.log.debug("QLabelGlobal.setting.annotationList.LookupTime.endTime", QLabelGlobal.setting.annotationList.LookupTime.endTime);
 			await QLabelBehaviorUpdateUIElement.annotationList();
-			QLabelBehaviorHelperUtils.setButtonsDisabled(false);
+			QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(false);
 		});
 	}
 	static async reflash() {
 		// 刷新当前的作业数量列表
 		this.reflash_btn.addEventListener("click", async () => {
-			QLabelBehaviorHelperUtils.setButtonsDisabled(true);
+			QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(true);
 			await QLabelBehaviorUpdateUIElement.annotationList();
-			QLabelBehaviorHelperUtils.setButtonsDisabled(false);
+			QLabelBehaviorHelperUtils.setAnnotationListButtonsDisabled(false);
 		});
 	}
 }
@@ -412,10 +412,10 @@ class QLabelBehaviorUpdateUIElement extends QLabelBehavior {
 		}
 		
 	}
+	// 更新进度条统计
 	static async updateHomeworkLoadProgress() {
 		const backgroundBar = this.homework_load_tatistics_background_bar;
-		if (!backgroundBar) return;
-
+		const loading = this.homework_load_statistics_loading;
 		const hourList = QLabelGlobal.setting.homeworkLoadStatistics.hourList || [];
 
 		let annotationHours = 0;

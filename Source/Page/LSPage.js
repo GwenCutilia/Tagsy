@@ -12,9 +12,9 @@ class LSWeb extends Framework {
 	}
 	async initTask() {
 		await LSBehaviorUpdateUIElement.loginStatus();
-		await LSBehaviorUpdateUIElement.getDailyReportList();
-		await LSBehaviorUpdateUIElement.fillDailyReportStatus();
-		await LSBehaviorUpdateUIElement.dailyReportList();
+		LSBehaviorUpdateUIElement.getDailyReportList();
+		LSBehaviorUpdateUIElement.fillDailyReportStatus();
+		LSBehaviorUpdateUIElement.dailyReportList();
 		await FrameworkAddAuxiliaryLogic.AllLoadedUIElement();
 	}
 	// 事件绑定

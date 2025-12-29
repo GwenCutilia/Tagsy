@@ -17,8 +17,8 @@ class QLabelWeb extends Framework {
 	// 初始化任务, 先运行一次任务
 	async initTask() {
 		await QLabelBehaviorUpdateUIElement.workHour();
-		await QLabelBehaviorUpdateUIElement.annotationList();
-		await QLabelBehaviorUpdateUIElement.updateHomeworkLoadProgress();
+		QLabelBehaviorUpdateUIElement.annotationList();
+		QLabelBehaviorUpdateUIElement.updateHomeworkLoadProgress();
 		await FrameworkAddAuxiliaryLogic.AllLoadedUIElement();
 	}
 	async bindEvents() {

@@ -33,18 +33,18 @@ class W2BehaviorBindEvents extends W2Behavior {
 		this.meal_working_status_btn.addEventListener("click", async () => {
 			if (this.meal_working_status_label.innerText === "正在标注") {
 				if (await W2Request.meal()) {
-					Message.notify({ content: "切换前往用餐成功" });
+					Message.notify({ body: "切换前往用餐成功" });
 					this.log.log("切换前往用餐成功");
 				} else {
-					Message.notify({ content: "切换前往用餐失败" });
+					Message.notify({ body: "切换前往用餐失败" });
 					this.log.log("切换前往用餐失败");
 				}
 			} else if (this.meal_working_status_label.innerText === "前往用餐") {
 				if (await W2Request.working()) {
-					Message.notify({ content: "切换正在标注成功" });
+					Message.notify({ body: "切换正在标注成功" });
 					this.log.log("切换正在标注成功");
 				} else {
-					Message.notify({ content: "切换正在标注失败" });
+					Message.notify({ body: "切换正在标注失败" });
 					this.log.log("切换正在标注失败");
 				}
 			}
@@ -54,19 +54,19 @@ class W2BehaviorBindEvents extends W2Behavior {
 	static async checkInOutClick() {
 		this.check_in_btn.addEventListener("click", async () => {
 			if (await W2Request.checkIn()) {
-				Message.notify({ content: "签到成功" });
+				Message.notify({ body: "签到成功" });
 				this.log.log("签到成功");
 			} else {
-				Message.notify({ content: "签到失败" });
+				Message.notify({ body: "签到失败" });
 				this.log.log("签到失败");
 			}
 		});
 		this.check_out_btn.addEventListener("click", async () => {
 			if (await W2Request.checkOut()) {
-				Message.notify({ content: "签退成功" });
+				Message.notify({ body: "签退成功" });
 				this.log.log("签退成功");
 			} else {
-					Message.notify({ content: "签退失败" });
+					Message.notify({ body: "签退失败" });
 				this.log.log("签退失败");
 			}
 		});
@@ -75,12 +75,12 @@ class W2BehaviorBindEvents extends W2Behavior {
 	static async currentTaskClick() {
 		this.current_time_line_task_start_btn.addEventListener("click", async () => {
 			await W2BehaviorTask.currentTask();
-			Message.notify({ content: "已经开启W2所有任务" });
+			Message.notify({ body: "已经开启W2所有任务" });
 			this.log.log("已经开启W2所有任务");
 		});
 		this.current_time_line_task_stop_btn.addEventListener("click", async () => {
 			await W2BehaviorTask.stopAllTask();
-			Message.notify({ content: "已经关闭W2所有任务" });
+			Message.notify({ body: "已经关闭W2所有任务" });
 			this.log.log("已经关闭W2所有任务");
 		});
 	}
@@ -228,10 +228,10 @@ class W2BehaviorTask extends W2Behavior {
 				end:  W2Global.setting.time_range_login_end,
 				action: async () => {
 					if (await W2Request.login()) {
-						Message.notify({ content: "W2登录成功" });
+						Message.notify({ body: "W2登录成功" });
 						this.log.log("W2登录成功");
 					} else {
-						Message.notify({ content: "W2登录失败" });
+						Message.notify({ body: "W2登录失败" });
 						this.log.log("W2登录失败");
 					}
 				},

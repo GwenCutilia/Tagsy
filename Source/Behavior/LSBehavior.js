@@ -4,16 +4,25 @@ class LSBehavior extends Behavior {
 class LSBehaviorBindEvents extends LSBehavior {
 	static initLSDomButtons() {
 		this.login_btn.addEventListener("click", async () => {
-			await LSBehaviorTask.loginProcess();
+			await LSBehaviorTask.loginProcess() ? 
+				Message.notify({body: "LS 登录成功"}) : 
+				Message.notify({body: "LS 登录失败"});
 		});
 
 		this.login_out_btn.addEventListener("click", async () => {
-			await LSBehaviorTask.loginOut();
-			LSGlobal.status.login = LSGlobal.statusMap.loginStatus.out;
+			await LSRequest.loginOut() ? (() => {
+				LSGlobal.status.login = LSGlobal.statusMap.loginStatus.out
+				Message.notify({body: "LS 登出成功"});
+			})() :
+			Message.notify({body: "LS 登出失败"});
 		});
 
 		this.fill_daily_report_btn.addEventListener("click", async () => {
-			await LSRequest.fillDailyReport();
+			if (await LSRequest.fillDailyReport()) {
+				Message.notify({body: "LS 日报填写成功"});
+			} else {
+				Message.notify({body: "LS 日报填写失败"});
+			}
 		});
 	}
 }
@@ -57,6 +66,7 @@ class LSBehaviorTask extends LSBehavior {
 			this.log.error("获取日报名称失败");
 			return;
 		}
+		return true;
 	}
 	// 定时任务
 	static async currentTask() {
@@ -143,11 +153,11 @@ class LSBehaviorUpdateUIElement extends LSBehavior {
 	// 日报列表
 	static async dailyReportList() {
 		const daily_report_list_loading = this.daily_report_list_loading;
+		daily_report_list_loading.classList.remove("hidden");
 		let result = LSGlobal.cache.dailyReport.list;
 		if (result === null) {
 			return;
 		}
-		daily_report_list_loading.classList.add("hidden");
 		this.daily_report_list_table.innerHTML = '';
 		if (result.code === 200) {
 			result.rows.forEach(item => {
@@ -212,6 +222,7 @@ class LSBehaviorUpdateUIElement extends LSBehavior {
 				// 添加到容器
 				this.daily_report_list_table.appendChild(recordDiv);
 			})
+			daily_report_list_loading.classList.add("hidden");
 		}
 	}
 }
