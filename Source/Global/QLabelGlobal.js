@@ -42,6 +42,7 @@ class QLabelGlobal extends Global {
 		homework_load_tatistics_background_bar: "#homework_load_tatistics_background_bar",
 		login_status_label: "#login_status_label", // 登录状态标签
 		annotation_list_title: "#annotation_list_title", // 标注列表标题
+		annotation_list_loading: "#annotation_list_loading", // 标注列表加载图标
 		prev_day_btn: "#prev_day_btn", // 前一天按钮
 		next_day_btn: "#next_day_btn", // 后一天按钮
 		reflash_btn: "#reflash_btn", // 刷新按钮
