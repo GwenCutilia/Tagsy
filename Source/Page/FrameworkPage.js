@@ -18,6 +18,7 @@ class Framework {
 		await W2Request.getLoginPage(); // 获取W2页面
 		await FrameworkAddAuxiliaryLogic.jumpPage(); // 如果没登录的逻辑
 		FrameworkTask.loadTask(); // 加载任务
+		// SystemBehavior.isFirstRun(); // 判断是否第一次运行
 		this.log.log("Page初始化完成");
 	}
 	async _initValue() {

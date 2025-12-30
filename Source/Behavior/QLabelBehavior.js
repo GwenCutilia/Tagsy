@@ -472,5 +472,7 @@ class QLabelBehaviorUpdateUIElement extends QLabelBehavior {
 			backgroundBar,
 			totalHours.toFixed(2) + " / 8 小时"
 		);
+		
+		loading.classList.add("hidden");
 	}
 }
