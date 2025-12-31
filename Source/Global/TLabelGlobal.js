@@ -4,8 +4,14 @@ class TLabelGlobal extends Global {
 		this.setting = await super.initObject(this.setting, "TLabelGlobal.setting");
 	}
 	static cache = {
+		information: {
+			login: {
+				uuid: null,
+			}
+
+		},
 		cookie: {
-			
+
 		}
 	}
 	static task = {
