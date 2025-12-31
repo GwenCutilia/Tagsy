@@ -7,8 +7,9 @@ class Route {
 			"Index.html": () => new IndexWeb().init(),
 			"W2.html": () => new W2Web().init(),
 			"QLabel.html": () => new QLabelWeb().init(),
+			"TLabel.html": () => new TLabelWeb().init(),
 			"LS.html": () => new LSWeb().init(),
-			"WeCom.html": () => new WeComWeb().init(),
+			// "WeCom.html": () => new WeComWeb().init(),
 			"Setting.html": () => new SettingWeb().init(),
 		},
 		qlabel: {

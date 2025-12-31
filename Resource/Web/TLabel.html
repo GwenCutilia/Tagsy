@@ -13,16 +13,16 @@
 			<!-- 侧边栏 -->
 			<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white shadow border-r z-40 flex flex-col">
 				<div id="sidebar_header" class="text-center text-xl font-bold text-gray-800 h-16 flex items-center justify-center border-b border-gray-200">
-					Tagsy_V2.0.0
-				</div>
+						Tagsy_V2.0.0
+					</div>
 				<ul id="sidebar_menu" class="flex flex-col mt-4 space-y-1 px-2">
-					<li>
-						<a id="menu_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<li id="menu_overview">
+						<a id="link_overview" href="Index.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
 							<i class="fas fa-gauge mr-3 w-5 text-center"></i>概览
 						</a>
 					</li>
-					<li>
-						<a id="menu_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<li id="menu_w2">
+						<a id="link_w2" href="W2.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
 							<i class="fas fa-server mr-3 w-5 text-center"></i>万维平台
 						</a>
 					</li>
@@ -32,7 +32,7 @@
 						</a>
 					</li>
 					<li id="menu_tlabel">
-						<a id="link_qlabel" href="TLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+						<a id="link_qlabel" href="TLabel.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
 							<i class="fas fa-tags mr-3 w-5 text-center"></i>企鹅标注(New)
 						</a>
 					</li>
@@ -42,7 +42,7 @@
 						</a>
 					</li>
 					<li id="menu_ls">
-						<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-blue-600 font-semibold bg-blue-100">
+						<a id="link_ls" href="LS.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
 							<i class="fas fa-file-alt mr-3 w-5 text-center"></i>凌波微步日报
 						</a>
 					</li>
@@ -51,13 +51,13 @@
 							<i class="fas fa-comments mr-3 w-5 text-center"></i>企业微信日报
 						</a>
 					</li>
-					<li id="menu_help">
+                    <li id="menu_help">
 						<a id="link_help" href="Help.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
 							<i class="fa-solid fa-comments mr-3 w-5 text-center"></i>帮助
 						</a>
 					</li>
-					<li>
-						<a id="menu_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
+					<li id="menu_setting">
+						<a id="link_setting" href="Setting.html" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700">
 							<i class="fas fa-cog mr-3 w-5 text-center"></i>设置
 						</a>
 					</li>
@@ -66,11 +66,12 @@
 					由 @Gwencutilia 打造
 				</div>
 			</aside>
+			<!-- 主内容区域 -->
 			<div class="flex-1 ml-64 flex flex-col">
 				<!-- 顶部导航栏 -->
 				<header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 fixed top-0 left-64 right-0 z-30">
 					<div class="flex-1 text-lg font-semibold text-gray-600"></div>
-					
+
 					<div class="flex items-center space-x-4 relative">
 						<!-- 通知按钮及面板 -->
 						<div class="relative">
@@ -80,14 +81,14 @@
 
 							<!-- 面板相对于按钮弹出 -->
 							<div id="notice_panel_div"
-							class="notice-panel hidden absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-xl border border-gray-200 z-40 transform scale-95 opacity-0 transition-all duration-200">
+								class="notice-panel hidden absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-xl border border-gray-200 z-40 transform scale-95 opacity-0 transition-all duration-200">
 								<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
 									<div class="font-semibold text-gray-700">通知中心</div>
 									<button id="notice_close" class="text-gray-400 hover:text-gray-600">
 										<i class="fas fa-times"></i>
 									</button>
 								</div>
-								
+
 								<div id="notice_list_div" class="max-h-80 overflow-y-auto p-4 space-y-3">
 									<div id="notice_div" class="rounded-lg bg-gray-50 hover:bg-gray-100 transition hidden">
 										<div id="notice_label" class="text-gray-800 font-medium">系统更新完成</div>
@@ -113,59 +114,8 @@
 						</div>
 					</div>
 					<div id="main_area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-						<!-- 状态卡片区域 -->
-						<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-							<div class="flex items-center justify-between">
-								<div class="text-gray-500 text-sm mb-1">当前登录状态</div>
-								<div class="flex space-x-2">
-									<button id="login_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
-										<i class="fa-solid fa-right-to-bracket"></i>
-									</button>
-									<button id="login_out_btn" class="ml-auto bg-red-300 text-red-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-500 hover:text-red-100 transition">
-										<i class="fa-solid fa-right-from-bracket"></i>
-									</button>
-								</div>
-							</div>
-							<div id="login_status_label" class="text-2xl font-bold text-blue-600">--</div>
-						</div>
-						<div class="grid-cell bg-white shadow rounded-xl p-5 h-24 flex flex-col justify-center">
-							<div class="flex items-center justify-between">
-								<div class="text-gray-500 text-sm mb-1">日报打卡状态</div>
-								<div class="flex space-x-2">
-									<button id="fill_daily_report_btn" class="ml-auto bg-green-300 text-green-600 w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-500 hover:text-green-100 transition">
-										<i class="fa-solid fa-id-card-clip"></i>
-									</button>
-								</div>
-							</div>
-							<div id="fill_daily_report_label" class="text-2xl font-bold text-green-600">--</div>
-						</div>
-						<div class="grid-cell bg-white shadow rounded-xl p-5 h-200 flex flex-col justify-center">
-							<div class="flex items-center justify-between mb-2">
-								<div class="text-gray-500 text-sm mb-1">日报打卡列表</div>
-								<div id="daily_report_list_loading" class="flex items-center">
-									<i class="fa-solid fa-spinner-third fa-spin"></i>
-								</div>
-							</div>
-							<div class="flex justify-between items-center mb-1">
-								<div id="daily_report_list_label" class="text-gray-800 font-bold text-xl">--</div>
-								<div class="flex space-x-2">
-									<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-										<i class="fas fa-chevron-left text-gray-600"></i>
-									</button>
-									<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-										<i class="fas fa-chevron-right text-gray-600"></i>
-									</button>
-									<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-										<i class="fa-solid fa-arrow-rotate-right"></i>
-									</button>
-								</div>
-							</div>
-							<!-- 日报打卡列表 -->
-							<div id="daily_report_list_table" class="mt-3 space-y-3 overflow-y-auto max-h-[calc(5*64px+16px)]">
-								<!-- 可动态生成日报列表 -->
-							</div>
-						</div>
-					</div>
+                        
+                    </div>
 				</main>
 				<!-- 底部导航栏 -->
 				<footer class="bg-white border-t border-gray-200 h-16 flex items-center justify-between fixed bottom-0 left-64 right-0 z-30 px-6">

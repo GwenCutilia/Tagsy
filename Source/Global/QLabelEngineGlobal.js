@@ -31,6 +31,7 @@ class QLabelEngineGlobal extends Global {
 			},
 			local: {
 				session: null,
+				sessionId: null,
 				route: null,
 			}
 		},

@@ -206,8 +206,8 @@ class QLabelBehaviorUpdateUIElement extends QLabelBehavior {
 		if (!container) return;
 
 		// 获取标注和质检数据
-		const result1 = await QLabelRequest.getTotalAnnotationsList();
-		const result2 = await QLabelRequest.getQualityInspectionList();
+		const result1 = await QLabelApi.getTotalAnnotationsList();
+		const result2 = await QLabelApi.getQualityInspectionList();
 
 		// 清空容器
 		container.innerHTML = "";
@@ -472,7 +472,7 @@ class QLabelBehaviorUpdateUIElement extends QLabelBehavior {
 			backgroundBar,
 			totalHours.toFixed(2) + " / 8 小时"
 		);
-		
+
 		loading.classList.add("hidden");
 	}
 }

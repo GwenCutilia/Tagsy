@@ -142,6 +142,7 @@ if (!window.ResourceLoader) {
 				],
 				[
 					Url + "Source/Global/QLabelGlobal.js",
+					Url + "Source/Global/TLabelGlobal.js",
 					Url + "Source/Global/LoginGlobal.js",
 					Url + "Source/Global/W2Global.js",
 					Url + "Source/Global/LSGlobal.js",
@@ -156,6 +157,7 @@ if (!window.ResourceLoader) {
 				],
 				[
 					Url + "Source/Request/QLabelRequest.js",
+					Url + "Source/Request/TLabelRequest.js",
 					Url + "Source/Request/JsonBinRequest.js",
 					Url + "Source/Request/W2Request.js",
 					Url + "Source/Request/LSRequest.js",
@@ -171,6 +173,7 @@ if (!window.ResourceLoader) {
 				],
 				[
 					Url + "Source/Behavior/QLabelBehavior.js",
+					Url + "Source/Behavior/TLabelBehavior.js",
 					Url + "Source/Behavior/LoginBehavior.js",
 					Url + "Source/Behavior/W2Behavior.js",
 					Url + "Source/Behavior/LSBehavior.js",
@@ -183,6 +186,7 @@ if (!window.ResourceLoader) {
 				],
 				[
 					Url + "Source/Page/QLabelPage.js",
+					Url + "Source/Page/TLabelPage.js",
 					Url + "Source/Page/LoginPage.js",
 					Url + "Source/Page/W2Page.js",
 					Url + "Source/Page/LSPage.js",

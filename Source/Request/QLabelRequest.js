@@ -1,5 +1,9 @@
-class QLabelRequest extends HttpRequest {
-	// 分成两部分, 一部分是QLabelAPI一部分是QLabelRequest, API只管发送, Request管逻辑
+class QLabelRequrst extends HttpRequest {
+	static log = new Logger("QLabelRequest");
+
+}
+class QLabelApi extends HttpRequest {
+	// QLabel Api
 	static config = {
 		baseUrl: "https://qlabel.tencent.com/api/",
 		defaultHeader: {
@@ -11,7 +15,6 @@ class QLabelRequest extends HttpRequest {
 	constructor() {
 		super();
 	}
-	static log = new Logger("QLabelRequest");
 	// 获取标注总量列表
 	static async getTotalAnnotationsList() {
 		return await this._workbenchUserWorkingReport("total_annotations");

@@ -8,7 +8,7 @@ GM.CookieList({}, list => {
 GM.CookieList({}, list => {
 	const session = list.find(c => c.name === "SESSION_ID");
 	if (session) {
-		QLabelEngineGlobal.cache.cookie.local.session = session.value;
+		QLabelEngineGlobal.cache.cookie.local.sessionId = session.value;
 		this.log.log("SESSION:", session.value);
 	}
 });
