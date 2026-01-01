@@ -8,6 +8,7 @@
 // @match			http://127.0.0.1:5500/*
 // @match			https://weavefate.asia/*
 // @match			https://qlabel.tencent.com/*
+// @match			https://tlabel.tencent.com/*
 // @require			http://127.0.0.1:5500/Module/Tagsy_Import.js
 // @require			https://weavefate.asia/Module/Tagsy_Import.js
 // @license			CC

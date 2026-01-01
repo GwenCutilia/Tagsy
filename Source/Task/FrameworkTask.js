@@ -4,6 +4,7 @@ class FrameworkTask {
 		await LoginGlobal.init();
 		await W2Global.init();
 		await QLabelGlobal.init();
+		await TLabelGlobal.init();
 		await LSGlobal.init();
 		await ApiboxGlobal.init();
 		await SystemGlobal.init();
@@ -17,6 +18,7 @@ class FrameworkTask {
 	static async loadTask() {
 		await this.W2Task();
 		await this.LSTask();
+		await this.TLTask();
 	}
 	
 	// W2任务
@@ -30,5 +32,11 @@ class FrameworkTask {
 	static async LSTask() {
 		await LSBehaviorTask.loginProcess();
 		await LSBehaviorTask.currentTask();
+	}
+
+	// TL任务
+	static async TLTask() {
+		// await TLabelBehaviorTask.loginProcess();
+		await TLabelBehaviorTask.currentTask();
 	}
 }

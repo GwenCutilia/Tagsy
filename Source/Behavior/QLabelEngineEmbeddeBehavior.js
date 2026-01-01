@@ -26,11 +26,20 @@ class QLabelEngineEmbeddeBehaviorHelperUtils extends QLabelEngineEmbeddeBehavior
 			}
 		});
 	}
-	// 保存题目
-	static async updateDetailLabel() {
-		await QLabelEngineRequest.updateDetailLabel();
+	static async TLabelCookieInit() {
+		await this.getTLCookie();
 	}
-	
+	// 获取 TL Cookie
+	static async getTLCookie() {
+		// 获取 SESSION cookie
+		GM.CookieList({}, list => {
+			const session = list.find(c => c.name === "SESSION_ID");
+			if (session) {
+				QLabelEngineGlobal.cache.cookie.local.sessionId = session.value;
+				this.log.log("SESSION_ID:", session.value);
+			}
+		});
+	}
 }
 
 class QLabelEngineEmbeddeBehaviorBoundingBox extends QLabelEngineEmbeddeBehavior {

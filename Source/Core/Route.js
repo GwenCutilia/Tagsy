@@ -14,6 +14,10 @@ class Route {
 		},
 		qlabel: {
 			"/workbench/tasks": () => new QLabelEmbeddeEngine().init(),
+		},
+		tlabel: {
+			// 目前是只有获取cookie的逻辑
+			"/optimus/workbench/projects": () => new QLabelEmbeddeEngine().init(),
 		}
 	};
 
@@ -37,6 +41,18 @@ class Route {
 
 			// qlabel 组匹配 qlabel.tencent.com 域名
 			if (groupKey === "qlabel" && host === "qlabel.tencent.com") {
+				const matchedKey = Object.keys(group).find(key =>
+					path === key || path.startsWith(key + "/")
+				);
+
+				if (matchedKey) {
+					await group[matchedKey]();
+					return;
+				}
+			}
+
+			// qlabel 组匹配 tlabel.tencent.com 域名
+			if (groupKey === "tlabel" && host === "tlabel.tencent.com") {
 				const matchedKey = Object.keys(group).find(key =>
 					path === key || path.startsWith(key + "/")
 				);

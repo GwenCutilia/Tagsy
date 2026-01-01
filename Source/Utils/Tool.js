@@ -754,6 +754,7 @@ class Time {
 	}
 
 	static getRandomTimeInRange(startTimeStr, endTimeStr) {
+		console.log('Time.getRandomTimeInRange', startTimeStr, endTimeStr);
 		const timeRegex = new RegExp("^(\\d{1,2}):(\\d{1,2})$");
 		const parseTimeToMinutes = (timeStr) => {
 			const match = timeStr.match(timeRegex);

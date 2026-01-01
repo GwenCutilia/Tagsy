@@ -31,7 +31,7 @@ class QLabelEngineGlobal extends Global {
 			},
 			local: {
 				session: null,
-				sessionId: null,
+				sessionId: null, // 以后需要改一下所属的类
 				route: null,
 			}
 		},

@@ -19,9 +19,31 @@ class TLabelGlobal extends Global {
 			// annotationList: "QLABEL_ANNOTATION_LIST_UI_TASK",
 			// homeworkLoadTatistics: "QLABEL_HOMEWORK_LOAD_TATISTICS_UI_TASK",
 			// workHour: "QLABEL_WORK_HOUR_UI_TASK",
+		},
+		dailyTask: {
+			loginProcess: "TLabel_LOGIN_PROCESS_DAILY_TASK",
+			checkIn: "TLabel_CHECK_IN_DAILY_TASK",
+			meal: "TLabel_MEAL_DAILY_TASK",
+			work: "TLabel_WORK_DAILY_TASK",
+			checkOut: "TLabel_CHECK_OUT_DAILY_TASK",
+			logOut: "TLabel_LOGIN_OUT_DAILY_TASK",
 		}
 	}
 	static setting = {
+		currentTask: {
+			time_range_login_process_start: "08:50", // 登录开始时间
+			time_range_login_process_end: "08:50", // 登录结束时间
+			time_range_check_in_start: "09:00", // 签到开始时间
+			time_range_check_in_end: "09:00", // 签到结束时间
+			time_range_meal_start: "12:00", // 用餐开始时间
+			time_range_meal_end: "12:00", // 用餐结束时间
+			time_range_work_start: "13:30", // 标注开始时间
+			time_range_work_end: "13:30", // 标注结束时间
+			time_range_check_out_start: "18:30", // 签退开始时间
+			time_range_check_out_end: "18:30", // 签退结束时间
+			time_range_log_out_start: "18:50", // 退出登录开始时间
+			time_range_log_out_end: "18:50", // 退出登录结束时间
+		}
 		// 作业量统计
 		// homeworkLoadStatistics: {
 		// 	hourList: [],
