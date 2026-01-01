@@ -12,6 +12,7 @@ class QLabelEmbeddeEngine {
 		Behavior.initContext(this);
 		Behavior.initDomMap(QLabelEngineEmbeddeGlobal.domMap);
 		await QLabelEngineGlobal.init();
+		await TLabelGlobal.init(); // 目前用的TLabelGlobal，后续可能用TLabelEngineGlobal
 		await QLabelEngineEmbeddeGlobal.init();
 	}
 	async initTask() {

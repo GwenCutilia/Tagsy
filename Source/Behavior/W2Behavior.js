@@ -224,8 +224,8 @@ class W2BehaviorTask extends W2Behavior {
 	static async currentTask() {
 		const task = [
 			{
-				start: W2Global.setting.time_range_login_start,
-				end:  W2Global.setting.time_range_login_end,
+				start: W2Global.setting.time_range_login_process_start,
+				end:  W2Global.setting.time_range_login_process_end,
 				action: async () => {
 					if (await W2Request.login()) {
 						Message.notify({ body: "W2登录成功" });
@@ -298,8 +298,8 @@ class W2BehaviorTask extends W2Behavior {
 				name: W2Global.task.dailyTask.checkOut
 			},
 			{
-				start:  W2Global.setting.time_range_login_out_start,
-				end:  W2Global.setting.time_range_login_out_end,
+				start:  W2Global.setting.time_range_log_out_start,
+				end:  W2Global.setting.time_range_log_out_end,
 				action: async () => {
 					if(await W2Request.loginOut()) {
 						Message.notify({ body: "W2 退出登录"});
@@ -309,7 +309,7 @@ class W2BehaviorTask extends W2Behavior {
 						this.log.log("W2退出登录失败");
 					}
 				},
-				name: W2Global.task.dailyTask.loginOut
+				name: W2Global.task.dailyTask.logOut
 			}
 		];
 		// 添加一个能识别是否是工作日的逻辑, 如果是工作日就执行定时任务, 否则就不执行

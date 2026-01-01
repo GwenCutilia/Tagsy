@@ -45,8 +45,8 @@ class W2Global extends Global {
 
 		},
 		// 模块时间区间任务设置
-		time_range_login_start: "08:50",
-		time_range_login_end: "08:50",
+		time_range_login_process_start: "08:50",
+		time_range_login_process_end: "08:50",
 		time_range_check_in_start: "08:55",
 		time_range_check_in_end: "08:55",
 		time_range_meal_start: "12:00",
@@ -55,8 +55,8 @@ class W2Global extends Global {
 		time_range_working_end: "13:30",
 		time_range_check_out_start: "18:30",
 		time_range_check_out_end: "18:30",
-		time_range_login_out_start: "18:35",
-		time_range_login_out_end: "18:35",
+		time_range_log_out_start: "18:35",
+		time_range_log_out_end: "18:35",
 	}
 	static task = {
 		dailyTask: {
@@ -65,7 +65,7 @@ class W2Global extends Global {
 			meal: "W2_MEAL_DAILY_TASK",
 			working: "W2_WORKING_DAILY_TASK",
 			checkOut: "W2_CHECK_OUT_DAILY_TASK",
-			loginOut: "W2_LOGIN_OUT_DAILY_TASK",
+			logOut: "W2_LOG_OUT_DAILY_TASK",
 		},
 		intervalTask: {
 			loginCheck: "W2_LOGIN_CHECK_INTERVAL_TASK",

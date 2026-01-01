@@ -2,8 +2,10 @@ class TLabelRequest extends HttpRequest {
 	// 发起登录
 	static async checkLogin() {
 		const result = await TLabelApi.initiateLogin();
-		if (result.code === 200) {
-			TLabelGlobal.cache.information.login.uuid = result.data.uuid;
+		this.log.log("TLabelRequest => checkLogin result: ", result);
+		// this.log.log("TLabelRequest => checkLogin result.jsdata.authorize_uuid: ", result.jsdata.authorize_uuid);
+		if (result.errcode === 0) {
+			TLabelGlobal.cache.information.login.uuid = result.jsdata.authorize_uuid;
 			return true;
 		} else {
 			return false;
@@ -12,7 +14,7 @@ class TLabelRequest extends HttpRequest {
 	// 验证登录
 	static async verifyLogin() {
 		const result = await TLabelApi.verifyLogin();
-		if (result.code === 200) {
+		if (result.errcode === 0) {
 			return true;
 		} else {
 			return false;

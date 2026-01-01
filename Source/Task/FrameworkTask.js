@@ -12,6 +12,7 @@ class FrameworkTask {
 	}
 	static async initQLabelValue() {
 		await QLabelEngineGlobal.init();
+		await TLabelGlobal.init();
 		await SystemGlobal.init();
 	}
 	// 初始化任务

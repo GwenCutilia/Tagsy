@@ -345,11 +345,11 @@ class SettingBehaviorUpdateUIElement extends SettingBehavior {
 		this.ls_user_password_account_setting_input.value = LSGlobal.cache.information.password;
 
 		// W2 时间段设置
-		this.w2_time_range_login_start_module_setting_input.value = W2Global.setting.time_range_login_start;
-		this.w2_time_range_login_end_module_setting_input.value = W2Global.setting.time_range_login_end;
+		this.w2_time_range_login_start_module_setting_input.value = W2Global.setting.time_range_login_process_start;
+		this.w2_time_range_login_end_module_setting_input.value = W2Global.setting.time_range_login_process_end;
 
-		this.w2_time_range_login_out_start_module_setting_input.value = W2Global.setting.time_range_login_out_start;
-		this.w2_time_range_login_out_end_module_setting_input.value = W2Global.setting.time_range_login_out_end;
+		this.w2_time_range_login_out_start_module_setting_input.value = W2Global.setting.time_range_log_out_start;
+		this.w2_time_range_login_out_end_module_setting_input.value = W2Global.setting.time_range_log_out_end;
 
 		this.w2_time_range_check_in_start_module_setting_input.value = W2Global.setting.time_range_check_in_start;
 		this.w2_time_range_check_in_end_module_setting_input.value = W2Global.setting.time_range_check_in_end;
