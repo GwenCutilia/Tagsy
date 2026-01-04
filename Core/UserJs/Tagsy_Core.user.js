@@ -9,8 +9,8 @@
 // @match			https://weavefate.asia/*
 // @match			https://qlabel.tencent.com/*
 // @match			https://tlabel.tencent.com/*
-// @require			http://127.0.0.1:5500/Module/Tagsy_Import.js
-// @require			https://weavefate.asia/Module/Tagsy_Import.js
+// @require			http://127.0.0.1:5500/Core/Tagsy_Import.js
+// @require			https://weavefate.asia/Core/Tagsy_Import.js
 // @license			CC
 // ==/UserScript==
 

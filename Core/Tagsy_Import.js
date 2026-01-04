@@ -194,7 +194,7 @@ if (!window.ResourceLoader) {
 					Url + "Source/Page/QLabelEnginePage.js",
 				],
 				[
-					Url + "Module/Common/Tagsy_Core.js",
+					Url + "Core/Tagsy_Core.js",
 				],
 			];
 

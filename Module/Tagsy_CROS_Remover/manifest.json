@@ -1,6 +1,6 @@
 {
 	"manifest_version": 3,
-	"name": "Tagsy_Extension",
+	"name": "Tagsy_CROS_Remover",
 	"version": "1.0.0",
 	"description": "Tagsy所需的Chrome辅助拓展",
 	"permissions": [
