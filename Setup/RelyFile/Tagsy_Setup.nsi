@@ -56,15 +56,15 @@ CreateDirectory "$INSTDIR"
 
 ; 2) 仅安装指定的两个文件 + 一个文件夹
 ; 安装结构：$INSTDIR\Module\...
-SetOutPath "$INSTDIR\Module"
+SetOutPath "$INSTDIR\Core"
 
 ; 两个文件
-File "..\..\Module\Tagsy_ApiBridge.user.js"
-File "..\..\Module\Tagsy_Core.user.js"
+File "..\..\Core\UserJs\Tagsy_ApiBridge.user.js"
+File "..\..\Core\UserJs\Tagsy_Core.user.js"
 
 ; 一个文件夹（递归拷贝）
-SetOutPath "$INSTDIR\Module\Tagsy_Chrome_Extension"
-File /r "..\..\Module\Tagsy_Chrome_Extension\*.*"
+SetOutPath "$INSTDIR\Core"
+File /r "..\..\Core\*.*"
 
 SectionEnd
 
