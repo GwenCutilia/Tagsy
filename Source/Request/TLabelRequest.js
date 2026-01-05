@@ -15,6 +15,7 @@ class TLabelRequest extends HttpRequest {
 	static async verifyLogin() {
 		const result = await TLabelApi.verifyLogin();
 		if (result.errcode === 0) {
+			TLabelGlobal.cache.information.login.callBackUrl = result.jsdata.redirect_url;
 			return true;
 		} else {
 			return false;
@@ -22,12 +23,12 @@ class TLabelRequest extends HttpRequest {
 	}
 	// 给服务发请求使其点击确定按钮
 	static async sendLocalServer() {
-		
+		await DesktopRequset.clickWeChat();
 	}
 	// 打开callback的网页, 让服务器给浏览器设置cookie
 	// 这里要访问一下callback的网页, 可以参考W2的逻辑
 	static async openCallbackPage() {
-
+		await TLabelApi.getLoginPage();
 	}
 
 	// 可以定时发送查询登录状态来确定是否cookie过期
@@ -104,7 +105,6 @@ class TLabelRequest extends HttpRequest {
 			return false;
 		}
 	}
-
 }
 class TLabelApi extends HttpRequest {
 	static log = new Logger("QLabelApi");
@@ -227,6 +227,16 @@ class TLabelApi extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("checkIset_work_statusnOut result: ", result);
 		return result;
+	}
+	// 访问已经登录的页面
+	static async getLoginPage() {
+		const url = TLabelGlobal.cache.information.login.callBackUrl;
+		return await this.fetch({
+			method: "GET",
+			url: url,
+			headers: {},
+			responseType: "text"
+		});
 	}
 	static async _request(method, url, headers, data) {
 		return await super.fetch({

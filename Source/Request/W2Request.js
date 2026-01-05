@@ -191,7 +191,7 @@ class W2Api extends HttpRequest {
 	// 获取登录页面
 	static async getLoginPage() {
 		const url = "https://wanwei.myapp.com/login";
-		return await this.fetch({
+		return await super.fetch({
 			method: "GET",
 			url: url,
 			headers: {},

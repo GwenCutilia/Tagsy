@@ -9,9 +9,12 @@ class TLabelBehaviorAddAanimationEffect extends TLabelBehavior {
 class TLabelBehaviorTask extends TLabelBehavior {
 	// 登录流程
 	static async loginProcess() {
+		if (!await DesktopRequset.isServiceRunning()) {
+			await DesktopRequset.startService();
+		}
 		await TLabelRequest.checkLogin();
-		await TLabelRequest.sendLocalServer();
 		await TLabelRequest.verifyLogin();
+		await TLabelRequest.sendLocalServer();
 		await TLabelRequest.openCallbackPage();
 	}
 	// 定时任务

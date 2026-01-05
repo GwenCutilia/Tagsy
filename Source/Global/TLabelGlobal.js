@@ -7,6 +7,7 @@ class TLabelGlobal extends Global {
 		information: {
 			login: {
 				uuid: null,
+				callBackUrl: null, // 登录的callback地址
 			}
 
 		},

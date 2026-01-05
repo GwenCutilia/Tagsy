@@ -7,26 +7,68 @@
 	"tasks": {
 		"version": "2.0.0",
 		"tasks": [
-			{
-				"label": "BuildInstaller",
-				"type": "shell",
-				"command": "cmd.exe",
-				"args": [
-					"/C",
-					"del /f /q \"Setup\\Build\\Tagsy_Setup.exe\" 2>nul & \"NSIS\\makensis.exe\" \"Setup\\RelyFile\\Tagsy_Setup.nsi\""
-				],
-				"presentation": {
-					"reveal": "silent",
-					"echo": false,
-					"focus": false,
-					"panel": "dedicated"
-				},
-				"options": {
-					"cwd": "${workspaceFolder}"
-				},
-				"problemMatcher": []
-			}
-		]
+            {
+                // --- 步骤 1: 清理旧文件 ---
+                "label": "1_Clean",
+                "type": "shell",
+                "command": "cmd.exe",
+                "args": [
+                    "/C",
+                    "del /f /q \"Setup\\Build\\Tagsy_Setup.exe\" \"Setup\\Build\\Tagsy_WeChat_Clicker.exe\" 2>nul"
+                ],
+                "presentation": {
+                    "reveal": "silent"
+                }
+            },
+            {
+                // --- 步骤 2: 编译 Go 程序 (无图标版) ---
+                "label": "2_Build_Go",
+                "type": "shell",
+                "command": "go",
+                "args": [
+                    "build",
+                    "-ldflags", "-H=windowsgui -s -w",
+                    "-o", "..\\..\\Setup\\Build\\Tagsy_WeChat_Clicker.exe",
+                    "main.go"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}\\Module\\Tagsy_WeChat_Clicker"
+                },
+                "presentation": {
+                    "reveal": "always"
+                }
+            },
+            {
+                // --- 步骤 3: NSIS 打包 ---
+                "label": "3_Pack_Installer",
+                "type": "shell",
+                "command": "${workspaceFolder}\\NSIS\\makensis.exe",
+                "args": [
+                    "Setup\\RelyFile\\Tagsy_Setup.nsi"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}"
+                },
+                "presentation": {
+                    "reveal": "always"
+                }
+            },
+            {
+                // --- 【总任务】 ---
+                "label": "BuildInstaller",
+                "dependsOn": [
+                    "1_Clean",
+                    "2_Build_Go",
+                    "3_Pack_Installer"
+                ],
+                "dependsOrder": "sequence",
+                "problemMatcher": [],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                }
+            }
+        ]
 	},
 	"launch": {
 		"version": "0.2.0",
@@ -55,6 +97,7 @@
 		},
 		"commentTranslate.targetLanguage": "zh-CN",
 		"commentTranslate.source": "Bing",
-		"commentTranslate.multiLineMerge": true
+		"commentTranslate.multiLineMerge": true,
+		"nsis.compiler.pathToMakensis": "D:\\Creat\\VSCode\\Tagsy_V2.0\\Tagsy\\NSIS\\makensis.exe"
 	}
 }

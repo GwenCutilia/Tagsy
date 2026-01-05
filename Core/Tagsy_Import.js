@@ -163,6 +163,7 @@ if (!window.ResourceLoader) {
 					Url + "Source/Request/LSRequest.js",
 					Url + "Source/Request/ApiboxRequest.js",
 					Url + "Source/Request/QLabelEngineRequest.js",
+					Url + "Source/Request/DesktopRequest.js",
 				],
 				[
 					Url + "Source/Behavior/FrameworkBehavior.js", // 网站框架函数类
