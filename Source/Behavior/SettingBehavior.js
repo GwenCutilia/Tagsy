@@ -45,7 +45,7 @@ class SettingBehaviorBindEvent extends SettingBehavior {
 			ApiboxGlobal.cache.information.id = this.api_box_user_id_account_setting_input.value;
 			ApiboxGlobal.cache.information.key = this.api_box_api_key_account_setting_input.value;
 
-			let result = await ApiboxRequest.getInfo();
+			let result = await ApiboxApi.getInfo();
 
 			SettingBehaviorHelperUtils.updateStatusUI({
 				box: this.api_box_account_setting_message_box,
@@ -71,8 +71,8 @@ class SettingBehaviorBindEvent extends SettingBehavior {
 		this.w2_user_test_account_setting_button.addEventListener("click", async () => {
 			W2Global.cache.information.name = this.w2_user_name_account_setting_input.value;
 			W2Global.cache.information.password = this.w2_user_password_account_setting_input.value;
-
-			let result = await W2Request.getVerifyCode();
+			
+			let result = await W2Api.getVerifyCode(); // 将来改成W2Request
 
 			SettingBehaviorHelperUtils.updateStatusUI({
 				box: this.w2_account_setting_message_box,
@@ -105,7 +105,7 @@ class SettingBehaviorBindEvent extends SettingBehavior {
 			W2Global.cache.information.address = this.w2_email_api_address_account_setting_input.value;
 			W2Global.cache.information.pop3_auth_code = this.w2_email_api_pop3_auth_code_account_setting_input.value;
 
-			let result = await ApiboxRequest.getInfo();
+			let result = await ApiboxApi.getInfo();
 
 			if (result.code !== 200) {
 				SettingBehaviorHelperUtils.updateStatusUI({
@@ -127,7 +127,7 @@ class SettingBehaviorBindEvent extends SettingBehavior {
 				return;
 			}
 
-			result = await ApiboxRequest.getEmailApi();
+			result = await ApiboxApi.getMailList();
 
 			const success = result.code === 200;
 
@@ -227,7 +227,7 @@ class SettingBehaviorBindEvent extends SettingBehavior {
 					W2Global.setting[field.configStart] = field.startInput.value;
 					W2Global.setting[field.configEnd] = field.endInput.value;
 				}
-				await W2Web.currentTask();
+				 W2BehaviorTask.currentTask();
 			}
 		});
 	}
@@ -247,7 +247,7 @@ class SettingBehaviorBindEvent extends SettingBehavior {
 			LSGlobal.cache.information.name = this.ls_user_name_account_setting_input.value;
 			LSGlobal.cache.information.password = this.ls_user_password_account_setting_input.value;
 
-			let result = await LSRequest.login();
+			let result = await LSApi.login(); // 将来改成LSRequest
 
 			SettingBehaviorHelperUtils.updateStatusUI({
 				box: this.ls_account_setting_message_box,
