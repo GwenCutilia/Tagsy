@@ -9,6 +9,7 @@ class LoginWeb extends Framework {
 		await this.addAanimationEffect();
 	}
 	async initValue() {
+		await LoginGlobal.init();
 		Behavior.initContext(this);
 		// 初始化Behavior
 		Behavior.initDomMap(LoginGlobal.domMap);
