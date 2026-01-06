@@ -1,4 +1,16 @@
 class TLabelRequest extends HttpRequest {
+	// 登录流程
+	static async loginProcess() {
+		if (!await DesktopRequset.isServiceRunning()) {
+			this.log.log("未开启服务, 正在开启服务");
+			await DesktopRequset.startService();
+		}
+		await DesktopRequset.startWatch();
+		await TLabelRequest.checkLogin();
+		await TLabelRequest.verifyLogin();
+		await DesktopRequset.stopWatch();
+		await TLabelRequest.openCallbackPage();
+	}
 	// 发起登录
 	static async checkLogin() {
 		const result = await TLabelApi.initiateLogin();
@@ -27,8 +39,40 @@ class TLabelRequest extends HttpRequest {
 	}
 	// 打开callback的网页, 让服务器给浏览器设置cookie
 	// 这里要访问一下callback的网页, 可以参考W2的逻辑
+	// 访问已经登录的页面, 并且获取cookie
 	static async openCallbackPage() {
-		await TLabelApi.getLoginPage();
+        const url = TLabelGlobal.cache.information.login.callBackUrl;
+        
+        if (!url) {
+            this.log.error("未找到回调地址");
+            return;
+        }
+
+        // 1. 打开后台标签页
+        const tabObj = GM.OpenInTab(url, {
+            active: false,    // 后台打开
+            insert: true,
+            setParent: true
+        });
+
+        // 2. 【这里直接调用你的函数】等待 3 秒
+        await Delay.sleepSeconds(3);
+
+        // 3. 3秒后继续执行关闭逻辑
+        if (tabObj && typeof tabObj.close === 'function') {
+            tabObj.close();
+            this.log.log("后台临时标签页已自动销毁");
+        } else {
+            this.log.log("无法自动关闭，请检查油猴设置");
+        }
+		// static async getTLCookie() {
+			// // 获取 SESSION cookie
+			const details = { url: "https://tlabel.tencent.com/" };
+			GM.Cookie.list(details, (cookies) => {
+				QLabelEngineGlobal.cache.cookie.local.sessionId = cookies[0].value;
+			});
+		// }
+        return true;
 	}
 
 	// 可以定时发送查询登录状态来确定是否cookie过期
@@ -95,7 +139,7 @@ class TLabelRequest extends HttpRequest {
 	// 退出登录
 	static async logOut() {
 		const result = await TLabelApi.logOut();
-		if (result.code === 200) {
+		if (result.message === "success") {
 			Message.notify({ body: " TL 退出登录成功" });
 			this.log.log("TL退出登录成功");
 			return true;
@@ -227,16 +271,6 @@ class TLabelApi extends HttpRequest {
 		const result = await this._request("POST", url, headers, data);
 		this.log.log("checkIset_work_statusnOut result: ", result);
 		return result;
-	}
-	// 访问已经登录的页面
-	static async getLoginPage() {
-		const url = TLabelGlobal.cache.information.login.callBackUrl;
-		return await this.fetch({
-			method: "GET",
-			url: url,
-			headers: {},
-			responseType: "text"
-		});
 	}
 	static async _request(method, url, headers, data) {
 		return await super.fetch({

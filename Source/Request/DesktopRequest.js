@@ -1,14 +1,19 @@
 class DesktopRequset extends HttpRequest {
 	static log = new Logger("DesktopRequest");
-	static async clickWeChat() {
-		const result = await DesktopApi.clickWeChat();
+	static async startWatch() {
+		// await Delay.sleepSeconds(3); // 待优化, 让它一出来就点击, 而不是延迟点击
+		const result = await DesktopApi.startWatch();
 		if (result.success) {
-			Message.notify({ body: "点击微信确定按钮成功" });
-			this.log.log("点击微信确定按钮成功");
 			return true;
 		} else {
-			Message.notify({ body: "点击微信确定按钮失败" });
-			this.log.log("点击微信确定按钮失败");
+			return false;
+		}
+	}
+	static async stopWatch() {
+		const result = await DesktopApi.stopWatch();
+		if (result.success) {
+			return true;
+		} else {
 			return false;
 		}
 	}
@@ -50,15 +55,26 @@ class DesktopRequset extends HttpRequest {
 }
 class DesktopApi extends HttpRequest {
 	static log = new Logger("DesktopApi");
-	// 自动点击微信的确定按钮
-	static async clickWeChat() {
-		const url = "http://localhost:5555/click";
+	// 自动点击微信的确定按钮(巡逻机制)
+	static async startWatch() {
+		const url = "http://localhost:5555/start";
 		const headers = {
 			"Content-Type": "application/json;charset=UTF-8",
 			"X-Requested-With": "XMLHttpRequest",
 		}
 		const result = await this._request("GET", url, headers);
 		this.log.log("clickWeChat result: ", result);
+		return result;
+	}
+	// 停止巡逻
+	static async stopWatch() {
+		const url = "http://localhost:5555/stop";
+		const headers = {
+			"Content-Type": "application/json;charset=UTF-8",
+			"X-Requested-With": "XMLHttpRequest",
+		}
+		const result = await this._request("GET", url, headers);
+		this.log.log("stopClick result: ", result);
 		return result;
 	}
 	// 检查后台服务是否存活

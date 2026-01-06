@@ -7,16 +7,6 @@ class TLabelBehaviorAddAanimationEffect extends TLabelBehavior {
 }
 // 全局任务
 class TLabelBehaviorTask extends TLabelBehavior {
-	// 登录流程
-	static async loginProcess() {
-		if (!await DesktopRequset.isServiceRunning()) {
-			await DesktopRequset.startService();
-		}
-		await TLabelRequest.checkLogin();
-		await TLabelRequest.verifyLogin();
-		await TLabelRequest.sendLocalServer();
-		await TLabelRequest.openCallbackPage();
-	}
 	// 定时任务
 	static async currentTask() {
 		const task = [
@@ -25,7 +15,7 @@ class TLabelBehaviorTask extends TLabelBehavior {
 				start: TLabelGlobal.setting.currentTask.time_range_login_process_start,
 				end: TLabelGlobal.setting.currentTask.time_range_login_process_end,
 				action: async () => {
-					await TLabelBehaviorTask.loginProcess();
+					await TLabelRequest.loginProcess();
 				},
 				name: TLabelGlobal.task.dailyTask.loginProcess,
 			},
