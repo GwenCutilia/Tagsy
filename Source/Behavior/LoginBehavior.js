@@ -3,7 +3,7 @@ class LoginBehavior extends Behavior {
 }
 class LoginAddAanimationEffect extends LoginBehavior {
 	// 给背景添加粒子动画
-	async addParticleEffects() {
+	static async addParticleEffects() {
 		const canvas = this.animation_canvas;
 		const ctx = canvas.getContext("2d");
 		let width, height;
@@ -64,7 +64,7 @@ class LoginAddAanimationEffect extends LoginBehavior {
 }
 class LoginAddAuxiliaryLogic extends LoginBehavior {
 	// 切换二维码区域的遮罩状态
-	async toggleQrMask() {
+	static async toggleQrMask() {
 		const infomation_div = this.infomation_div;
 		const qr_div = this.qr_div;
 		const form_visible = infomation_div.classList.contains('opacity-100');
@@ -84,7 +84,7 @@ class LoginAddAuxiliaryLogic extends LoginBehavior {
 			qr_div.classList.add('pointer-events-none');
 		}
 	}
-	async regAccountAddQrLogin() {
+	static async regAccountAddQrLogin() {
 		const qr_url_img = this.qr_url_img;
 
 		let result;
@@ -138,8 +138,8 @@ class LoginAddAuxiliaryLogic extends LoginBehavior {
 	}
 }
 class LoginBehaviorBindEvents extends LoginBehavior {
-// 显示密码
-	async togglePasswordMask() {
+	// 显示密码
+	static async togglePasswordMask() {
 		// 密码显示切换
 		const password_toggle_btn = this.password_toggle_btn;
 		const password_input = this.password_input;
@@ -150,7 +150,7 @@ class LoginBehaviorBindEvents extends LoginBehavior {
 			password_toggle_btn.classList.toggle('fa-eye-slash');
 		});
 	}
-	async loginUserName() {
+	static async loginUserName() {
 		// 登录按钮
 		const login_btn = this.login_btn;
 		const username_input = this.username_input;
@@ -166,13 +166,13 @@ class LoginBehaviorBindEvents extends LoginBehavior {
 			}
 		});
 	}
-	async regAccountForBtn() {
+	static async regAccountForBtn() {
 		const register_btn = this.register_btn;
 		register_btn.addEventListener('click', async () => {
 			LoginAddAuxiliaryLogic.toggleQrMask();
 		});
 	}
-	async regAccountForQrBtn() {
+	static async regAccountForQrBtn() {
 		// 二维码切换逻辑
 		const qr_toggle_btn = this.qr_toggle_btn;
 		qr_toggle_btn.addEventListener('click', async () => {

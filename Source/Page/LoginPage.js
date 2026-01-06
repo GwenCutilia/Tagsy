@@ -3,11 +3,13 @@ class LoginWeb extends Framework {
 		super();
 	}
 	async init() {
+		// await super.init();
 		await this.initValue();
 		await this.bindEvents();
 		await this.addAanimationEffect();
 	}
 	async initValue() {
+		Behavior.initContext(this);
 		// 初始化Behavior
 		Behavior.initDomMap(LoginGlobal.domMap);
 	}
