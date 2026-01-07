@@ -24,13 +24,11 @@ const (
 	TargetH_Min = 200
 	TargetH_Max = 320
 
-	// 【目标类名】
 	TargetClass = "Qt51514QWindowIcon"
 )
 
-// --- 全局状态控制 ---
-// 0 = 停止/休息, 1 = 运行/巡逻
-var watchState int32 = 0 
+// --- 全局状态 ---
+var watchState int32 = 0
 
 // --- API 定义 ---
 var (
@@ -40,40 +38,33 @@ var (
 	procGetWindowThreadProcessId = user32.NewProc("GetWindowThreadProcessId")
 	procIsWindowVisible          = user32.NewProc("IsWindowVisible")
 	procGetWindowRect            = user32.NewProc("GetWindowRect")
-	procShowWindow               = user32.NewProc("ShowWindow")
-	procSetForegroundWindow      = user32.NewProc("SetForegroundWindow")
-	procGetForegroundWindow      = user32.NewProc("GetForegroundWindow")
-	procGetCursorPos             = user32.NewProc("GetCursorPos")
-	procSetCursorPos             = user32.NewProc("SetCursorPos")
-	procMouseEvent               = user32.NewProc("mouse_event")
+	
+	// 【关键变化】使用 PostMessageW 代替鼠标事件
+	procPostMessageW             = user32.NewProc("PostMessageW")
 )
 
 type RECT struct {
 	Left, Top, Right, Bottom int32
 }
 
-type POINT struct {
-	X, Y int32
-}
-
 const (
-	MOUSEEVENTF_LEFTDOWN = 0x0002
-	MOUSEEVENTF_LEFTUP   = 0x0004
-	SW_RESTORE           = 9
+	// Windows 消息常量
+	WM_LBUTTONDOWN = 0x0201
+	WM_LBUTTONUP   = 0x0202
+	MK_LBUTTON     = 0x0001
 )
 
 func main() {
 	setAutoStart()
 
-	// 1. 启动后台协程 (但它一开始会处于休息状态，因为 watchState 默认为 0)
+	// 启动哨兵
 	go startSilentWatchDog()
 	
-	simpleLog("服务已启动 (待机模式). 等待指令开启巡逻...")
+	simpleLog("后台消息点击服务已启动 (支持锁屏运行)...")
 
-	// 2. 注册 API
-	http.HandleFunc("/start", handleStart)   // 开启巡逻
-	http.HandleFunc("/stop", handleStop)     // 停止巡逻
-	http.HandleFunc("/status", handleStatus) // 查询状态
+	http.HandleFunc("/start", handleStart)
+	http.HandleFunc("/stop", handleStop)
+	http.HandleFunc("/status", handleStatus)
 	
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		sendJSON(w, true, "Pong", 200)
@@ -86,84 +77,94 @@ func main() {
 	http.ListenAndServe(ServerPort, nil)
 }
 
-// --- API 处理函数 ---
-
+// --- API Handlers ---
 func handleStart(w http.ResponseWriter, r *http.Request) {
-	atomic.StoreInt32(&watchState, 1) // 原子操作：设为 1
-	simpleLog("指令接收: 🟢 开始巡逻")
-	sendJSON(w, true, "Sentinel Started", 200)
+	atomic.StoreInt32(&watchState, 1)
+	simpleLog("🟢 哨兵已激活")
+	sendJSON(w, true, "Started", 200)
 }
 
 func handleStop(w http.ResponseWriter, r *http.Request) {
-	atomic.StoreInt32(&watchState, 0) // 原子操作：设为 0
-	simpleLog("指令接收: 🔴 停止巡逻")
-	sendJSON(w, true, "Sentinel Stopped", 200)
+	atomic.StoreInt32(&watchState, 0)
+	simpleLog("🔴 哨兵已暂停")
+	sendJSON(w, true, "Stopped", 200)
 }
 
 func handleStatus(w http.ResponseWriter, r *http.Request) {
 	state := atomic.LoadInt32(&watchState)
 	msg := "Stopped"
-	if state == 1 {
-		msg = "Running"
-	}
+	if state == 1 { msg = "Running" }
 	sendJSON(w, true, msg, 200)
 }
 
-// --- 哨兵逻辑 (循环) ---
-
+// --- 哨兵循环 ---
 func startSilentWatchDog() {
 	ptrClass, _ := syscall.UTF16PtrFromString(TargetClass)
 
 	for {
-		// 【关键检查】如果状态是 0，就睡觉，不干活
 		if atomic.LoadInt32(&watchState) == 0 {
 			time.Sleep(1 * time.Second)
 			continue
 		}
 
-		// --- 下面是干活逻辑 ---
-		
-		// 1. 获取微信 PID
 		weixinPID := getWeChatPID()
 		if weixinPID == 0 {
 			time.Sleep(3 * time.Second)
 			continue
 		}
 
-		// 2. 检查当前活动窗口 (优先)
-		fgHwnd, _, _ := procGetForegroundWindow.Call()
-		if fgHwnd != 0 && checkWindow(fgHwnd, weixinPID) {
-			simpleLog("⚡ 捕获到活动弹窗，执行点击...")
-			if executeClick(fgHwnd) {
-				// 点击成功后，自动转入休息模式? 还是继续巡逻?
-				// 建议: 继续巡逻，直到 JS 发送 stop，或者休息几秒防止连点
-				time.Sleep(3 * time.Second) 
-			}
-			continue
-		}
-
-		// 3. 扫描后台窗口
+		// 遍历所有微信窗口
 		var hwnd uintptr = 0
 		for {
 			hwnd, _, _ = procFindWindowExW.Call(0, hwnd, uintptr(unsafe.Pointer(ptrClass)), 0)
 			if hwnd == 0 { break }
 
 			if checkWindow(hwnd, weixinPID) {
-				simpleLog("👀 扫描到后台弹窗，执行点击...")
-				if executeClick(hwnd) {
-					time.Sleep(3 * time.Second)
+				simpleLog("⚡ 发现弹窗，发送后台点击消息...")
+				
+				// 执行后台点击
+				if executeBackgroundClick(hwnd) {
+					// 点完多休息一会，等待窗口销毁
+					time.Sleep(2 * time.Second)
 				}
 				break
 			}
 		}
-
-		// 巡逻间隔
-		time.Sleep(800 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
-// --- 检查窗口 ---
+// --- 【核心】后台点击逻辑 ---
+func executeBackgroundClick(hwnd uintptr) bool {
+	var rect RECT
+	procGetWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&rect)))
+	width := rect.Right - rect.Left
+	height := rect.Bottom - rect.Top
+
+	// 计算相对于窗口左上角的坐标 (不是屏幕坐标!)
+	// 允许按钮位置: X=30%, Y=85%
+	x := int32(float64(width) * 0.30)
+	y := int32(float64(height) * 0.85)
+
+	// 构造 lParam: 高16位是Y，低16位是X
+	lParam := uintptr((y << 16) | (x & 0xFFFF))
+
+	// 1. 发送左键按下消息
+	// PostMessageW(hwnd, Msg, wParam, lParam)
+	procPostMessageW.Call(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, lParam)
+	
+	// 稍微停顿，模拟真实点击
+	time.Sleep(50 * time.Millisecond)
+	
+	// 2. 发送左键抬起消息
+	procPostMessageW.Call(hwnd, WM_LBUTTONUP, 0, lParam)
+
+	simpleLog(fmt.Sprintf("已向窗口发送点击指令 (坐标: %d, %d)", x, y))
+	return true
+}
+
 func checkWindow(hwnd uintptr, targetPID uint32) bool {
+	// 注意：锁屏状态下 IsWindowVisible 依然为真，所以这个检查是有效的
 	isVisible, _, _ := procIsWindowVisible.Call(hwnd)
 	if isVisible == 0 { return false }
 
@@ -183,53 +184,19 @@ func checkWindow(hwnd uintptr, targetPID uint32) bool {
 	return false
 }
 
-// --- 辅助函数 ---
-
 func getWeChatPID() uint32 {
 	ptrClass, _ := syscall.UTF16PtrFromString(TargetClass)
 	hwnd, _, _ := procFindWindowW.Call(uintptr(unsafe.Pointer(ptrClass)), 0)
-	
 	if hwnd == 0 {
 		ptrTitle, _ := syscall.UTF16PtrFromString("微信")
 		hwnd, _, _ = procFindWindowW.Call(0, uintptr(unsafe.Pointer(ptrTitle)))
 	}
-
 	if hwnd != 0 {
 		var pid uint32
 		procGetWindowThreadProcessId.Call(hwnd, uintptr(unsafe.Pointer(&pid)))
 		return pid
 	}
 	return 0
-}
-
-func executeClick(hwnd uintptr) bool {
-	procShowWindow.Call(hwnd, SW_RESTORE)
-	procSetForegroundWindow.Call(hwnd)
-	time.Sleep(100 * time.Millisecond)
-
-	var rect RECT
-	procGetWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&rect)))
-	width := rect.Right - rect.Left
-	height := rect.Bottom - rect.Top
-
-	targetX := int32(float64(rect.Left) + float64(width)*0.30)
-	targetY := int32(float64(rect.Top) + float64(height)*0.85)
-
-	var oldPos POINT
-	procGetCursorPos.Call(uintptr(unsafe.Pointer(&oldPos)))
-	
-	clickAt(targetX, targetY)
-	
-	procSetCursorPos.Call(uintptr(oldPos.X), uintptr(oldPos.Y))
-	return true
-}
-
-func clickAt(x, y int32) {
-	procSetCursorPos.Call(uintptr(x), uintptr(y))
-	time.Sleep(20 * time.Millisecond)
-	procMouseEvent.Call(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-	time.Sleep(20 * time.Millisecond)
-	procMouseEvent.Call(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
 }
 
 func sendJSON(w http.ResponseWriter, success bool, message string, code int) {
