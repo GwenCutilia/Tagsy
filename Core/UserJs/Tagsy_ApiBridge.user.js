@@ -37,6 +37,9 @@
 // @connect		api.ipify.org
 // @connect		cloud.seatable.cn
 // @connect		qlabel.tencent.com
+// @connect     localhost
+// @connect     localhost.weixin.qq.com
+// @connect     tlabel.tencent.com
 // @run-at 		document-start
 // @license		CC
 // ==/UserScript==
